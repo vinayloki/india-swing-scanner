@@ -11,6 +11,11 @@ on:
 jobs:
   update-scanner-data:
     runs-on: ubuntu-latest
+    
+    # Grant permissions needed to push code back to the repo
+    permissions:
+      contents: write
+
 
     steps:
       - name: Checkout Repository
