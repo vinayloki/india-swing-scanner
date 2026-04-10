@@ -107,15 +107,15 @@ async function loadEverything() {
       opportunitiesData = oj.opportunities || [];
     }
 
+  } catch (err) {
+    // Network failure — show inline warning banner; AI Picks still works (static data)
+    console.warn('Scan data fetch failed:', err.message);
+    document.getElementById('errorScreen').style.display = 'flex';
+  } finally {
+    // Always reveal the dashboard so static tabs are accessible
     buildDashboard();
     document.getElementById('loadScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById('loadScreen').style.display = 'none';
-    document.getElementById('errorScreen').style.display = 'flex';
-    document.getElementById('errorBody').textContent = `Error: ${err.message}`;
   }
 }
 
