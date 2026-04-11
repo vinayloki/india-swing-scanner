@@ -1,1252 +1,880 @@
 """
 MarketPulse India — Unified Quantitative Trading Terminal
-A professional-grade Streamlit dashboard replacing the static GitHub Pages site.
-All features in one place: AI Picks · Scanner · Market Pulse · Backtest Lab · Strategy Guide
+Mirrors ALL content from https://vinayloki.github.io/india-swing-scanner/
+with enhanced interactive UI, TradingView integration, and Backtest Lab.
 """
 
 import streamlit as st
-import json
-import os
-import random
-import math
+import json, os, math, random
 import numpy as np
 import pandas as pd
 from datetime import datetime
 
-# ─── Page Config ─────────────────────────────────────────────────────────────
-
+# ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="MarketPulse India — Quantitative Trading Terminal",
+    page_title="MarketPulse India — NSE Trading Terminal",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="collapsed",
-    menu_items={
-        "Get Help": "https://github.com/vinayloki/india-swing-scanner",
-        "About": "MarketPulse India — AI-Powered NSE Swing Trading Intelligence"
-    }
 )
 
-# ─── Global CSS ───────────────────────────────────────────────────────────────
+TV_BASE = "https://in.tradingview.com/chart/?symbol=NSE:"
+SCAN_DIR = "scan_results"
 
+# ─── CSS ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-  html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-    background-color: #080c14;
-    color: #e2e8f0;
-  }
+:root {
+  --bg: #080c14; --bg2: #0d1420; --bg3: #111827;
+  --border: #1e2a3a; --border2: #243044;
+  --blue: #1a56db; --blue-light: #38bdf8; --blue-glow: rgba(26,86,219,0.25);
+  --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --purple: #a78bfa;
+  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b; --text4: #475569;
+}
+html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; background: var(--bg) !important; color: var(--text); }
 
-  /* Tabs */
-  .stTabs [data-baseweb="tab-list"] {
-    gap: 4px;
-    background: #0d1420;
-    border-radius: 12px;
-    padding: 6px;
-    border: 1px solid #1e2a3a;
-  }
-  .stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: #64748b;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 10px 18px;
-    border: none;
-    transition: all 0.2s;
-  }
-  .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #1a56db, #0ea5e9) !important;
-    color: #fff !important;
-    box-shadow: 0 4px 12px rgba(26,86,219,0.4);
-  }
+/* ── Tabs ────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] { gap:4px; background:var(--bg2); border-radius:14px; padding:6px; border:1px solid var(--border); }
+.stTabs [data-baseweb="tab"] { background:transparent; color:var(--text3); border-radius:10px; font-weight:600; font-size:13px; padding:10px 16px; border:none; transition:all .2s; }
+.stTabs [aria-selected="true"] { background:linear-gradient(135deg,#1a56db,#0ea5e9) !important; color:#fff !important; box-shadow:0 4px 15px var(--blue-glow); }
 
-  /* Cards */
-  .card {
-    background: linear-gradient(135deg, #0d1420 0%, #111827 100%);
-    border: 1px solid #1e2a3a;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .card:hover { border-color: #1a56db44; transform: translateY(-1px); }
+/* ── Cards ───────────────────────────────────────── */
+.card { background:linear-gradient(135deg,var(--bg2),var(--bg3)); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:14px; transition:border-color .2s,transform .15s; }
+.card:hover { border-color:#1a56db44; }
 
-  /* Metric Cards */
-  .metric-card {
-    background: linear-gradient(135deg, #0d1420 0%, #0a1628 100%);
-    border: 1px solid #1e2a3a;
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
-  }
-  .metric-val { font-size: 2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1; }
-  .metric-label { font-size: 12px; color: #64748b; font-weight: 500; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .metric-sub { font-size: 11px; color: #475569; margin-top: 4px; }
-  .pos { color: #22c55e; }
-  .neg { color: #ef4444; }
-  .warn { color: #f59e0b; }
-  .blue { color: #38bdf8; }
-  .purple { color: #a78bfa; }
+/* ── Metric Card ─────────────────────────────────── */
+.mc { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+.mc-val { font-size:1.9rem; font-weight:900; font-family:'JetBrains Mono',monospace; line-height:1.1; }
+.mc-lbl { font-size:11px; color:var(--text3); font-weight:600; margin-top:5px; text-transform:uppercase; letter-spacing:.06em; }
+.mc-sub { font-size:11px; color:var(--text4); margin-top:3px; }
 
-  /* AI Pick Card */
-  .pick-card {
-    background: linear-gradient(135deg, #0d1420, #0d1728);
-    border: 1px solid #1e2a3a;
-    border-left: 3px solid #1a56db;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    transition: border-color 0.2s;
-  }
-  .pick-card:hover { border-left-color: #38bdf8; }
-  .sell-card { border-left-color: #ef4444 !important; }
-  .hold-card { border-left-color: #f59e0b !important; }
-  .ticker-label { font-size: 16px; font-weight: 700; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
-  .stock-name { font-size: 12px; color: #64748b; margin-top: 2px; }
-  .badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
-  .badge-buy { background: #14532d; color: #4ade80; }
-  .badge-sell { background: #450a0a; color: #f87171; }
-  .badge-hold { background: #451a03; color: #fbbf24; }
-  .badge-bull { background: #1e3a5f; color: #38bdf8; font-size: 10px; padding: 2px 8px; }
-  .badge-large { background: #312e81; color: #a5b4fc; font-size: 10px; padding: 2px 8px; }
-  .badge-small { background: #1a2e1a; color: #86efac; font-size: 10px; padding: 2px 8px; }
-  .badge-mid { background: #27272a; color: #d4d4d8; font-size: 10px; padding: 2px 8px; }
+/* ── Pick Cards ──────────────────────────────────── */
+.pick { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--blue); border-radius:10px; padding:14px 16px; margin-bottom:10px; transition:border-color .2s,transform .1s; }
+.pick:hover { transform:translateY(-1px); border-color:var(--border2); }
+.pick.buy { border-left-color:var(--green); }
+.pick.sell { border-left-color:var(--red); }
+.pick.hold { border-left-color:var(--yellow); }
 
-  /* Pulse signal rows */
-  .mover-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    background: #0d1420;
-    border: 1px solid #1a2233;
-  }
+/* ── Badges ──────────────────────────────────────── */
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.03em; }
+.b-buy { background:#14532d; color:#4ade80; }
+.b-sell { background:#450a0a; color:#f87171; }
+.b-hold { background:#451a03; color:#fbbf24; }
+.b-brk { background:#1e1e3f; color:#818cf8; }
+.b-vol { background:#0f2744; color:#38bdf8; }
+.b-mom { background:#1a2e1a; color:#86efac; }
+.b-lg { background:#312e81; color:#a5b4fc; }
+.b-md { background:#27272a; color:#d4d4d8; }
+.b-sm { background:#1a2e1a; color:#86efac; }
+.b-mc { background:#292524; color:#a8a29e; }
 
-  /* Header */
-  .site-header {
-    background: linear-gradient(135deg, #060a12 0%, #0a1628 60%, #0d1f3c 100%);
-    border-bottom: 1px solid #1e2a3a;
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .site-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(26,86,219,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-title { font-size: 26px; font-weight: 900; color: #f1f5f9; letter-spacing: -0.02em; }
-  .header-sub { font-size: 13px; color: #64748b; margin-top: 4px; }
-  .regime-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #14532d44;
-    border: 1px solid #166534;
-    color: #4ade80;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-  }
+/* ── Opp Card ────────────────────────────────────── */
+.opp-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; position:relative; }
+.opp-score-ring { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:15px; border:3px solid; }
 
-  /* News */
-  .news-item {
-    padding: 12px 0;
-    border-bottom: 1px solid #1e2a3a;
-  }
-  .news-title { font-size: 13px; font-weight: 500; color: #cbd5e1; }
-  .news-meta { font-size: 11px; color: #475569; margin-top: 4px; }
+/* ── Table ───────────────────────────────────────── */
+.tv-table { width:100%; border-collapse:collapse; font-size:13px; }
+.tv-table th { background:var(--bg2); color:var(--text3); font-weight:600; padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase; letter-spacing:.05em; position:sticky; top:0; }
+.tv-table td { padding:9px 12px; border-bottom:1px solid #111827; color:var(--text2); vertical-align:middle; }
+.tv-table tr:hover td { background:#0d1420cc; }
+.tv-link { color:var(--blue-light); text-decoration:none; font-weight:700; font-family:'JetBrains Mono',monospace; }
+.tv-link:hover { color:#60a5fa; text-decoration:underline; }
+.chart-btn { background:#0d1f3c; border:1px solid #1a3a6a; color:var(--blue-light); padding:3px 10px; border-radius:6px; font-size:11px; text-decoration:none; font-weight:600; white-space:nowrap; }
+.chart-btn:hover { background:#1a3a6a; color:#fff; }
+.pos { color:var(--green); font-weight:600; }
+.neg { color:var(--red); font-weight:600; }
+.neu { color:var(--text3); }
 
-  /* Disclaimer */
-  .disclaimer {
-    background: #1c1200;
-    border: 1px solid #854d0e;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 12px;
-    color: #fbbf24;
-    margin-top: 16px;
-  }
+/* ── Mover Row ───────────────────────────────────── */
+.mv-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px; margin-bottom:5px; background:var(--bg2); border:1px solid var(--border); }
 
-  /* Sliders */
-  .stSlider [data-baseweb="slider"] { padding: 0 !important; }
+/* ── Header ──────────────────────────────────────── */
+.hdr { background:linear-gradient(135deg,#060a12,#0a1628 60%,#0d1f3c); border-bottom:1px solid var(--border); border-radius:16px; padding:22px 28px; margin-bottom:18px; position:relative; overflow:hidden; }
+.hdr::after { content:''; position:absolute; top:-60%;right:-15%;width:500px;height:500px; background:radial-gradient(circle,rgba(26,86,219,.1) 0%,transparent 70%); pointer-events:none; }
 
-  /* Dataframe */
-  .stDataFrame { border-radius: 12px; overflow: hidden; }
+/* ── News ────────────────────────────────────────── */
+.news-item { padding:12px 0; border-bottom:1px solid var(--border); }
+.news-title a { color:var(--text2); text-decoration:none; font-size:13px; font-weight:500; }
+.news-title a:hover { color:var(--blue-light); }
+.news-meta { font-size:11px; color:var(--text4); margin-top:3px; }
 
-  /* Buttons */
-  .stButton > button {
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 13px;
-    transition: all 0.2s;
-    border: 1px solid #1e2a3a;
-    background: #0d1420;
-    color: #94a3b8;
-  }
-  .stButton > button:hover { border-color: #1a56db; color: #60a5fa; }
-  div[data-testid="column"]:has(> div > div > button[kind="primary"]) > div > div > button {
-    background: linear-gradient(135deg, #1a56db, #0ea5e9) !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: 0 4px 15px rgba(26,86,219,0.4);
-  }
+/* ── Progress ring ───────────────────────────────── */
+.p52w { height:6px; background:#1e2a3a; border-radius:3px; margin-top:4px; }
+.p52w-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#1a56db,#38bdf8); }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0d1420; }
-  ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+/* ── Disclaimer ──────────────────────────────────── */
+.disc { background:#1c1200; border:1px solid #854d0e; border-radius:10px; padding:12px 16px; font-size:12px; color:#fbbf24; margin-top:14px; }
 
-  h1, h2, h3 { color: #f1f5f9 !important; }
-  .stMarkdown hr { border-color: #1e2a3a; }
-  .stSelectbox label, .stSlider label, .stRadio label { color: #94a3b8 !important; font-size: 13px !important; font-weight: 500 !important; }
-  .stTextInput input { background: #0d1420 !important; border: 1px solid #1e2a3a !important; color: #e2e8f0 !important; border-radius: 8px !important; }
+/* ── Info box ────────────────────────────────────── */
+.info-box { background:#0a1e38; border:1px solid #1a3a6a; border-radius:10px; padding:14px 18px; font-size:13px; color:#93c5fd; margin:12px 0; }
 
-  /* Section labels */
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-  }
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #f1f5f9;
-    margin-bottom: 4px;
-  }
-  .section-icon { font-size: 22px; vertical-align: middle; margin-right: 8px; }
+/* Misc overrides */
+.stButton>button { border-radius:10px; font-weight:600; font-size:13px; transition:all .2s; border:1px solid var(--border); background:var(--bg2); color:var(--text2); }
+.stButton>button:hover { border-color:var(--blue); color:#60a5fa; }
+.stSelectbox label,.stSlider label,.stRadio label,.stTextInput label,.stMultiSelect label { color:var(--text2) !important; font-size:13px !important; font-weight:500 !important; }
+.stTextInput>div>div>input { background:var(--bg2) !important; border:1px solid var(--border) !important; color:var(--text) !important; border-radius:8px !important; }
+::-webkit-scrollbar { width:5px; height:5px; } ::-webkit-scrollbar-track { background:var(--bg); } ::-webkit-scrollbar-thumb { background:#1e3a5f; border-radius:3px; }
+h1,h2,h3 { color:#f1f5f9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-
 # ─── Data Loaders ─────────────────────────────────────────────────────────────
-
-SCAN_DIR = "scan_results"
-
 @st.cache_data(ttl=3600)
-def load_ai_picks():
+def load_json(fname, default=None):
     try:
-        with open(os.path.join(SCAN_DIR, "ai_picks.json")) as f:
+        with open(os.path.join(SCAN_DIR, fname)) as f:
             return json.load(f)
     except:
-        return {"generated": "N/A", "regime": "Unknown", "summary": {}, "picks": [], "total_stocks": 0}
+        return default or {}
 
 @st.cache_data(ttl=3600)
-def load_top_performers():
+def load_csv(fname):
     try:
-        with open(os.path.join(SCAN_DIR, "latest_top_performers.json")) as f:
-            return json.load(f)
-    except:
-        return {}
-
-@st.cache_data(ttl=3600)
-def load_performance():
-    try:
-        with open(os.path.join(SCAN_DIR, "performance_report.json")) as f:
-            return json.load(f)
-    except:
-        return {}
-
-@st.cache_data(ttl=3600)
-def load_market_regime():
-    try:
-        with open(os.path.join(SCAN_DIR, "market_regime.json")) as f:
-            return json.load(f)
-    except:
-        return {"regime": "Unknown", "score": 0}
-
-@st.cache_data(ttl=3600)
-def load_news():
-    try:
-        with open(os.path.join(SCAN_DIR, "daily_news.json")) as f:
-            return json.load(f)
-    except:
-        return []
-
-@st.cache_data(ttl=3600)
-def load_full_scan():
-    try:
-        df = pd.read_csv(os.path.join(SCAN_DIR, "latest_full_scan.csv"))
-        return df
+        return pd.read_csv(os.path.join(SCAN_DIR, fname))
     except:
         return pd.DataFrame()
 
-@st.cache_data(ttl=3600)
-def load_opportunities():
-    try:
-        with open(os.path.join(SCAN_DIR, "opportunities.json")) as f:
-            return json.load(f)
-    except:
-        return []
+ai_data     = load_json("ai_picks.json", {"picks":[], "summary":{}, "regime":"Unknown", "generated":"N/A"})
+top_data    = load_json("latest_top_performers.json", {})
+perf_data   = load_json("performance_report.json", {})
+opp_raw     = load_json("opportunities.json", {"opportunities":[]})
+regime_data = load_json("market_regime.json", {"regime":"Unknown"})
+news_raw    = load_json("daily_news.json", [])
+scan_df     = load_csv("latest_full_scan.csv")
+full_sum    = load_json("latest_scan_summary.json", {})
 
-# ─── Helper functions ─────────────────────────────────────────────────────────
+picks    = ai_data.get("picks", [])
+regime   = ai_data.get("regime", "Unknown")
+gen_date = ai_data.get("generated", "N/A")
+summary  = ai_data.get("summary", {})
+buys, holds, sells = summary.get("buy",0), summary.get("hold",0), summary.get("sell",0)
+total_stocks = ai_data.get("total_stocks", 0)
+opps     = opp_raw.get("opportunities", [])
+mb       = perf_data.get("mode_b", {})
 
-def fmt_pct(v):
-    if v is None or (isinstance(v, float) and math.isnan(v)):
-        return "–"
-    color = "pos" if v >= 0 else "neg"
-    sign = "+" if v >= 0 else ""
-    return f'<span class="{color}">{sign}{v:.1f}%</span>'
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+def tv(ticker): return f"{TV_BASE}{ticker}"
+def tv_link(ticker, label=None):
+    lab = label or ticker
+    return f'<a href="{tv(ticker)}" target="_blank" class="tv-link">{lab}</a>'
+def chart_btn(ticker):
+    return f'<a href="{tv(ticker)}" target="_blank" class="chart-btn">📊 Chart ↗</a>'
 
-def fmt_price(v):
-    if v is None:
-        return "–"
-    if v >= 10000:
-        return f"₹{v:,.0f}"
-    return f"₹{v:,.2f}"
+def pct_fmt(v, dash="–"):
+    if v is None or (isinstance(v, float) and math.isnan(v)): return f'<span class="neu">{dash}</span>'
+    cls = "pos" if v >= 0 else "neg"; sign = "+" if v >= 0 else ""
+    return f'<span class="{cls}">{sign}{v:.1f}%</span>'
+
+def price_fmt(v):
+    if not v: return "–"
+    return f"₹{v:,.2f}" if v < 10000 else f"₹{v:,.0f}"
 
 def cap_badge(code, label):
-    cls = "badge-large" if code == "L" else ("badge-mid" if code == "M" else "badge-small")
+    cls = {"L":"b-lg","M":"b-md","S":"b-sm"}.get(str(code),"b-mc")
     return f'<span class="badge {cls}">{label}</span>'
 
 def rec_badge(rec):
-    cls = "badge-buy" if rec == "buy" else ("badge-sell" if rec == "sell" else "badge-hold")
-    icon = "▲ BUY" if rec == "buy" else ("▼ SELL" if rec == "sell" else "◆ HOLD")
+    cls = {"buy":"b-buy","sell":"b-sell","hold":"b-hold"}.get(str(rec).lower(),"b-hold")
+    icon = {"buy":"▲ BUY","sell":"▼ SELL","hold":"◆ HOLD"}.get(str(rec).lower(),"◆ HOLD")
     return f'<span class="badge {cls}">{icon}</span>'
 
-def conf_bar(conf):
-    color = "#22c55e" if conf >= 75 else ("#f59e0b" if conf >= 55 else "#ef4444")
-    return f'''<div style="height:4px;background:#1e2a3a;border-radius:2px;margin-top:6px">
-        <div style="height:100%;width:{conf}%;background:{color};border-radius:2px;transition:width 0.3s"></div></div>
-        <div style="font-size:10px;color:#475569;margin-top:3px">Confidence {conf}%</div>'''
+def sig_badge(sig):
+    mp = {"52W_BREAKOUT":("b-brk","🚀 52W HIGH"),"HIGH_VOLUME":("b-vol","📊 HIGH VOL"),"VOLUME_SPIKE":("b-vol","⚡ VOL SPIKE"),"EMA_MOMENTUM":("b-mom","📈 EMA MOM")}
+    cls, lab = mp.get(sig, ("b-sm", sig))
+    return f'<span class="badge {cls}">{lab}</span>'
 
-def metric_card(label, val_html, sub=None, border_color="#1a56db"):
-    sub_html = f'<div class="metric-sub">{sub}</div>' if sub else ""
-    return f'''<div class="metric-card" style="border-top: 3px solid {border_color}">
-        <div class="metric-val">{val_html}</div>
-        <div class="metric-label">{label}</div>
-        {sub_html}
-    </div>'''
+def score_color(s):
+    if s >= 80: return "#22c55e"
+    if s >= 60: return "#f59e0b"
+    if s >= 40: return "#38bdf8"
+    return "#94a3b8"
+
+def metric_box(label, val_html, sub=None, top_color="#1a56db"):
+    sub_h = f'<div class="mc-sub">{sub}</div>' if sub else ""
+    return f'<div class="mc" style="border-top:3px solid {top_color}"><div class="mc-val">{val_html}</div><div class="mc-lbl">{label}</div>{sub_h}</div>'
 
 # ─── Header ───────────────────────────────────────────────────────────────────
+rc = "#22c55e" if regime=="Bull" else ("#ef4444" if regime=="Bear" else "#f59e0b")
+ri = "🟢" if regime=="Bull" else ("🔴" if regime=="Bear" else "🟡")
+opp_count = len(opps)
 
-ai_data = load_ai_picks()
-regime_data = load_market_regime()
-regime = ai_data.get("regime", regime_data.get("regime", "Unknown"))
-gen_date = ai_data.get("generated", "N/A")
-total_stocks = ai_data.get("total_stocks", 0)
-summary = ai_data.get("summary", {})
-buys = summary.get("buy", 0)
-holds = summary.get("hold", 0)
-sells = summary.get("sell", 0)
-
-regime_icon = "🟢" if regime == "Bull" else ("🔴" if regime == "Bear" else "🟡")
-regime_color = "#22c55e" if regime == "Bull" else ("#ef4444" if regime == "Bear" else "#f59e0b")
+# Scan summary stats from full scan
+try:
+    adv_1w = full_sum.get("adv_1w", 0); dec_1w = full_sum.get("dec_1w", 0)
+    gainers_1w = full_sum.get("gainers_1w", 0); losers_1m = full_sum.get("losers_1m", 0)
+    super_perf = full_sum.get("super_performers_12m", 0)
+except: adv_1w=dec_1w=gainers_1w=losers_1m=super_perf=0
 
 st.markdown(f"""
-<div class="site-header">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+<div class="hdr">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px">
     <div>
-      <div class="header-title">📈 MarketPulse India</div>
-      <div class="header-sub">AI-Powered NSE Swing Trading Intelligence · {total_stocks:,} Stocks Analysed</div>
+      <div style="font-size:24px;font-weight:900;color:#f1f5f9;letter-spacing:-.02em">📈 MarketPulse India</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px">NSE Intelligence Engine · {total_stocks:,} Stocks · AI-Powered EOD Analysis</div>
     </div>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <div class="regime-pill" style="border-color:{regime_color}44;color:{regime_color};background:{regime_color}11">
-        {regime_icon} {regime} Market
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:#475569">Last Updated</div>
-        <div style="font-size:13px;color:#94a3b8;font-weight:600">{gen_date}</div>
-      </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:{rc}11;border:1px solid {rc}44;color:{rc};padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700">{ri} {regime} Market</div>
+      <div style="text-align:right"><div style="font-size:10px;color:#475569">UPDATED</div><div style="font-size:13px;color:#94a3b8;font-weight:700">{gen_date}</div></div>
     </div>
   </div>
-  <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap">
-    <div><span style="color:#4ade80;font-weight:700;font-size:18px">{buys}</span> <span style="color:#64748b;font-size:12px">BUY signals</span></div>
-    <div><span style="color:#fbbf24;font-weight:700;font-size:18px">{holds}</span> <span style="color:#64748b;font-size:12px">HOLD signals</span></div>
-    <div><span style="color:#f87171;font-weight:700;font-size:18px">{sells}</span> <span style="color:#64748b;font-size:12px">SELL signals</span></div>
-    <div style="margin-left:auto"><span style="color:#94a3b8;font-size:12px">⚠️ For educational purposes only · Not SEBI-registered advice</span></div>
+  <div style="display:flex;gap:28px;margin-top:16px;flex-wrap:wrap;border-top:1px solid #1e2a3a;padding-top:14px">
+    <div><span style="font-size:20px;font-weight:900;color:#f1f5f9">{total_stocks:,}</span><br><span style="font-size:11px;color:#64748b">Stocks Scanned</span></div>
+    <div><span style="font-size:20px;font-weight:900;color:#38bdf8">{opp_count}</span><br><span style="font-size:11px;color:#64748b">Opportunities</span></div>
+    <div><span style="font-size:20px;font-weight:900;color:#22c55e">{buys}</span><br><span style="font-size:11px;color:#64748b">▲ BUY Signals</span></div>
+    <div><span style="font-size:20px;font-weight:900;color:#fbbf24">{holds}</span><br><span style="font-size:11px;color:#64748b">◆ HOLD</span></div>
+    <div><span style="font-size:20px;font-weight:900;color:#ef4444">{sells}</span><br><span style="font-size:11px;color:#64748b">▼ SELL Signals</span></div>
+    <div style="margin-left:auto;align-self:center"><span style="font-size:11px;color:#475569">⚠️ Educational only · Not SEBI-registered advice</span></div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ─── Navigation Tabs ──────────────────────────────────────────────────────────
-
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "🤖 AI Intelligence",
-    "🌪️ Market Pulse",
-    "🔍 Full Scanner",
-    "🧪 Backtest Lab",
-    "📚 Strategy Guide"
+# ─── Tabs ─────────────────────────────────────────────────────────────────────
+t1, t2, t3, t4, t5, t6 = st.tabs([
+    "🎯 Opportunities", "🏆 Top Movers", "📋 Full Scan",
+    "📰 News", "🤖 AI Picks", "🧪 Backtest Lab"
 ])
 
 
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 1 — AI INTELLIGENCE
-# ════════════════════════════════════════════════════════════════════════════════
-
-with tab1:
-    picks = ai_data.get("picks", [])
-
+# ══════════════════════════════════════════════════════════════════
+# TAB 1 — OPPORTUNITIES  (52W Breakout, Volume Spike, Momentum)
+# ══════════════════════════════════════════════════════════════════
+with t1:
     st.markdown("""
-    <div class="card" style="border-color:#1a56db33">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="font-size:28px">🤖</div>
-        <div>
-          <div class="section-title">AI EOD Intelligence Engine v2</div>
-          <div style="color:#64748b;font-size:13px">Multi-timeframe momentum analysis across 2,100+ NSE stocks. Ranked by AI Score.</div>
-        </div>
-      </div>
-    </div>
+    <div class="info-box">💡 <b>Opportunities</b> are high-conviction technical setups ranked by AI Score.
+    Each has at least one confirmed signal: 52W Breakout, Volume Spike, or EMA Momentum.
+    Click <b>📊 Chart ↗</b> to open TradingView for detailed analysis.</div>
     """, unsafe_allow_html=True)
 
-    # Filter controls
-    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
-    with col1:
-        rec_filter = st.selectbox("Signal", ["All", "BUY", "HOLD", "SELL"], key="rec_f")
-    with col2:
-        cap_filter = st.selectbox("Market Cap", ["All", "Large Cap", "Mid Cap", "Small Cap", "Micro Cap"], key="cap_f")
-    with col3:
-        sector_filter = st.selectbox("Sector", ["All"] + sorted(list(set(p.get("sector","") for p in picks if p.get("sector","") != ""))), key="sec_f")
-    with col4:
-        min_conf = st.slider("Min Confidence", 0, 100, 60, step=5, key="conf_f")
+    # Filters
+    fc1, fc2, fc3, fc4 = st.columns([3,2,2,2])
+    with fc1: opp_search = st.text_input("🔍 Search ticker / name", placeholder="e.g. INOX, RELIANCE...", key="opp_s")
+    with fc2: opp_sig = st.selectbox("Signal Type", ["ALL","52W Breakout","Volume Spike","EMA Momentum"], key="opp_sig")
+    with fc3: opp_score = st.selectbox("Min Score", ["All","50+","70+","80+","90+"], key="opp_sc")
+    with fc4:
+        all_secs_opp = sorted(set(o.get("fundamental",{}).get("sector","") or "" for o in opps) - {""})
+        opp_sector = st.selectbox("Sector", ["All"] + all_secs_opp, key="opp_sec")
 
-    st.markdown("---")
+    score_map = {"All":0,"50+":50,"70+":70,"80+":80,"90+":90}
+    sig_map = {"ALL":None,"52W Breakout":"52W_BREAKOUT","Volume Spike":"VOLUME_SPIKE","EMA Momentum":"EMA_MOMENTUM"}
+    min_opp_score = score_map.get(opp_score, 0)
+    sig_filter = sig_map.get(opp_sig)
 
-    # Filter picks
-    filtered = []
-    for p in picks:
-        if rec_filter != "All" and p.get("recommendation","").upper() != rec_filter:
+    filtered_opps = []
+    for o in opps:
+        if opp_search:
+            s = opp_search.upper()
+            if s not in o.get("ticker","").upper() and s not in (o.get("fundamental",{}).get("name","") or "").upper():
+                continue
+        if sig_filter and sig_filter not in o.get("signals",[]):
             continue
-        if cap_filter != "All" and p.get("cap_label","") != cap_filter:
+        if o.get("score",0) < min_opp_score:
             continue
-        if sector_filter != "All" and p.get("sector","") != sector_filter:
+        if opp_sector != "All" and (o.get("fundamental",{}).get("sector","") or "") != opp_sector:
             continue
-        if p.get("confidence", 0) < min_conf:
-            continue
-        filtered.append(p)
+        filtered_opps.append(o)
 
-    st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:12px">Showing <b style="color:#38bdf8">{len(filtered)}</b> stocks matching your filters</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(filtered_opps)}</b> of {len(opps)} setups</div>', unsafe_allow_html=True)
 
-    if not filtered:
-        st.info("No stocks match your current filters. Try relaxing the criteria.")
+    if not filtered_opps:
+        st.info("No setups match your filters.")
     else:
-        # Show top picks
-        show_count = st.select_slider("Show Top N", options=[10, 25, 50, 100, 200, len(filtered)], value=25 if len(filtered) >= 25 else len(filtered))
-        for p in filtered[:show_count]:
-            rec = p.get("recommendation", "hold")
-            card_cls = "pick-card" + (" sell-card" if rec == "sell" else (" hold-card" if rec == "hold" else ""))
-            conf = p.get("confidence", 0)
-            score = p.get("score", 0)
-            tf = p.get("tf_details", {})
+        for o in filtered_opps:
+            score = o.get("score", 0)
+            ticker = o.get("ticker","")
+            rank = o.get("rank","?")
+            sigs = o.get("signals",[])
+            ind = o.get("indicators",{})
+            fund = o.get("fundamental",{})
+            sc = score_color(score)
+            price = ind.get("price", fund.get("price",0)) or 0
+            vol_ratio = ind.get("volume_ratio",0) or 0
+            chg_1d = ind.get("pct_change_1d")
+            high52 = ind.get("high_52w") or fund.get("52h")
+            low52 = fund.get("52l")
+            pe = fund.get("pe")
+            mcap = fund.get("mcap_cr")
+            name = fund.get("name","") or ticker
+            sector = fund.get("sector","") or ""
 
-            # Build timeframe row
-            tf_cells = ""
-            for tf_key in ["1W", "2W", "1M", "3M", "6M", "12M"]:
-                tf_data = tf.get(tf_key, {})
-                pct = tf_data.get("pct")
-                if pct is None:
-                    tf_cells += f'<span style="color:#475569;font-size:11px;margin-right:10px">{tf_key}: –</span>'
-                else:
-                    color = "#22c55e" if pct >= 5 else ("#f59e0b" if pct >= 0 else "#ef4444")
-                    sign = "+" if pct >= 0 else ""
-                    tf_cells += f'<span style="color:{color};font-size:11px;margin-right:10px">{tf_key}: {sign}{pct:.1f}%</span>'
+            # 52W range bar
+            range_pct = 0
+            if high52 and low52 and high52 > low52:
+                range_pct = max(0, min(100, (price - low52) / (high52 - low52) * 100))
 
-            # Entry/SL/TP
-            entry = fmt_price(p.get("entry_price"))
-            sl = fmt_price(p.get("stop_loss"))
-            tp = fmt_price(p.get("take_profit"))
-            sl_pct = p.get("sl_pct", 0)
-            tp_pct = p.get("tp_pct", 0)
-            rr = p.get("risk_reward", 0)
-            p_success = p.get("p_success", 0)
-            horizon = p.get("horizon", "")
-
-            # Reasons/Risks
-            reasons = p.get("reasons", [])
-            risks = p.get("risks", [])
-            reasons_html = "".join([f'<div style="color:#4ade80;font-size:11px;margin-top:3px">✓ {r}</div>' for r in reasons[:3]])
-            risks_html = "".join([f'<div style="color:#f87171;font-size:11px;margin-top:3px">⚠ {r}</div>' for r in risks[:2]])
+            sigs_html = " ".join(sig_badge(s) for s in sigs)
+            pe_str = f"P/E {pe:.1f}x" if pe else "P/E –"
+            mcap_str = f"₹{mcap:,.0f} Cr" if mcap else ""
+            chg_html = pct_fmt(chg_1d) if chg_1d is not None else ""
 
             st.markdown(f"""
-            <div class="{card_cls}">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-                <div>
-                  <span class="ticker-label">{p.get("ticker","")}</span>
-                  <div class="stock-name">{p.get("name","")} · {p.get("sector","")}</div>
+            <div class="opp-card">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div class="opp-score-ring" style="border-color:{sc};color:{sc};min-width:52px">{score}</div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                    <div>
+                      <span style="font-size:18px;font-weight:800;color:#f1f5f9;font-family:'JetBrains Mono',monospace">
+                        {tv_link(ticker)}
+                      </span>
+                      <span style="font-size:12px;color:#64748b;margin-left:8px">#{rank} · {name}</span>
+                      <span style="font-size:12px;color:#94a3b8;margin-left:8px">{sector}</span>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                      {sigs_html}
+                      {chart_btn(ticker)}
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:20px;margin-top:10px;flex-wrap:wrap">
+                    <div><span style="color:#64748b;font-size:12px">Price: </span><b style="color:#f1f5f9;font-size:14px">{price_fmt(price)}</b></div>
+                    <div><span style="color:#64748b;font-size:12px">1D: </span>{chg_html}</div>
+                    <div><span style="color:#64748b;font-size:12px">Vol Ratio: </span><b style="color:#38bdf8">{vol_ratio:.2f}x</b></div>
+                    <div><span style="color:#64748b;font-size:12px">{pe_str}</span></div>
+                    <div><span style="color:#64748b;font-size:12px">{mcap_str}</span></div>
+                  </div>
+                  <div style="margin-top:8px">
+                    <span style="color:#64748b;font-size:11px">52W Range: {price_fmt(low52)} → {price_fmt(high52)}</span>
+                    <div class="p52w"><div class="p52w-fill" style="width:{range_pct:.0f}%"></div></div>
+                  </div>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-                  {rec_badge(rec)}
-                  {cap_badge(p.get("mcap_code","S"), p.get("cap_label",""))}
-                  <span class="badge badge-bull">{regime} Market</span>
-                  <span style="color:#475569;font-size:12px">Rank #{p.get("rank","?")}</span>
-                </div>
               </div>
-              <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap">
-                <div style="font-size:12px;color:#64748b">Entry: <b style="color:#f1f5f9">{entry}</b></div>
-                <div style="font-size:12px;color:#64748b">Stop Loss: <b style="color:#ef4444">{sl}</b> (-{sl_pct}%)</div>
-                <div style="font-size:12px;color:#64748b">Target: <b style="color:#22c55e">{tp}</b> (+{tp_pct}%)</div>
-                <div style="font-size:12px;color:#64748b">R:R <b style="color:#38bdf8">1:{rr:.1f}</b></div>
-                <div style="font-size:12px;color:#64748b">Prob. Success: <b style="color:#a78bfa">{p_success}%</b></div>
-                <div style="font-size:12px;color:#64748b">Horizon: <b style="color:#94a3b8">{horizon}</b></div>
-              </div>
-              <div style="margin-top:8px">{tf_cells}</div>
-              {conf_bar(conf)}
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-                <div>{reasons_html}</div>
-                <div>{risks_html}</div>
-              </div>
-              <div style="color:#475569;font-size:11px;margin-top:6px">AI Score: {score:.1f}/100</div>
             </div>
             """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="disclaimer">
-      ⚠️ <b>IMPORTANT DISCLAIMER</b>: All AI signals are generated by an automated algorithm for <b>educational and research purposes only</b>.
-      This is NOT SEBI-registered investment advice. Past performance does not guarantee future results.
-      Always consult a qualified financial advisor before investing. Trade at your own risk.
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="disc">⚠️ These setups are algorithmically generated for educational purposes. Always do your own research before trading.</div>', unsafe_allow_html=True)
 
 
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — MARKET PULSE
-# ════════════════════════════════════════════════════════════════════════════════
-
-with tab2:
-    top_data = load_top_performers()
-    news_data = load_news()
-
-    st.markdown("""
-    <div class="card">
-      <div class="section-title">🌪️ Market Pulse — NSE Momentum Dashboard</div>
-      <div style="color:#64748b;font-size:13px">Top Gainers & Losers across 1W, 2W, 1M and 3M timeframes.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    tf_sel = st.radio("Timeframe", ["1W", "2W", "1M", "3M"], horizontal=True, key="tf_pulse")
+# ══════════════════════════════════════════════════════════════════
+# TAB 2 — TOP MOVERS
+# ══════════════════════════════════════════════════════════════════
+with t2:
+    tf_sel = st.radio("Timeframe", ["1W","2W","1M","3M"], horizontal=True, key="tf_mv")
+    mv_search = st.text_input("🔍 Search ticker", placeholder="e.g. STLTECH", key="mv_s")
 
     tf_data = top_data.get(tf_sel, {})
     gainers = tf_data.get("top_gainers", [])
-    losers = tf_data.get("top_losers", [])
+    losers  = tf_data.get("top_losers", [])
 
-    col_g, col_l = st.columns(2)
-
-    with col_g:
-        st.markdown(f'<div style="color:#22c55e;font-weight:700;font-size:14px;margin-bottom:12px">🚀 Top Gainers ({tf_sel})</div>', unsafe_allow_html=True)
-        for i, g in enumerate(gainers[:20]):
-            pct = g.get(tf_sel, 0) or 0
-            price = fmt_price(g.get("last_close"))
-            bar_w = min(100, abs(pct) * 1.5)
-            st.markdown(f"""
-            <div class="mover-row">
-              <div>
-                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#f1f5f9">{g.get("ticker","")}</span>
-                <div style="font-size:10px;color:#475569;margin-top:2px">{price}</div>
-              </div>
+    g2, l2 = st.columns(2)
+    with g2:
+        st.markdown(f'<div style="color:#22c55e;font-weight:700;font-size:15px;margin-bottom:12px">🚀 Top Gainers ({tf_sel})</div>', unsafe_allow_html=True)
+        disp_g = [g for g in gainers if not mv_search or mv_search.upper() in g.get("ticker","").upper()] if mv_search else gainers
+        rows_g = ""
+        for g in disp_g[:20]:
+            p = g.get(tf_sel, 0) or 0
+            pr = g.get("last_close", 0) or 0
+            bar = min(100, abs(p) * 1.2)
+            rows_g += f"""<div class="mv-row">
+              <div>{tv_link(g.get("ticker",""))}<div style="font-size:10px;color:#475569;margin-top:2px">{price_fmt(pr)}</div></div>
               <div style="text-align:right">
-                <span style="color:#22c55e;font-weight:700;font-size:15px">+{pct:.1f}%</span>
-                <div style="height:2px;background:#1e2a3a;border-radius:1px;margin-top:4px;width:80px;margin-left:auto">
-                  <div style="height:100%;width:{bar_w:.0f}%;background:#22c55e;border-radius:1px"></div>
-                </div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
+                <span class="pos">+{p:.1f}%</span>
+                <div style="height:3px;background:#1e2a3a;border-radius:2px;margin-top:4px;width:80px;margin-left:auto">
+                  <div style="height:100%;width:{bar:.0f}%;background:#22c55e;border-radius:2px"></div></div>
+                {chart_btn(g.get("ticker",""))}
+              </div></div>"""
+        st.markdown(rows_g, unsafe_allow_html=True)
 
-    with col_l:
-        st.markdown(f'<div style="color:#ef4444;font-weight:700;font-size:14px;margin-bottom:12px">📉 Top Losers ({tf_sel})</div>', unsafe_allow_html=True)
-        for i, l in enumerate(losers[:20]):
-            pct = l.get(tf_sel, 0) or 0
-            price = fmt_price(l.get("last_close"))
-            bar_w = min(100, abs(pct) * 1.5)
-            st.markdown(f"""
-            <div class="mover-row">
-              <div>
-                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#f1f5f9">{l.get("ticker","")}</span>
-                <div style="font-size:10px;color:#475569;margin-top:2px">{price}</div>
-              </div>
+    with l2:
+        st.markdown(f'<div style="color:#ef4444;font-weight:700;font-size:15px;margin-bottom:12px">📉 Top Losers ({tf_sel})</div>', unsafe_allow_html=True)
+        disp_l = [l for l in losers if not mv_search or mv_search.upper() in l.get("ticker","").upper()] if mv_search else losers
+        rows_l = ""
+        for l in disp_l[:20]:
+            p = l.get(tf_sel, 0) or 0
+            pr = l.get("last_close", 0) or 0
+            bar = min(100, abs(p) * 1.2)
+            rows_l += f"""<div class="mv-row">
+              <div>{tv_link(l.get("ticker",""))}<div style="font-size:10px;color:#475569;margin-top:2px">{price_fmt(pr)}</div></div>
               <div style="text-align:right">
-                <span style="color:#ef4444;font-weight:700;font-size:15px">{pct:.1f}%</span>
-                <div style="height:2px;background:#1e2a3a;border-radius:1px;margin-top:4px;width:80px;margin-left:auto">
-                  <div style="height:100%;width:{bar_w:.0f}%;background:#ef4444;border-radius:1px"></div>
-                </div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
+                <span class="neg">{p:.1f}%</span>
+                <div style="height:3px;background:#1e2a3a;border-radius:2px;margin-top:4px;width:80px;margin-left:auto">
+                  <div style="height:100%;width:{bar:.0f}%;background:#ef4444;border-radius:2px"></div></div>
+                {chart_btn(l.get("ticker",""))}
+              </div></div>"""
+        st.markdown(rows_l, unsafe_allow_html=True)
 
-    # News Section
+    # ── Fundamentals for top movers (Top Movers with full detail) ──
     st.markdown("---")
-    st.markdown('<div class="section-title">📰 Market News Feed</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:12px">📊 Detailed Fundamentals — Top Gainers</div>', unsafe_allow_html=True)
 
-    if news_data:
-        news_list = news_data if isinstance(news_data, list) else news_data.get("articles", [])
-        if news_list:
-            for article in news_list[:15]:
-                title = article.get("title", article.get("headline", ""))
-                source = article.get("source", article.get("publisher", "NSE"))
-                pub_time = article.get("published", article.get("time", ""))
-                url = article.get("url", article.get("link", "#"))
-                if title:
-                    st.markdown(f"""
-                    <div class="news-item">
-                      <div class="news-title"><a href="{url}" target="_blank" style="color:#cbd5e1;text-decoration:none">{title}</a></div>
-                      <div class="news-meta">{source} · {pub_time}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.info("No news available. News is refreshed daily via GitHub Actions.")
+    # Build enriched table from ai_picks for top gainers
+    top_tickers = [g.get("ticker") for g in gainers[:20]]
+    pick_map = {p.get("ticker"): p for p in picks}
+
+    rows_html = "".join([f"""
+    <tr>
+      <td>{tv_link(t)}</td>
+      <td>{price_fmt(pick_map.get(t,{}).get("price",0))}</td>
+      <td>{pick_map.get(t,{}).get("sector","–")[:20]}</td>
+      <td>{pick_map.get(t,{}).get("pe","–")}</td>
+      <td>{f"₹{pick_map.get(t,{}).get('mcap_cr',0):,.0f} Cr" if pick_map.get(t,{}).get("mcap_cr") else "–"}</td>
+      <td>{pct_fmt(next((g.get(tf_sel) for g in gainers if g.get("ticker")==t), None))}</td>
+      <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("1M",{}).get("pct"))}</td>
+      <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("3M",{}).get("pct"))}</td>
+      <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("12M",{}).get("pct"))}</td>
+      <td>{chart_btn(t)}</td>
+    </tr>
+    """ for t in top_tickers if t in pick_map])
+
+    st.markdown(f"""
+    <div style="overflow-x:auto">
+    <table class="tv-table">
+      <thead><tr>
+        <th>Ticker</th><th>Price</th><th>Sector</th><th>P/E</th><th>Mkt Cap</th>
+        <th>{tf_sel} Ret</th><th>1M Ret</th><th>3M Ret</th><th>12M Ret</th><th>Chart</th>
+      </tr></thead>
+      <tbody>{rows_html}</tbody>
+    </table></div>
+    """, unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 3 — FULL SCAN
+# ══════════════════════════════════════════════════════════════════
+with t3:
+    st.markdown('<div class="info-box">📋 Complete scan of all NSE stocks. Click any ticker to open TradingView chart. Sortable by any column.</div>', unsafe_allow_html=True)
+
+    sc1, sc2, sc3 = st.columns([3,2,2])
+    with sc1: scan_search = st.text_input("🔍 Search ticker", placeholder="INFY, TCS...", key="sc_s")
+    with sc2: scan_filter = st.selectbox("Filter", ["All","Gainers Only","Losers Only"], key="sc_f")
+    with sc3: scan_cap = st.selectbox("Cap Size", ["All","Large Cap","Mid Cap","Small Cap"], key="sc_c")
+
+    if not scan_df.empty:
+        df = scan_df.copy()
+        str_cols = [c for c in df.columns if not c.startswith("Unnamed")]
+        df = df[str_cols]
+
+        # Rename columns for display
+        col_renames = {}
+        for c in df.columns:
+            cl = c.lower()
+            if "ticker" in cl or "symbol" in cl: col_renames[c]="Ticker"
+            elif "price" in cl or "close" in cl: col_renames[c]="Price"
+            elif "1w" in cl: col_renames[c]="1W%"
+            elif "2w" in cl: col_renames[c]="2W%"
+            elif "1m" in cl: col_renames[c]="1M%"
+            elif "3m" in cl: col_renames[c]="3M%"
+            elif "6m" in cl: col_renames[c]="6M%"
+            elif "12m" in cl or "1y" in cl: col_renames[c]="12M%"
+            elif "sector" in cl: col_renames[c]="Sector"
+            elif "cap" in cl: col_renames[c]="Cap"
+        df = df.rename(columns=col_renames)
+
+        if scan_search:
+            mask = df.astype(str).apply(lambda r: r.str.contains(scan_search.upper(), case=False, na=False)).any(axis=1)
+            df = df[mask]
+
+        if scan_filter == "Gainers Only" and "1W%" in df.columns:
+            df = df[pd.to_numeric(df["1W%"], errors="coerce") > 0]
+        elif scan_filter == "Losers Only" and "1W%" in df.columns:
+            df = df[pd.to_numeric(df["1W%"], errors="coerce") < 0]
+
+        if scan_cap != "All" and "Cap" in df.columns:
+            df = df[df["Cap"].astype(str).str.contains(scan_cap.split()[0], case=False, na=False)]
+
+        st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:8px">Showing <b style="color:#38bdf8">{len(df):,}</b> stocks</div>', unsafe_allow_html=True)
+
+        # Build HTML table with TV links (show first 200 rows for performance)
+        display_df = df.head(200)
+        ticker_col = "Ticker" if "Ticker" in display_df.columns else display_df.columns[0]
+        pct_cols = [c for c in display_df.columns if "%" in c]
+
+        # Add TradingView link column
+        if ticker_col in display_df.columns:
+            display_df = display_df.copy()
+            display_df["📊"] = display_df[ticker_col].apply(lambda t: f'<a href="{tv(str(t))}" target="_blank" class="chart-btn">Chart ↗</a>')
+            display_df[ticker_col] = display_df[ticker_col].apply(lambda t: f'<a href="{tv(str(t))}" target="_blank" class="tv-link">{t}</a>')
+
+        # Format pct columns
+        for c in pct_cols:
+            display_df[c] = display_df[c].apply(lambda v: pct_fmt(float(v)) if pd.notna(v) and str(v).strip() not in ["","–","nan"] else "–")
+
+        # Render table
+        th_cells = "".join(f"<th>{c}</th>" for c in display_df.columns)
+        td_rows = ""
+        for _, row in display_df.iterrows():
+            td_rows += "<tr>" + "".join(f"<td>{v}</td>" for v in row.values) + "</tr>"
+
+        st.markdown(f"""
+        <div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px">
+        <table class="tv-table"><thead><tr>{th_cells}</tr></thead><tbody>{td_rows}</tbody></table>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if len(df) > 200:
+            st.caption(f"Showing first 200 of {len(df):,} results. Use search to narrow down.")
     else:
-        st.info("News data not available. Run the workflow to fetch latest news.")
-
-    # Market Stats
-    st.markdown("---")
-    st.markdown('<div class="section-title">📊 Market Regime Analysis</div>', unsafe_allow_html=True)
-
-    m_cols = st.columns(4)
-    regime_score = regime_data.get("score", 0)
-    with m_cols[0]:
-        st.markdown(metric_card("Market Regime", f'<span class="pos">{regime}</span>' if regime == "Bull" else f'<span class="warn">{regime}</span>', "Based on Nifty50 momentum"), unsafe_allow_html=True)
-    with m_cols[1]:
-        st.markdown(metric_card("BUY Signals", f'<span class="pos">{buys}</span>', f"{buys/total_stocks*100:.1f}% of universe" if total_stocks else "–"), unsafe_allow_html=True)
-    with m_cols[2]:
-        st.markdown(metric_card("SELL Signals", f'<span class="neg">{sells}</span>', f"{sells/total_stocks*100:.1f}% of universe" if total_stocks else "–"), unsafe_allow_html=True)
-    with m_cols[3]:
-        avg_conf = summary.get("avg_confidence", 0)
-        st.markdown(metric_card("Avg AI Confidence", f'<span class="blue">{avg_conf:.1f}%</span>', "Across all BUY picks"), unsafe_allow_html=True)
+        st.info("Full scan data not available. Run the GitHub Actions workflow to generate it.")
 
 
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 3 — FULL SCANNER
-# ════════════════════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════
+# TAB 4 — NEWS
+# ══════════════════════════════════════════════════════════════════
+with t4:
+    st.markdown('<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:12px">📰 Market News — NSE Intelligence Feed</div>', unsafe_allow_html=True)
 
-with tab3:
-    st.markdown("""
-    <div class="card">
-      <div class="section-title">🔍 Full NSE Technical Scanner</div>
-      <div style="color:#64748b;font-size:13px">Screener across 2,100+ NSE stocks with multi-timeframe technical filters.</div>
-    </div>
-    """, unsafe_allow_html=True)
+    news_list = news_raw if isinstance(news_raw, list) else news_raw.get("articles", [])
 
-    opp_data = load_opportunities()
-
-    if opp_data:
-        st.markdown('<div style="color:#64748b;font-size:13px;margin-bottom:12px">Showing high-probability swing trade setups from the latest scan.</div>', unsafe_allow_html=True)
-
-        opp_df_rows = []
-        for o in opp_data:
-            opp_df_rows.append({
-                "Ticker": o.get("ticker",""),
-                "Price": o.get("price", o.get("last_close", 0)),
-                "Signal": o.get("signal", o.get("recommendation","")),
-                "Score": o.get("score", 0),
-                "Sector": o.get("sector",""),
-                "1W%": o.get("1W", o.get("pct_1w", None)),
-                "1M%": o.get("1M", o.get("pct_1m", None)),
-                "3M%": o.get("3M", o.get("pct_3m", None)),
-            })
-
-        opp_df = pd.DataFrame(opp_df_rows)
-        st.dataframe(
-            opp_df,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Price": st.column_config.NumberColumn("Price (₹)", format="₹%.2f"),
-                "Score": st.column_config.ProgressColumn("AI Score", format="%.1f", min_value=0, max_value=100),
-                "1W%": st.column_config.NumberColumn("1W %", format="%.1f%%"),
-                "1M%": st.column_config.NumberColumn("1M %", format="%.1f%%"),
-                "3M%": st.column_config.NumberColumn("3M %", format="%.1f%%"),
-            }
-        )
-    else:
-        # Try full scan CSV
-        df = load_full_scan()
-        if not df.empty:
-            st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:12px">Full scan with <b style="color:#38bdf8">{len(df):,}</b> stocks.</div>', unsafe_allow_html=True)
-
-            # Search
-            search = st.text_input("🔍 Search by ticker or name", placeholder="e.g. INFY, TCS, RELIANCE...", key="scan_search")
-            if search:
-                mask = df.astype(str).apply(lambda row: row.str.contains(search.upper(), case=False)).any(axis=1)
-                df = df[mask]
-
-            # Column selection
-            cols_to_show = [c for c in df.columns if not c.startswith("Unnamed")]
-            st.dataframe(df[cols_to_show].head(500), use_container_width=True, hide_index=True)
-        else:
-            st.info("Full scan data not available. Run the GitHub Actions workflow to generate it.")
-
-    st.markdown("---")
-    st.markdown("""
-    <div class="card">
-      <div style="font-weight:700;color:#f1f5f9;margin-bottom:8px">🗓️ How the Scanner Works</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-        <div>
-          <div style="color:#38bdf8;font-weight:600;font-size:13px">Step 1: Universe</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">Downloads all 2,100+ NSE tickers from NSEpy/yfinance every trading day at 6PM IST.</div>
-        </div>
-        <div>
-          <div style="color:#a78bfa;font-weight:600;font-size:13px">Step 2: Multi-TF Analysis</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">Calculates momentum across 1W, 2W, 1M, 3M, 6M, 12M. Scores each stock on trend strength.</div>
-        </div>
-        <div>
-          <div style="color:#22c55e;font-weight:600;font-size:13px">Step 3: AI Ranking</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">Applies regime filter, fundamentals (P/E, Market Cap) and generates final BUY/HOLD/SELL with entry, SL, TP.</div>
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 4 — BACKTEST LAB
-# ════════════════════════════════════════════════════════════════════════════════
-
-with tab4:
-    perf = load_performance()
-    mb = perf.get("mode_b", {})
-
-    # Real backtest summary from performance.py
-    real_wr = mb.get("win_rate_pct", 52.6)
-    real_aw = mb.get("avg_win_pct", 3.43)
-    real_al = abs(mb.get("avg_loss_pct", -4.84))
-    real_trades = mb.get("total_trades", 156)
-    real_expectancy = mb.get("expectancy_pct", -0.49)
-    real_pf = mb.get("profit_factor", 0.847)
-    real_dd = mb.get("max_drawdown_pct", 18.06)
-    real_total_ret = mb.get("total_return_pct", -12.56)
-    real_sharpe = mb.get("sharpe_like", -0.99)
-    equity_curve = mb.get("equity_curve", [])
-    monthly_dist = mb.get("monthly_dist", [])
-
-    st.markdown("""
-    <div class="card" style="border-color:#1a56db33">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="font-size:28px">🧪</div>
-        <div>
-          <div class="section-title">Quantitative Backtest Laboratory</div>
-          <div style="color:#64748b;font-size:13px">Simulate strategy performance with custom parameters. Based on 52-week historical NSE data.</div>
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ─── Section A: Real Backtest Results ────────────────────────────────────
-
-    st.markdown('<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin:8px 0 16px">📊 Real Historical Backtest Results (52 Weeks · 156 Trades)</div>', unsafe_allow_html=True)
-
-    m1, m2, m3, m4 = st.columns(4)
-
-    wr_color = "#22c55e" if real_wr >= 60 else ("#f59e0b" if real_wr >= 50 else "#ef4444")
-    tr_color = "#22c55e" if real_total_ret >= 0 else "#ef4444"
-    exp_color = "#22c55e" if real_expectancy >= 0 else "#ef4444"
-    dd_color = "#f59e0b" if real_dd < 20 else "#ef4444"
-
-    with m1:
-        st.markdown(metric_card("Win Rate", f'<span style="color:{wr_color}">{real_wr:.1f}%</span>', "Target: >60%", wr_color), unsafe_allow_html=True)
-    with m2:
-        st.markdown(metric_card("Total Return", f'<span style="color:{tr_color}">{real_total_ret:+.2f}%</span>', "₹10L → ₹8.74L", tr_color), unsafe_allow_html=True)
-    with m3:
-        st.markdown(metric_card("Expectancy/Trade", f'<span style="color:{exp_color}">{real_expectancy:+.2f}%</span>', "Target: >0%", exp_color), unsafe_allow_html=True)
-    with m4:
-        st.markdown(metric_card("Max Drawdown", f'<span style="color:{dd_color}">{real_dd:.1f}%</span>', "Target: <15%", dd_color), unsafe_allow_html=True)
-
-    m5, m6, m7, m8 = st.columns(4)
-    with m5:
-        st.markdown(metric_card("Avg Win", f'<span class="pos">+{real_aw:.2f}%</span>', f"{mb.get('exit_reasons',{}).get('TP',0)} TP hits"), unsafe_allow_html=True)
-    with m6:
-        st.markdown(metric_card("Avg Loss", f'<span class="neg">-{real_al:.2f}%</span>', f"{mb.get('exit_reasons',{}).get('SL',0)} SL hits"), unsafe_allow_html=True)
-    with m7:
-        st.markdown(metric_card("Profit Factor", f'<span class="warn">{real_pf:.3f}</span>', "Target: >1.25"), unsafe_allow_html=True)
-    with m8:
-        st.markdown(metric_card("Sharpe Ratio", f'<span class="neg">{real_sharpe:.2f}</span>', "Target: >0.5"), unsafe_allow_html=True)
-
-    # Exit Reasons
-    exits = mb.get("exit_reasons", {})
-    tp_hits = exits.get("TP", 0)
-    sl_hits = exits.get("SL", 0)
-    time_exits = exits.get("TIME", 0)
-
-    st.markdown("---")
-    st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:12px">🎯 Exit Reason Breakdown</div>', unsafe_allow_html=True)
-    ec1, ec2, ec3 = st.columns(3)
-    with ec1:
-        st.markdown(f"""<div class="card" style="text-align:center;border-color:#14532d33">
-            <div style="font-size:28px;font-weight:900;color:#22c55e">{tp_hits}</div>
-            <div style="color:#64748b;font-size:12px;margin-top:4px">✅ Take Profit Hit</div>
-            <div style="color:#475569;font-size:11px">{tp_hits/real_trades*100:.0f}% of trades</div>
-        </div>""", unsafe_allow_html=True)
-    with ec2:
-        st.markdown(f"""<div class="card" style="text-align:center;border-color:#450a0a33">
-            <div style="font-size:28px;font-weight:900;color:#ef4444">{sl_hits}</div>
-            <div style="color:#64748b;font-size:12px;margin-top:4px">🛑 Stop Loss Hit</div>
-            <div style="color:#475569;font-size:11px">{sl_hits/real_trades*100:.0f}% of trades</div>
-        </div>""", unsafe_allow_html=True)
-    with ec3:
-        st.markdown(f"""<div class="card" style="text-align:center;border-color:#451a0333">
-            <div style="font-size:28px;font-weight:900;color:#f59e0b">{time_exits}</div>
-            <div style="color:#64748b;font-size:12px;margin-top:4px">⏰ Time Exit (5d)</div>
-            <div style="color:#475569;font-size:11px">{time_exits/real_trades*100:.0f}% of trades</div>
-        </div>""", unsafe_allow_html=True)
-
-    # Monthly Performance
-    if monthly_dist:
-        st.markdown("---")
-        st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:12px">📅 Monthly Performance Breakdown</div>', unsafe_allow_html=True)
-        monthly_df = pd.DataFrame(monthly_dist)
-        if "month" in monthly_df.columns:
-            monthly_df = monthly_df.rename(columns={"month": "Month", "trades": "Trades", "wins": "Wins",
-                                                     "win_rate": "Win Rate %", "return_pct": "Return %", "pnl": "P&L (₹)"})
-            st.dataframe(
-                monthly_df[["Month","Trades","Wins","Win Rate %","Return %","P&L (₹)"]],
-                use_container_width=True, hide_index=True,
-                column_config={
-                    "Win Rate %": st.column_config.NumberColumn(format="%.1f%%"),
-                    "Return %": st.column_config.NumberColumn(format="%+.2f%%"),
-                    "P&L (₹)": st.column_config.NumberColumn(format="₹%.0f"),
-                }
-            )
-
-    # Regime Breakdown
-    regime_breakdown = mb.get("regime_breakdown", {})
-    if regime_breakdown:
-        st.markdown("---")
-        st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:12px">🌐 Performance by Market Regime</div>', unsafe_allow_html=True)
-        for reg_name, reg_stats in regime_breakdown.items():
-            reg_wr = reg_stats.get("win_rate_pct", 0)
-            reg_exp = reg_stats.get("expectancy", 0)
-            reg_trades = reg_stats.get("trades", 0)
-            reg_pnl = reg_stats.get("total_pnl", 0)
-            icon = "🟢" if reg_name == "Bull" else ("🔴" if reg_name == "Bear" else "🟡")
-            color = "#22c55e" if reg_exp >= 0 else "#ef4444"
+    if news_list:
+        for article in news_list[:30]:
+            title = article.get("title") or article.get("headline","")
+            source = article.get("source") or article.get("publisher","NSE")
+            pub = article.get("published") or article.get("time","")
+            url = article.get("url") or article.get("link","#")
+            if not title: continue
             st.markdown(f"""
-            <div class="card" style="padding:12px 16px;margin-bottom:8px">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><span style="font-weight:700;color:#f1f5f9">{icon} {reg_name} Market</span> <span style="color:#64748b;font-size:12px">({reg_trades} trades)</span></div>
-                <div style="display:flex;gap:20px">
-                  <span style="font-size:13px;color:#94a3b8">WR: <b style="color:{wr_color}">{reg_wr:.1f}%</b></span>
-                  <span style="font-size:13px;color:#94a3b8">Expectancy: <b style="color:{color}">{reg_exp:+.2f}%</b></span>
-                  <span style="font-size:13px;color:#94a3b8">P&L: <b style="color:{color}">₹{reg_pnl:+,.0f}</b></span>
+            <div class="news-item">
+              <div class="news-title"><a href="{url}" target="_blank">{title}</a></div>
+              <div class="news-meta">📡 {source} &nbsp;·&nbsp; 🕐 {pub}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("News is fetched daily via GitHub Actions. Run the workflow to populate this feed.")
+
+    st.markdown("""<div class="disc">News sourced from LiveMint, Economic Times, and MoneyControl RSS feeds. Auto-refreshed daily.</div>""", unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 5 — AI PICKS (Execute Mode)
+# ══════════════════════════════════════════════════════════════════
+with t5:
+    st.markdown(f"""
+    <div class="info-box">
+      🤖 <b>AI EOD Intelligence Engine v2</b> — {total_stocks:,} stocks analysed ·
+      <b style="color:#22c55e">{buys} BUY</b> ·
+      <b style="color:#fbbf24">{holds} HOLD</b> ·
+      <b style="color:#ef4444">{sells} SELL</b> ·
+      Avg Confidence: <b style="color:#a78bfa">{summary.get("avg_confidence",0):.1f}%</b>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Filters ──
+    af1, af2, af3, af4, af5 = st.columns([3,2,2,2,2])
+    with af1: ai_search = st.text_input("🔍 Search ticker / name", key="ai_s")
+    with af2: ai_rec = st.selectbox("Signal", ["All","BUY","HOLD","SELL"], key="ai_r")
+    with af3: ai_cap = st.selectbox("Cap Size", ["All","Large Cap","Mid Cap","Small Cap","Micro Cap"], key="ai_c")
+    with af4:
+        all_sectors = ["All"] + sorted(set(p.get("sector","") for p in picks if p.get("sector","")))
+        ai_sec = st.selectbox("Sector", all_sectors, key="ai_sec")
+    with af5: ai_conf = st.slider("Min Confidence", 0, 100, 60, 5, key="ai_conf")
+
+    # Filter
+    filtered = []
+    for p in picks:
+        if ai_search:
+            s = ai_search.upper()
+            if s not in p.get("ticker","").upper() and s not in p.get("name","").upper():
+                continue
+        if ai_rec != "All" and p.get("recommendation","").upper() != ai_rec:
+            continue
+        if ai_cap != "All" and p.get("cap_label","") != ai_cap:
+            continue
+        if ai_sec != "All" and p.get("sector","") != ai_sec:
+            continue
+        if p.get("confidence",0) < ai_conf:
+            continue
+        filtered.append(p)
+
+    st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(filtered)}</b> stocks</div>', unsafe_allow_html=True)
+
+    # View toggle
+    view_mode = st.radio("View", ["Cards (Detailed)","Table (Compact)"], horizontal=True, key="ai_view")
+    show_n = st.select_slider("Show", [10,25,50,100,200,len(filtered)] if len(filtered) > 200 else [10,25,50,min(100,len(filtered)),len(filtered)], value=min(25,len(filtered)), key="ai_n")
+
+    if view_mode == "Table (Compact)":
+        # ── Compact table ──
+        th = "<tr><th>Ticker</th><th>Price</th><th>Signal</th><th>Confidence</th><th>Entry</th><th>Stop Loss</th><th>Target</th><th>R:R</th><th>P(Win)</th><th>1W</th><th>1M</th><th>3M</th><th>12M</th><th>Chart</th></tr>"
+        trs = ""
+        for p in filtered[:show_n]:
+            t = p.get("ticker","")
+            rec = p.get("recommendation","hold")
+            tf = p.get("tf_details",{})
+            trs += f"""<tr>
+              <td><a href="{tv(t)}" target="_blank" class="tv-link">{t}</a><br><span style="font-size:10px;color:#475569">{p.get('name','')[:20]}</span></td>
+              <td><b>{price_fmt(p.get('price'))}</b></td>
+              <td>{rec_badge(rec)}</td>
+              <td><b style="color:#a78bfa">{p.get('confidence',0)}%</b></td>
+              <td>{price_fmt(p.get('entry_price'))}</td>
+              <td><span class="neg">{price_fmt(p.get('stop_loss'))}</span></td>
+              <td><span class="pos">{price_fmt(p.get('take_profit'))}</span></td>
+              <td><b style="color:#38bdf8">1:{p.get('risk_reward',0):.1f}</b></td>
+              <td>{p.get('p_success',0):.1f}%</td>
+              <td>{pct_fmt(tf.get('1W',{}).get('pct'))}</td>
+              <td>{pct_fmt(tf.get('1M',{}).get('pct'))}</td>
+              <td>{pct_fmt(tf.get('3M',{}).get('pct'))}</td>
+              <td>{pct_fmt(tf.get('12M',{}).get('pct'))}</td>
+              <td><a href="{tv(t)}" target="_blank" class="chart-btn">Chart ↗</a></td>
+            </tr>"""
+        st.markdown(f'<div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px"><table class="tv-table"><thead>{th}</thead><tbody>{trs}</tbody></table></div>', unsafe_allow_html=True)
+
+    else:
+        # ── Detail cards ──
+        for p in filtered[:show_n]:
+            ticker = p.get("ticker","")
+            rec = p.get("recommendation","hold")
+            conf = p.get("confidence",0)
+            tf = p.get("tf_details",{})
+            reasons = p.get("reasons",[])
+            risks = p.get("risks",[])
+
+            tf_row = "".join([
+                f'<span style="color:{"#22c55e" if (tf.get(k,{}).get("pct") or 0)>=0 else "#ef4444"};font-size:11px;margin-right:10px">{k}: {pct_fmt(tf.get(k,{}).get("pct"))}</span>'
+                for k in ["1W","2W","1M","3M","6M","12M"]
+            ])
+            conf_bar = f'<div style="height:4px;background:#1e2a3a;border-radius:2px;margin-top:6px;margin-bottom:3px"><div style="height:100%;width:{conf}%;background:{"#22c55e" if conf>=75 else "#f59e0b" if conf>=55 else "#ef4444"};border-radius:2px;transition:width .3s"></div></div>'
+            reasons_h = "".join([f'<div style="color:#4ade80;font-size:11px;margin-top:2px">✓ {r}</div>' for r in reasons[:3]])
+            risks_h = "".join([f'<div style="color:#f87171;font-size:11px;margin-top:2px">⚠ {r}</div>' for r in risks[:2]])
+
+            st.markdown(f"""
+            <div class="pick {rec}">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                <div>
+                  <span style="font-size:18px;font-weight:800;color:#f1f5f9;font-family:'JetBrains Mono',monospace">
+                    {tv_link(ticker)}
+                  </span>
+                  <span style="font-size:12px;color:#64748b;margin-left:8px">{p.get("name","")}</span>
+                  <span style="font-size:12px;color:#94a3b8;margin-left:6px">· {p.get("sector","")}</span>
+                  <span style="font-size:11px;color:#475569;margin-left:6px">#{p.get("rank","?")}</span>
                 </div>
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  {rec_badge(rec)}
+                  {cap_badge(p.get("mcap_code","S"), p.get("cap_label","Small Cap"))}
+                  <span class="badge" style="background:#1e3a5f;color:#38bdf8;font-size:10px">{regime}</span>
+                  <a href="{tv(ticker)}" target="_blank" class="chart-btn">📊 Chart ↗</a>
+                </div>
+              </div>
+              <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap">
+                <span style="font-size:12px;color:#64748b">Entry: <b style="color:#f1f5f9">{price_fmt(p.get("entry_price"))}</b></span>
+                <span style="font-size:12px;color:#64748b">SL: <b style="color:#ef4444">{price_fmt(p.get("stop_loss"))}</b> (-{p.get("sl_pct",0):.2f}%)</span>
+                <span style="font-size:12px;color:#64748b">Target: <b style="color:#22c55e">{price_fmt(p.get("take_profit"))}</b> (+{p.get("tp_pct",0):.2f}%)</span>
+                <span style="font-size:12px;color:#64748b">R:R <b style="color:#38bdf8">1:{p.get("risk_reward",0):.1f}</b></span>
+                <span style="font-size:12px;color:#64748b">P(Win): <b style="color:#a78bfa">{p.get("p_success",0):.1f}%</b></span>
+                <span style="font-size:12px;color:#64748b">Horizon: <b style="color:#94a3b8">{p.get("horizon","")}</b></span>
+              </div>
+              <div style="margin-top:8px">{tf_row}</div>
+              {conf_bar}
+              <span style="font-size:10px;color:#475569">Confidence {conf}% · AI Score {p.get("score",0):.1f}/100</span>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+                <div>{reasons_h}</div><div>{risks_h}</div>
               </div>
             </div>
             """, unsafe_allow_html=True)
 
-    # ─── Section B: Strategy Simulator ───────────────────────────────────────
+    st.markdown('<div class="disc">⚠️ All AI signals are for educational research only. Not SEBI-registered advice. Past performance ≠ future results.</div>', unsafe_allow_html=True)
 
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 6 — BACKTEST LAB
+# ══════════════════════════════════════════════════════════════════
+with t6:
+    real_wr    = mb.get("win_rate_pct",52.6)
+    real_aw    = mb.get("avg_win_pct",3.43)
+    real_al    = abs(mb.get("avg_loss_pct",-4.84))
+    real_trades = mb.get("total_trades",156)
+    real_exp   = mb.get("expectancy_pct",-0.49)
+    real_pf    = mb.get("profit_factor",0.847)
+    real_dd    = mb.get("max_drawdown_pct",18.06)
+    real_ret   = mb.get("total_return_pct",-12.56)
+    real_sh    = mb.get("sharpe_like",-0.99)
+    exits      = mb.get("exit_reasons",{"TP":64,"SL":55,"TIME":37})
+    monthly    = mb.get("monthly_dist",[])
+    regime_bk  = mb.get("regime_breakdown",{})
+
+    st.markdown("""
+    <div class="info-box">🧪 <b>Backtest Laboratory</b> — Real 52-week historical results (156 trades) + interactive parameter simulator.
+    Understand what's working, what's not, and how to fix it.</div>
+    """, unsafe_allow_html=True)
+
+    # ── Real Results ──
+    st.markdown('<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin:8px 0 14px">📊 Real Backtest Results — 52 Weeks · 156 Trades</div>', unsafe_allow_html=True)
+
+    mc1,mc2,mc3,mc4 = st.columns(4)
+    wrc = "#22c55e" if real_wr>=60 else ("#f59e0b" if real_wr>=50 else "#ef4444")
+    trc = "#22c55e" if real_ret>=0 else "#ef4444"
+    exc = "#22c55e" if real_exp>=0 else "#ef4444"
+    with mc1: st.markdown(metric_box("Win Rate",f'<span style="color:{wrc}">{real_wr:.1f}%</span>',"Target: >60%",wrc),unsafe_allow_html=True)
+    with mc2: st.markdown(metric_box("Total Return",f'<span style="color:{trc}">{real_ret:+.2f}%</span>',"₹10L → ₹8.74L",trc),unsafe_allow_html=True)
+    with mc3: st.markdown(metric_box("Expectancy/Trade",f'<span style="color:{exc}">{real_exp:+.2f}%</span>',"Target: >0%",exc),unsafe_allow_html=True)
+    with mc4: st.markdown(metric_box("Max Drawdown",f'<span class="neg">{real_dd:.1f}%</span>',"Target: <15%","#ef4444"),unsafe_allow_html=True)
+
+    mc5,mc6,mc7,mc8 = st.columns(4)
+    with mc5: st.markdown(metric_box("Avg Win",f'<span class="pos">+{real_aw:.2f}%</span>',f"{exits.get('TP',0)} TP hits"),unsafe_allow_html=True)
+    with mc6: st.markdown(metric_box("Avg Loss",f'<span class="neg">-{real_al:.2f}%</span>',f"{exits.get('SL',0)} SL hits"),unsafe_allow_html=True)
+    with mc7: st.markdown(metric_box("Profit Factor",f'<span class="warn">{real_pf:.3f}</span>',"Target: >1.25","#f59e0b"),unsafe_allow_html=True)
+    with mc8: st.markdown(metric_box("Sharpe Ratio",f'<span class="neg">{real_sh:.2f}</span>',"Target: >0.5","#ef4444"),unsafe_allow_html=True)
+
+    # Exit breakdown
+    st.markdown("---")
+    ex1,ex2,ex3 = st.columns(3)
+    with ex1:
+        tp_n = exits.get("TP",0)
+        st.markdown(f'<div class="mc" style="border-top:3px solid #22c55e"><div class="mc-val pos">{tp_n}</div><div class="mc-lbl">✅ Take Profit Hit</div><div class="mc-sub">{tp_n/real_trades*100:.0f}% of trades</div></div>',unsafe_allow_html=True)
+    with ex2:
+        sl_n = exits.get("SL",0)
+        st.markdown(f'<div class="mc" style="border-top:3px solid #ef4444"><div class="mc-val neg">{sl_n}</div><div class="mc-lbl">🛑 Stop Loss Hit</div><div class="mc-sub">{sl_n/real_trades*100:.0f}% of trades</div></div>',unsafe_allow_html=True)
+    with ex3:
+        ti_n = exits.get("TIME",0)
+        st.markdown(f'<div class="mc" style="border-top:3px solid #f59e0b"><div class="mc-val warn">{ti_n}</div><div class="mc-lbl">⏰ Time Exit (5d)</div><div class="mc-sub">{ti_n/real_trades*100:.0f}% of trades</div></div>',unsafe_allow_html=True)
+
+    # Monthly table
+    if monthly:
+        st.markdown("---")
+        st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:10px">📅 Monthly Breakdown</div>',unsafe_allow_html=True)
+        mdf = pd.DataFrame(monthly).rename(columns={"month":"Month","trades":"Trades","wins":"Wins","win_rate":"Win Rate %","return_pct":"Return %","pnl":"P&L (₹)"})
+        cols_show = [c for c in ["Month","Trades","Wins","Win Rate %","Return %","P&L (₹)"] if c in mdf.columns]
+        st.dataframe(mdf[cols_show], use_container_width=True, hide_index=True,
+            column_config={"Win Rate %":st.column_config.NumberColumn(format="%.1f%%"),"Return %":st.column_config.NumberColumn(format="%+.2f%%"),"P&L (₹)":st.column_config.NumberColumn(format="₹%.0f")})
+
+    # Regime breakdown
+    if regime_bk:
+        st.markdown("---")
+        st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:10px">🌐 Performance by Market Regime</div>',unsafe_allow_html=True)
+        for rn, rs in regime_bk.items():
+            ri2 = "🟢" if rn=="Bull" else ("🔴" if rn=="Bear" else "🟡")
+            rv_wr = rs.get("win_rate_pct",0); rv_exp = rs.get("expectancy",0)
+            rv_pnl = rs.get("total_pnl",0); rv_tr = rs.get("trades",0)
+            ec2 = "#22c55e" if rv_exp>=0 else "#ef4444"
+            st.markdown(f'<div class="card" style="padding:12px 16px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><b style="color:#f1f5f9">{ri2} {rn} Market</b><span style="color:#64748b;font-size:12px">{rv_tr} trades</span><div style="display:flex;gap:20px"><span style="font-size:13px">WR: <b style="color:{wrc}">{rv_wr:.1f}%</b></span><span style="font-size:13px">Expectancy: <b style="color:{ec2}">{rv_exp:+.2f}%</b></span><span style="font-size:13px">P&L: <b style="color:{ec2}">₹{rv_pnl:+,.0f}</b></span></div></div></div>',unsafe_allow_html=True)
+
+    # ── Simulator ──
     st.markdown("---")
     st.markdown("""
     <div class="card" style="border-color:#7c3aed33">
       <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px">🎛️ Strategy Parameter Simulator</div>
-      <div style="color:#64748b;font-size:13px">Adjust parameters and simulate how the strategy would perform. Uses calibrated win-probability model.</div>
+      <div style="color:#64748b;font-size:13px">Change TP/SL and see how the strategy would have performed using calibrated real backtest win rates.</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,unsafe_allow_html=True)
 
-    # Quick Presets
-    st.markdown('<div class="section-label">Quick Presets</div>', unsafe_allow_html=True)
-    pc1, pc2, pc3, pc4, pc5 = st.columns(5)
-
+    # Presets
+    st.markdown('<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Quick Presets</div>',unsafe_allow_html=True)
+    pb1,pb2,pb3,pb4,pb5 = st.columns(5)
     preset = None
-    with pc1:
-        if st.button("🛡️ Conservative\n(2% TP / 1.5% SL)"):
-            preset = {"tp": 2.0, "sl": 1.5, "weeks": 26, "pool": 20, "min_score": 65}
-    with pc2:
-        if st.button("⚡ Aggressive\n(5% TP / 3% SL)"):
-            preset = {"tp": 5.0, "sl": 3.0, "weeks": 52, "pool": 20, "min_score": 60}
-    with pc3:
-        if st.button("🎯 Tight Scalp\n(1.5% TP / 1% SL)"):
-            preset = {"tp": 1.5, "sl": 1.0, "weeks": 12, "pool": 10, "min_score": 70}
-    with pc4:
-        if st.button("🚀 High Conviction\n(8% TP / 4% SL)"):
-            preset = {"tp": 8.0, "sl": 4.0, "weeks": 52, "pool": 10, "min_score": 75}
-    with pc5:
-        if st.button("🔄 Reset to Actual"):
-            preset = {"tp": 4.0, "sl": 2.0, "weeks": 52, "pool": 20, "min_score": 60}
+    with pb1:
+        if st.button("🛡️ Conservative\n2%TP / 1.5%SL",key="p1"): preset={"tp":2.0,"sl":1.5,"w":26,"pool":20}
+    with pb2:
+        if st.button("⚡ Aggressive\n5%TP / 3%SL",key="p2"): preset={"tp":5.0,"sl":3.0,"w":52,"pool":20}
+    with pb3:
+        if st.button("🎯 Tight Scalp\n1.5%TP / 1%SL",key="p3"): preset={"tp":1.5,"sl":1.0,"w":12,"pool":10}
+    with pb4:
+        if st.button("🚀 High Conv.\n8%TP / 4%SL",key="p4"): preset={"tp":8.0,"sl":4.0,"w":52,"pool":10}
+    with pb5:
+        if st.button("🔄 Actual Params\n4%TP / 2%SL",key="p5"): preset={"tp":4.0,"sl":2.0,"w":52,"pool":20}
 
     if preset:
-        st.session_state["sim_tp"] = preset["tp"]
-        st.session_state["sim_sl"] = preset["sl"]
-        st.session_state["sim_weeks"] = preset["weeks"]
-        st.session_state["sim_pool"] = preset["pool"]
-        st.session_state["sim_min_score"] = preset["min_score"]
+        st.session_state.update({"s_tp":preset["tp"],"s_sl":preset["sl"],"s_w":preset["w"],"s_pool":preset["pool"]})
 
-    st.markdown("---")
+    sl1,sl2,sl3 = st.columns(3)
+    with sl1: tp_pct = st.slider("Take Profit %",1.0,15.0,st.session_state.get("s_tp",4.0),0.5,key="sl_tp")
+    with sl2: sl_pct = st.slider("Stop Loss %",0.5,10.0,st.session_state.get("s_sl",2.0),0.5,key="sl_sl")
+    with sl3: cap_sim = st.select_slider("Capital (₹)",[25000,50000,100000,250000,500000,1000000],100000,format_func=lambda x:f"₹{x:,}",key="sl_cap")
+    sl4,sl5 = st.columns(2)
+    with sl4: sim_w = st.slider("Backtest Weeks",4,52,st.session_state.get("s_w",12),4,key="sl_w")
+    with sl5: pool = st.slider("Picks/Week",5,30,st.session_state.get("s_pool",10),5,key="sl_pool")
 
-    # Sliders
-    s1, s2, s3 = st.columns(3)
-    with s1:
-        tp_pct = st.slider("Take Profit %", 1.0, 15.0, st.session_state.get("sim_tp", 4.0), 0.5, key="sim_tp_slider", help="Target return per trade")
-    with s2:
-        sl_pct = st.slider("Stop Loss %", 0.5, 10.0, st.session_state.get("sim_sl", 2.0), 0.5, key="sim_sl_slider", help="Max loss per trade")
-    with s3:
-        capital = st.select_slider("Starting Capital (₹)", options=[25000, 50000, 100000, 250000, 500000, 1000000],
-                                    value=100000, format_func=lambda x: f"₹{x:,}", key="sim_cap")
+    rr = tp_pct / sl_pct if sl_pct > 0 else 0
+    st.markdown(f'<div style="padding:10px 14px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b;margin-bottom:8px">Config: TP <b style="color:#22c55e">{tp_pct}%</b> · SL <b style="color:#ef4444">{sl_pct}%</b> · R:R <b style="color:#38bdf8">1:{rr:.1f}</b> · {sim_w}w · {pool} picks/wk</div>',unsafe_allow_html=True)
 
-    s4, s5, s6 = st.columns(3)
-    with s4:
-        sim_weeks = st.slider("Backtest Weeks", 4, 52, st.session_state.get("sim_weeks", 12), 4, key="sim_weeks_slider")
-    with s5:
-        pool_size = st.slider("Picks per Week", 5, 30, st.session_state.get("sim_pool", 10), 5, key="sim_pool_slider")
-    with s6:
-        min_score = st.slider("Min AI Score Filter", 40, 90, st.session_state.get("sim_min_score", 60), 5, key="sim_score_slider", help="Only trade picks above this AI score")
-
-    col_run, col_inf = st.columns([1, 4])
-    with col_run:
-        run_sim = st.button("▶ Run Simulation", type="primary", use_container_width=True)
-
-    st.markdown(f"""
-    <div style="padding: 10px 16px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b">
-      Current config: TP <b style="color:#22c55e">{tp_pct}%</b> · SL <b style="color:#ef4444">{sl_pct}%</b> ·
-      R:R <b style="color:#38bdf8">1:{tp_pct/sl_pct:.1f}</b> · 
-      {sim_weeks} weeks · {pool_size} picks/week · Min Score: {min_score}
-    </div>
-    """, unsafe_allow_html=True)
-
-    if run_sim:
-        progress = st.progress(0, text="Running simulation...")
-
-        # Calibrated win probability model based on real backtest data
-        # Base win rate from real data: 52.6%
-        # Adjustments based on TP/SL ratio and score filter
-        rr = tp_pct / sl_pct
-
-        # Win rate improves with better R:R and higher score filter
+    run_btn = st.button("▶ Run Simulation", type="primary", use_container_width=False, key="runsim")
+    if run_btn:
+        prog = st.progress(0,"Running...")
         base_wr = 0.526
-        rr_adj = (rr - 1.78) * 0.03      # Each unit of R:R above baseline
-        score_adj = (min_score - 60) * 0.003  # Higher score filter = better stocks
-        adj_wr = min(0.75, max(0.30, base_wr + rr_adj + score_adj))
-
-        # Simulate week by week
-        equity = float(capital)
-        equity_curve_sim = [equity]
+        rr_adj = (rr - 1.78) * 0.03
+        adj_wr = min(0.75, max(0.30, base_wr + rr_adj))
+        equity = float(cap_sim)
+        eq_curve = [equity]
         trade_log = []
         weekly_rets = []
-
-        for week in range(sim_weeks):
-            progress.progress((week + 1) / sim_weeks, text=f"Simulating week {week+1} of {sim_weeks}...")
-
-            # Regime effect (simulate regime shifts)
-            regime_mult = 1.0
-            if week % 8 < 2:  # ~25% bear weeks
-                regime_mult = 0.85
-
-            week_equity = equity
-            trade_size = equity / pool_size
-            week_pnl = 0.0
-            week_trades = 0
-
-            for _ in range(pool_size):
-                outcome = random.random()
-                effective_wr = adj_wr * regime_mult
-
-                if outcome < effective_wr:
-                    # Win — distributed around TP
-                    gain = random.gauss(tp_pct, tp_pct * 0.15) / 100
-                    week_pnl += trade_size * gain
-                    trade_log.append({"week": week+1, "type": "WIN", "pct": gain*100})
+        for wk in range(sim_w):
+            prog.progress((wk+1)/sim_w, f"Week {wk+1}/{sim_w}...")
+            wk_eq = equity; wk_pnl = 0.0; trade_size = equity/pool
+            for _ in range(pool):
+                if random.random() < adj_wr:
+                    g = random.gauss(tp_pct, tp_pct*0.15)/100
+                    wk_pnl += trade_size*g; trade_log.append(("WIN",g*100))
                 else:
-                    # Loss — SL or time exit
-                    loss_mult = random.choice([1.0, 1.0, 1.2, 1.5, 2.0])  # Sometimes SL slippage
-                    loss = -sl_pct * loss_mult / 100
-                    loss = max(loss, -sl_pct * 2.5 / 100)  # Cap loss
-                    week_pnl += trade_size * loss
-                    trade_log.append({"week": week+1, "type": "LOSS", "pct": loss*100})
-                week_trades += 1
+                    lm = random.choice([1.0,1.0,1.2,1.5,2.0])
+                    l = -sl_pct*lm/100; l = max(l,-sl_pct*2.5/100)
+                    wk_pnl += trade_size*l; trade_log.append(("LOSS",l*100))
+            equity += wk_pnl; equity = max(equity,0)
+            eq_curve.append(equity)
+            weekly_rets.append(wk_pnl/wk_eq*100 if wk_eq>0 else 0)
+        prog.empty()
 
-            equity += week_pnl
-            equity = max(equity, 0)
-            equity_curve_sim.append(equity)
+        wins_r = [t[1] for t in trade_log if t[0]=="WIN"]
+        loss_r = [t[1] for t in trade_log if t[0]=="LOSS"]
+        s_wr = len(wins_r)/len(trade_log)*100 if trade_log else 0
+        s_aw = sum(wins_r)/len(wins_r) if wins_r else 0
+        s_al = sum(loss_r)/len(loss_r) if loss_r else 0
+        s_exp = (s_wr/100*s_aw)+((1-s_wr/100)*s_al)
+        s_ret = (equity-cap_sim)/cap_sim*100
+        s_sh = (np.mean(weekly_rets)/np.std(weekly_rets))*math.sqrt(52) if len(weekly_rets)>1 and np.std(weekly_rets)>0 else 0
+        peak_e=cap_sim; s_dd=0
+        for eq in eq_curve:
+            if eq>peak_e: peak_e=eq
+            s_dd=max(s_dd,(peak_e-eq)/peak_e*100 if peak_e>0 else 0)
 
-            weekly_ret = week_pnl / week_equity * 100 if week_equity > 0 else 0
-            weekly_rets.append(weekly_ret)
+        ok = s_ret>5 and s_wr>55
+        st.markdown(f"""<div style="background:{'#14532d22' if ok else '#450a0a22'};border:1px solid {'#16653455' if ok else '#45100a55'};border-radius:10px;padding:14px 18px;margin:14px 0">
+          <span style="font-size:15px;font-weight:700;color:{'#4ade80' if ok else '#ef4444'}">{'✅ Strategy Viable!' if ok else '⚠ Needs Tuning'}</span>
+          <span style="font-size:13px;color:{'#86efac' if ok else '#fca5a5'};margin-left:10px">WR {s_wr:.1f}% · Exp/trade {s_exp:+.2f}% · Sharpe {s_sh:.2f}</span>
+        </div>""",unsafe_allow_html=True)
 
-        progress.empty()
+        r1,r2,r3,r4 = st.columns(4)
+        src = "#22c55e" if s_ret>=0 else "#ef4444"
+        swc = "#22c55e" if s_wr>=60 else ("#f59e0b" if s_wr>=50 else "#ef4444")
+        sec = "#22c55e" if s_exp>=0 else "#ef4444"
+        ssc = "#22c55e" if s_sh>=0.5 else ("#f59e0b" if s_sh>=0 else "#ef4444")
+        with r1: st.markdown(metric_box("Total Return",f'<span style="color:{src}">{s_ret:+.1f}%</span>',f'₹{cap_sim:,}→₹{equity:,.0f}',src),unsafe_allow_html=True)
+        with r2: st.markdown(metric_box("Win Rate",f'<span style="color:{swc}">{s_wr:.1f}%</span>',"Target: >60%",swc),unsafe_allow_html=True)
+        with r3: st.markdown(metric_box("Expectancy",f'<span style="color:{sec}">{s_exp:+.2f}%</span>',"Target: >0%",sec),unsafe_allow_html=True)
+        with r4: st.markdown(metric_box("Sharpe Ratio",f'<span style="color:{ssc}">{s_sh:.2f}</span>',"Target: >0.5",ssc),unsafe_allow_html=True)
 
-        # Metrics
-        total_ret = (equity - capital) / capital * 100
-        wins = [t for t in trade_log if t["type"] == "WIN"]
-        losses = [t for t in trade_log if t["type"] == "LOSS"]
-        actual_wr = len(wins) / len(trade_log) * 100 if trade_log else 0
-        avg_win = sum(t["pct"] for t in wins) / len(wins) if wins else 0
-        avg_loss = sum(t["pct"] for t in losses) / len(losses) if losses else 0
-        expectancy = (actual_wr/100 * avg_win) + ((1 - actual_wr/100) * avg_loss)
-
-        # Sharpe
-        if weekly_rets and len(weekly_rets) > 1:
-            sharpe = (np.mean(weekly_rets) / np.std(weekly_rets)) * math.sqrt(52) if np.std(weekly_rets) > 0 else 0
-        else:
-            sharpe = 0
-
-        # Max DD
-        peak = capital
-        max_dd = 0
-        for eq in equity_curve_sim:
-            if eq > peak:
-                peak = eq
-            dd = (peak - eq) / peak * 100 if peak > 0 else 0
-            max_dd = max(max_dd, dd)
-
-        # Status Banner
-        status_ok = total_ret > 5 and actual_wr > 55
-        if status_ok:
-            st.markdown(f"""<div style="background:#14532d22;border:1px solid #16653455;border-radius:10px;padding:14px 18px;margin:16px 0">
-                <span style="color:#4ade80;font-size:16px;font-weight:700">✅ Strategy is Viable!</span>
-                <span style="color:#86efac;font-size:13px;margin-left:10px">Avg return/trade: {expectancy:+.2f}% · Win Rate: {actual_wr:.1f}% · Sharpe: {sharpe:.2f}</span>
-            </div>""", unsafe_allow_html=True)
-        else:
-            st.markdown(f"""<div style="background:#450a0a22;border:1px solid #45100a55;border-radius:10px;padding:14px 18px;margin:16px 0">
-                <span style="color:#ef4444;font-size:16px;font-weight:700">⚠ Strategy Needs Tuning</span>
-                <span style="color:#fca5a5;font-size:13px;margin-left:10px">Avg return/trade: {expectancy:+.2f}% · Win Rate: {actual_wr:.1f}% · Sharpe: {sharpe:.2f}</span>
-            </div>""", unsafe_allow_html=True)
-
-        # Results Grid
-        st.markdown(f'<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin:12px 0">Simulation Results — {sim_weeks} Weeks · {len(trade_log)} Trades</div>', unsafe_allow_html=True)
-        r1, r2, r3, r4 = st.columns(4)
-        tr_color2 = "#22c55e" if total_ret >= 0 else "#ef4444"
-        wr_color2 = "#22c55e" if actual_wr >= 60 else ("#f59e0b" if actual_wr >= 50 else "#ef4444")
-        with r1:
-            final_cap = equity
-            st.markdown(metric_card("Total Return", f'<span style="color:{tr_color2}">{total_ret:+.1f}%</span>',
-                f'₹{capital:,} → ₹{final_cap:,.0f}', tr_color2), unsafe_allow_html=True)
-        with r2:
-            st.markdown(metric_card("Win Rate", f'<span style="color:{wr_color2}">{actual_wr:.1f}%</span>',
-                "Target: >60%", wr_color2), unsafe_allow_html=True)
-        with r3:
-            exp_col = "#22c55e" if expectancy >= 0 else "#ef4444"
-            st.markdown(metric_card("Expectancy/Trade", f'<span style="color:{exp_col}">{expectancy:+.2f}%</span>',
-                "Target: >0%", exp_col), unsafe_allow_html=True)
-        with r4:
-            sh_col = "#22c55e" if sharpe >= 0.5 else ("#f59e0b" if sharpe >= 0 else "#ef4444")
-            st.markdown(metric_card("Sharpe Ratio", f'<span style="color:{sh_col}">{sharpe:.2f}</span>',
-                ">0.5 = good, >1.0 = great", sh_col), unsafe_allow_html=True)
-
-        r5, r6, r7, r8 = st.columns(4)
-        with r5:
-            st.markdown(metric_card("Avg Win %", f'<span class="pos">+{avg_win:.2f}%</span>', f"{len(wins)} winning trades"), unsafe_allow_html=True)
-        with r6:
-            st.markdown(metric_card("Avg Loss %", f'<span class="neg">{avg_loss:.2f}%</span>', f"{len(losses)} losing trades"), unsafe_allow_html=True)
-        with r7:
-            st.markdown(metric_card("Max Drawdown", f'<span class="neg">{max_dd:.1f}%</span>', "Target: <15%"), unsafe_allow_html=True)
-        with r8:
-            st.markdown(metric_card("R:R Ratio", f'<span class="blue">1:{rr:.1f}</span>', "Target: >1.5"), unsafe_allow_html=True)
-
-        # Equity Curve Chart
-        st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin:16px 0 8px">📈 Simulated Equity Curve</div>', unsafe_allow_html=True)
-        eq_df = pd.DataFrame({"Week": list(range(len(equity_curve_sim))), "Equity (₹)": equity_curve_sim})
+        eq_df = pd.DataFrame({"Week":range(len(eq_curve)),"Equity (₹)":eq_curve})
+        st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin:12px 0 6px">📈 Simulated Equity Curve</div>',unsafe_allow_html=True)
         st.line_chart(eq_df.set_index("Week"), color=["#1a56db"])
 
-        # Key Insight
-        st.markdown(f"""
-        <div class="card" style="border-color:#7c3aed33;margin-top:8px">
-          <div style="font-weight:700;color:#a78bfa;margin-bottom:8px">💡 Simulation Insight</div>
-          <div style="color:#94a3b8;font-size:13px;line-height:1.6">
-            With <b style="color:#f1f5f9">TP: {tp_pct}%</b> and <b style="color:#f1f5f9">SL: {sl_pct}%</b>, the strategy
-            {'<b style="color:#22c55e">outperforms</b>' if total_ret > 0 else '<b style="color:#ef4444">underperforms</b>'}
-            on a {sim_weeks}-week horizon.
-            {'The R:R ratio of 1:' + f'{rr:.1f} combined with a {actual_wr:.0f}% win rate gives positive expectancy.' if expectancy > 0 else
-             'The fundamental issue is that losses (' + f'{avg_loss:.1f}%) exceed wins ({avg_win:.1f}%) in absolute terms. Tighten your SL or raise your TP to fix this.'}
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 5 — STRATEGY GUIDE
-# ════════════════════════════════════════════════════════════════════════════════
-
-with tab5:
-    st.markdown("""
-    <div class="card">
-      <div class="section-title">📚 MarketPulse India — Complete Strategy Guide</div>
-      <div style="color:#64748b;font-size:13px">Everything you need to understand and use this platform effectively.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    s1, s2 = st.columns([1, 1])
-
-    with s1:
+    # ── About & Guide ──
+    st.markdown("---")
+    st.markdown('<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:12px">ℹ️ About & Strategy Guide</div>',unsafe_allow_html=True)
+    with st.expander("📖 How the 5-Step Engine Works", expanded=False):
         st.markdown("""
-        <div class="card">
-          <div style="font-weight:700;color:#38bdf8;margin-bottom:12px;font-size:15px">🤖 Understanding AI Signals</div>
-
-          <div style="font-weight:600;color:#f1f5f9;margin-top:12px">What is an AI Score?</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">A composite score (0-100) calculated from multi-timeframe momentum, fundamental strength (PE, Market Cap), and market regime alignment. Higher = stronger setup.</div>
-
-          <div style="font-weight:600;color:#f1f5f9;margin-top:12px">What do BUY / HOLD / SELL mean?</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">
-            <span style="color:#4ade80">▲ BUY</span>: Stock showing uptrend across multiple timeframes + high AI score<br>
-            <span style="color:#fbbf24">◆ HOLD</span>: Sideways/consolidating — wait for clearer signal<br>
-            <span style="color:#f87171">▼ SELL</span>: Downtrend detected — avoid or exit if holding
-          </div>
-
-          <div style="font-weight:600;color:#f1f5f9;margin-top:12px">How to use Entry / SL / Target?</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">Entry = current EOD price<br>Stop Loss = maximum acceptable loss<br>Target = expected profit zone (4% default)<br>Always place a stop loss order immediately after buying.</div>
-
-          <div style="font-weight:600;color:#f1f5f9;margin-top:12px">Time Horizon</div>
-          <div style="color:#64748b;font-size:12px;margin-top:4px">Short Term = 2–4 weeks (momentum trade)<br>Medium Term = 1–2 months (trend continuation)</div>
-        </div>
-        """, unsafe_allow_html=True)
-
+        | Step | Component | Description |
+        |------|-----------|-------------|
+        | 1 | **Data Capture** | Post-market EOD collection from Yahoo Finance / NSEpy across 2,100+ tickers |
+        | 2 | **Trend Engine** | EMA-based multi-timeframe classification (1W, 2W, 1M, 3M, 6M, 12M) |
+        | 3 | **Alpha Scoring** | Breakout detection (52W High), Volume Spike, EMA Momentum — scored 0-100 |
+        | 4 | **AI Verdict** | Rules-based conviction: BUY (uptrend + score), HOLD (sideways), SELL (downtrend) |
+        | 5 | **Transparency** | Human-readable reasons + risks, Entry/SL/TP, R:R, P(Win) calculation |
+        """)
+    with st.expander("📊 Understanding the Metrics"):
         st.markdown("""
-        <div class="card">
-          <div style="font-weight:700;color:#a78bfa;margin-bottom:12px;font-size:15px">📊 Reading Backtest Results</div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">Win Rate</div>
-              <div style="color:#64748b;font-size:11px">% of trades that hit target. Target: >60%</div>
-            </div>
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">Expectancy</div>
-              <div style="color:#64748b;font-size:11px">Average profit per trade. Must be >0% to be profitable.</div>
-            </div>
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">Profit Factor</div>
-              <div style="color:#64748b;font-size:11px">Total wins ÷ Total losses. Must be >1.0. Target: >1.5</div>
-            </div>
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">Sharpe Ratio</div>
-              <div style="color:#64748b;font-size:11px">Risk-adjusted return. >0.5 = good, >1.0 = great</div>
-            </div>
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">Max Drawdown</div>
-              <div style="color:#64748b;font-size:11px">Biggest peak-to-trough loss. Target: <15%</div>
-            </div>
-            <div>
-              <div style="color:#f1f5f9;font-weight:600;font-size:12px">R:R Ratio</div>
-              <div style="color:#64748b;font-size:11px">Reward vs Risk per trade. Target: >1.5:1</div>
-            </div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with s2:
+        - **Win Rate**: % of trades that hit Take Profit target. Target: >60%
+        - **Expectancy**: Average profit per trade = (WR × Avg Win) + (1-WR × Avg Loss). Must be positive
+        - **Profit Factor**: Total wins ÷ Total losses. Must be >1.0 to be profitable. Target: >1.25
+        - **Sharpe Ratio**: Risk-adjusted return. >0.5 = good, >1.0 = great
+        - **Max Drawdown**: Biggest peak-to-trough loss. Target: <15%
+        - **R:R Ratio**: Reward vs Risk per trade = TP% ÷ SL%. Target: >1.5
+        - **P(Win)**: Probability of success for this specific setup based on historical conditions
+        """)
+    with st.expander("🛣️ Improvement Roadmap"):
         st.markdown("""
-        <div class="card">
-          <div style="font-weight:700;color:#22c55e;margin-bottom:12px;font-size:15px">🏗️ System Architecture</div>
+        | Phase | Status | Description |
+        |-------|--------|-------------|
+        | A | ✅ Done | Universe Download + Multi-TF Analysis |
+        | B | ✅ Done | AI Scoring + BUY/HOLD/SELL signals |
+        | C | 🔄 Active | Fix R:R — tighter SL, dynamic TP |
+        | D | Pending | Pullback Entry (EMA9 retest) for better entries |
+        | E | Pending | Dynamic Position Sizing by regime |
+        | F | Pending | Broker API (Kite/Upstox) live execution |
+        """)
 
-          <div style="position:relative;padding-left:20px">
-            <div style="border-left:2px solid #1e2a3a;padding-bottom:0">
-
-              <div style="margin-bottom:16px;position:relative">
-                <div style="width:10px;height:10px;background:#38bdf8;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#38bdf8;font-weight:600;font-size:13px">GitHub Actions (6PM IST Daily)</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Automated trigger: Downloads NSE universe, runs Python pipeline</div>
-              </div>
-
-              <div style="margin-bottom:16px;position:relative">
-                <div style="width:10px;height:10px;background:#a78bfa;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#a78bfa;font-weight:600;font-size:13px">scanner.py — Universe Builder</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Fetches 2,107 NSE tickers, calculates 1W/2W/1M/3M/6M/12M momentum</div>
-              </div>
-
-              <div style="margin-bottom:16px;position:relative">
-                <div style="width:10px;height:10px;background:#22c55e;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#22c55e;font-weight:600;font-size:13px">ai_engine.py — Intelligence Layer</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Scores stocks, applies market regime filter, generates BUY/HOLD/SELL with Entry/SL/TP</div>
-              </div>
-
-              <div style="margin-bottom:16px;position:relative">
-                <div style="width:10px;height:10px;background:#f59e0b;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#f59e0b;font-weight:600;font-size:13px">backtest.py — Validation Engine</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Walk-forward simulation across 52 weeks with TP/SL/Time exits</div>
-              </div>
-
-              <div style="margin-bottom:16px;position:relative">
-                <div style="width:10px;height:10px;background:#ef4444;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#ef4444;font-weight:600;font-size:13px">performance.py — Reporting Layer</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Generates performance_report.json (Sharpe, Drawdown, Expectancy, monthly breakdown)</div>
-              </div>
-
-              <div style="position:relative">
-                <div style="width:10px;height:10px;background:#f1f5f9;border-radius:50%;position:absolute;left:-25px;top:4px"></div>
-                <div style="color:#f1f5f9;font-weight:600;font-size:13px">Streamlit Dashboard (This App)</div>
-                <div style="color:#64748b;font-size:12px;margin-top:2px">Reads JSON outputs, renders interactive UI — deployed free on Streamlit Cloud</div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="card">
-          <div style="font-weight:700;color:#f59e0b;margin-bottom:12px;font-size:15px">📌 Current Strategy Status</div>
-
-          <div style="background:#1c1200;border:1px solid #451a03;border-radius:8px;padding:12px;margin-bottom:12px">
-            <div style="color:#fbbf24;font-weight:600;font-size:13px">⚠️ Current Assessment: LAB PHASE</div>
-            <div style="color:#92400e;font-size:12px;margin-top:6px">
-              Real backtest (52 weeks) shows -12.56% total return.<br>
-              Root cause: Avg loss (-4.84%) > Avg win (+3.43%) = Negative expectancy (-0.49%)
-            </div>
-          </div>
-
-          <div style="font-weight:600;color:#f1f5f9;font-size:13px;margin-bottom:8px">🔧 Improvement Roadmap</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.8">
-            <div>Phase A: <span style="color:#4ade80">✓ Complete</span> — Universe, AI Scoring, Multi-TF</div>
-            <div>Phase B: <span style="color:#4ade80">✓ Complete</span> — Backtest Infrastructure</div>
-            <div>Phase C: 🔄 In Progress — Fix R:R (tight SL + wider TP)</div>
-            <div>Phase D: Pending — Pullback Entry Logic (EMA9 retest)</div>
-            <div>Phase E: Pending — Dynamic Position Sizing by regime</div>
-            <div>Phase F: Pending — Broker API Integration (Kite/Upstox)</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="card">
-      <div style="font-weight:700;color:#f1f5f9;margin-bottom:12px;font-size:15px">❓ Frequently Asked Questions</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-        <div>
-          <div style="color:#38bdf8;font-weight:600;font-size:13px">Is this financial advice?</div>
-          <div style="color:#64748b;font-size:12px">No. This is a research and educational tool. All signals are algorithmic and not from registered advisors.</div>
-
-          <div style="color:#38bdf8;font-weight:600;font-size:13px;margin-top:14px">How often is it updated?</div>
-          <div style="color:#64748b;font-size:12px">Every trading day automatically via GitHub Actions at 6PM IST after market close.</div>
-
-          <div style="color:#38bdf8;font-weight:600;font-size:13px;margin-top:14px">What data sources are used?</div>
-          <div style="color:#64748b;font-size:12px">Price data: yfinance (Yahoo Finance NSE feed). Fundamentals: NSEpy / yfinance info. News: RSS/Google Finance</div>
-        </div>
-        <div>
-          <div style="color:#a78bfa;font-weight:600;font-size:13px">How should I size positions?</div>
-          <div style="color:#64748b;font-size:12px">Risk max 1-2% of total capital per trade. For ₹1L capital: risk ₹1,000-2,000 per trade. Never go all-in on one stock.</div>
-
-          <div style="color:#a78bfa;font-weight:600;font-size:13px;margin-top:14px">Why are there negative backtest results?</div>
-          <div style="color:#64748b;font-size:12px">The current stop loss (2%) is narrower than take profit (4%), but in practice slippage and whipsaw cause larger losses. We're actively optimizing this.</div>
-
-          <div style="color:#a78bfa;font-weight:600;font-size:13px;margin-top:14px">Where do I report issues?</div>
-          <div style="color:#64748b;font-size:12px">GitHub: <a href="https://github.com/vinayloki/india-swing-scanner" target="_blank" style="color:#38bdf8">vinayloki/india-swing-scanner</a></div>
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="disclaimer">
-      ⚠️ <b>SEBI DISCLAIMER</b>: MarketPulse India is NOT a SEBI-registered investment advisor, research analyst, or portfolio manager.
-      All content including AI signals, backtest results, and market analysis is provided for <b>educational and research purposes only</b>.
-      Investing in securities involves risk. Past performance is not indicative of future results.
-      Users are solely responsible for their own investment decisions. Always consult a qualified SEBI-registered advisor before trading.
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="disc">⚠️ Not SEBI-registered advice. All results are backtested simulations, not guarantees of future performance. Risk only what you can afford to lose.</div>',unsafe_allow_html=True)
 
 # ─── Footer ───────────────────────────────────────────────────────────────────
-
 st.markdown("""
-<div style="text-align:center;padding:24px;color:#334155;font-size:12px;border-top:1px solid #1e2a3a;margin-top:24px">
-  MarketPulse India · Quantitative Trading Terminal · Built with Python + Streamlit ·
-  <a href="https://github.com/vinayloki/india-swing-scanner" target="_blank" style="color:#475569;text-decoration:none">GitHub</a> ·
+<div style="text-align:center;padding:20px;color:#334155;font-size:12px;border-top:1px solid #1e2a3a;margin-top:20px">
+  MarketPulse India · NSE Quantitative Terminal · Python + Streamlit ·
+  <a href="https://github.com/vinayloki/india-swing-scanner" target="_blank" style="color:#475569">GitHub</a> ·
   Data: Yahoo Finance / NSEpy · Auto-updated daily via GitHub Actions · For educational use only
 </div>
 """, unsafe_allow_html=True)
