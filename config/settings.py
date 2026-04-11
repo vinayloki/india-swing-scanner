@@ -35,14 +35,20 @@ BATCH_SIZE            = 50       # tickers per yfinance batch
 BATCH_DELAY_SECONDS   = 2        # polite delay between batches
 MIN_DATA_POINTS       = 30       # drop ticker if fewer rows than this
 
-# ─── Performance Timeframes (in trading days) ────────────────────────
+# ─── Performance Timeframes ─────────────────────────────────────────
+# Expressed as pandas DateOffset strings.
+# Anchoring method: for each timeframe we find the last available close
+# ON OR BEFORE (scan_date - offset), matching TradingView's calendar logic.
+# 1W  = Monday of the current ISO week
+# 2W  = Monday two weeks ago
+# 1M+ = same calendar day N months/years ago
 TIMEFRAMES = {
-    "1W":  5,
-    "2W":  10,
-    "1M":  21,
-    "3M":  63,
-    "6M":  126,
-    "12M": 252,
+    "1W":  "1W",
+    "2W":  "2W",
+    "1M":  "1M",
+    "3M":  "3M",
+    "6M":  "6M",
+    "12M": "12M",
 }
 TOP_N = 20  # top/bottom N per timeframe in ranked output
 

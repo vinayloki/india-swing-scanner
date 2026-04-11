@@ -122,53 +122,49 @@ def extract_close(ohlcv: pd.DataFrame) -> pd.DataFrame:
              if close[c].dropna().shape[0] >= MIN_DATA_POINTS]
     return close[valid]
 
+# =============================================================================
+#  STEP 3: Calculate Multi-Timeframe Performance  (calendar-anchored, v2)
+# =============================================================================
 
-# ═══════════════════════════════════════════════════════════════════════
-#  STEP 3: Calculate Multi-Timeframe Performance
-# ═══════════════════════════════════════════════════════════════════════
+def _tf_anchor(last_dt, tf_code):
+    import pandas as pd
+    if tf_code == '1W':
+        return last_dt - pd.offsets.Week(weekday=0)
+    elif tf_code == '2W':
+        return last_dt - pd.offsets.Week(2, weekday=0)
+    elif tf_code == '1M':
+        return last_dt - pd.DateOffset(months=1)
+    elif tf_code == '3M':
+        return last_dt - pd.DateOffset(months=3)
+    elif tf_code == '6M':
+        return last_dt - pd.DateOffset(months=6)
+    elif tf_code == '12M':
+        return last_dt - pd.DateOffset(months=12)
+
 
 def calculate_performance(prices: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate % change for each stock across all timeframes.
-    Unchanged from V1 — same output format.
-    """
-    log.info("📊 Calculating multi-timeframe performance metrics...")
+    log.info('Calculating multi-timeframe performance (calendar-anchored)...')
     results = {}
-
     for ticker in prices.columns:
         series = prices[ticker].dropna()
         if len(series) < 5:
             continue
-
-        row = {
-            "ticker":     ticker,
-            "last_close": round(float(series.iloc[-1]), 2),
-            "last_date":  str(series.index[-1].date()),
-        }
-
-        for tf_name, tf_days in TIMEFRAMES.items():
-            if len(series) >= tf_days:
-                old_price = float(series.iloc[-tf_days])
-                new_price = float(series.iloc[-1])
-                if old_price > 0:
-                    pct = ((new_price - old_price) / old_price) * 100
-                    row[tf_name] = round(pct, 2)
-                else:
-                    row[tf_name] = None
-            else:
+        last_dt    = series.index[-1]
+        last_close = float(series.iloc[-1])
+        row = {'ticker': ticker, 'last_close': round(last_close, 2), 'last_date': str(last_dt.date())}
+        for tf_name, tf_code in TIMEFRAMES.items():
+            anchor   = _tf_anchor(last_dt, tf_code)
+            eligible = series[series.index <= anchor]
+            if eligible.empty:
                 row[tf_name] = None
-
+                continue
+            ref_close = float(eligible.iloc[-1])
+            row[tf_name] = round((last_close - ref_close) / ref_close * 100, 2) if ref_close > 0 else None
         results[ticker] = row
-
-    df = pd.DataFrame.from_dict(results, orient="index")
-    log.info(
-        f"   ✅ Performance calculated for {len(df)} stocks "
-        f"across {len(TIMEFRAMES)} timeframes"
-    )
+    df = pd.DataFrame.from_dict(results, orient='index')
+    log.info(f'   Performance calculated for {len(df)} stocks (calendar-anchored)')
     return df
 
-
-# ═══════════════════════════════════════════════════════════════════════
 #  STEP 4: Rank & Export (existing output files — unchanged)
 # ═══════════════════════════════════════════════════════════════════════
 
