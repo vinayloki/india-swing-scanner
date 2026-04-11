@@ -3,3 +3,5 @@ numpy
 requests
 yfinance
 feedparser
+streamlit>=1.32.0
+pyarrow
