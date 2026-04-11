@@ -1,6 +1,6 @@
 {
   "generated": "11 Apr 2026",
-  "generated_ts": "2026-04-11_0544",
+  "generated_ts": "2026-04-11_0643",
   "engine_version": "2.0",
   "total_opportunities": 31,
   "opportunities": [
@@ -246,7 +246,7 @@
         "ind": "Metal Fabrication",
         "mcap_cr": 2379.2,
         "pe": 28.9,
-        "eps": 11.9,
+        "eps": 11.89,
         "52h": 343.5,
         "52l": 183.0,
         "bv": 120.42,
