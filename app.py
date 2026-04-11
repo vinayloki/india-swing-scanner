@@ -1087,48 +1087,46 @@ with t6:
 # TAB 7 — BLUEPRINT
 # ══════════════════════════════════════════════════════════════════
 with t7:
-    st.markdown('''
-    <div style="max-width:900px;margin:0 auto">
-        <div style="font-size:24px;font-weight:900;color:#f1f5f9;margin-bottom:8px">📘 Platform Blueprint & Architecture</div>
-        <div style="color:#94a3b8;font-size:14px;margin-bottom:24px">Documentation of functional intent and core calculation logic for each module within the MarketPulse platform.</div>
-        
-        <div class="card" style="border-left:4px solid #38bdf8">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🎯 1. Opportunities</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Surface high-conviction, immediate swing trade setups.</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine filters the entire NSE universe for strong base constraints (e.g., Min Volume, Min Price) and evaluates them for categorical Alpha Signals (52-Week Breakouts, Volume Spikes, and strong EMA Momentum). Stocks passing these checks are given an AI Score out of 100 based on price action density. Only stocks with score >= 50 populate this tab.</p>
-        </div>
+    st.markdown('''<div style="max-width:900px;margin:0 auto">
+<div style="font-size:24px;font-weight:900;color:#f1f5f9;margin-bottom:8px">📘 Platform Blueprint & Architecture</div>
+<div style="color:#94a3b8;font-size:14px;margin-bottom:24px">Documentation of functional intent and core calculation logic for each module within the MarketPulse platform.</div>
 
-        <div class="card" style="border-left:4px solid #22c55e">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🏆 2. Top Movers</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Contextualize the broader market momentum across various hold durations (1 Week to 3 Months).</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Sorts the full market universe by aggregate percentage returns over the specified trailing periods. Excludes illiquid penny stocks to ensure realistic percentage shifts. Incorporates fundamental parameters like P/E and Market Cap for instant screening verification.</p>
-        </div>
+<div class="card" style="border-left:4px solid #38bdf8">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🎯 1. Opportunities</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Surface high-conviction, immediate swing trade setups.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine filters the entire NSE universe for strong base constraints (e.g., Min Volume, Min Price) and evaluates them for categorical Alpha Signals (52-Week Breakouts, Volume Spikes, and strong EMA Momentum). Stocks passing these checks are given an AI Score out of 100 based on price action density. Only stocks with score >= 50 populate this tab.</p>
+</div>
 
-        <div class="card" style="border-left:4px solid #f59e0b">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📋 3. Full Scan</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Complete transparency and visibility over the entire processed market universe (~2,100+ stocks).</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Loads the `latest_full_scan.csv` containing normalized closing price adjustments up to the latest trading session. Exposes a localized Pandas dataframe layer allowing fast in-memory filtering by structural criteria (Gainers, Losers, Market Capitalization bins).</p>
-        </div>
+<div class="card" style="border-left:4px solid #22c55e">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🏆 2. Top Movers</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Contextualize the broader market momentum across various hold durations (1 Week to 3 Months).</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Sorts the full market universe by aggregate percentage returns over the specified trailing periods. Excludes illiquid penny stocks to ensure realistic percentage shifts. Incorporates fundamental parameters like P/E and Market Cap for instant screening verification.</p>
+</div>
 
-        <div class="card" style="border-left:4px solid #a78bfa">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📰 4. News</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Provide fundamental macro and micro context to technical setups via live business intelligence.</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> An automated daily GitHub Actions parser scrapes RSS feeds from verified financial publishers (LiveMint, Economic Times, MoneyControl), normalizes the payload into `daily_news.json`, and feeds it directly into the interface with clickable source attribution.</p>
-        </div>
+<div class="card" style="border-left:4px solid #f59e0b">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📋 3. Full Scan</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Complete transparency and visibility over the entire processed market universe (~2,100+ stocks).</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Loads the `latest_full_scan.csv` containing normalized closing price adjustments up to the latest trading session. Exposes a localized Pandas dataframe layer allowing fast in-memory filtering by structural criteria (Gainers, Losers, Market Capitalization bins).</p>
+</div>
 
-        <div class="card" style="border-left:4px solid #ec4899">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🤖 5. AI Picks</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Algorithmic conviction scoring producing absolute BUY, HOLD, or SELL mandates.</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Evaluates the prevailing master trend (bull/bear/sideways regime) and cross-references it with localized Multi-Timeframe (MTF) EMA alignments. It dynamically computes Stop Loss based on Average True Range (ATR) multipliers, Take Profit ratios, Risk/Reward grids, and historical probability of success before finalizing a position tier.</p>
-        </div>
+<div class="card" style="border-left:4px solid #a78bfa">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📰 4. News</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Provide fundamental macro and micro context to technical setups via live business intelligence.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> An automated daily GitHub Actions parser scrapes RSS feeds from verified financial publishers (LiveMint, Economic Times, MoneyControl), normalizes the payload into `daily_news.json`, and feeds it directly into the interface with clickable source attribution.</p>
+</div>
 
-        <div class="card" style="border-left:4px solid #14b8a6">
-            <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🧪 6. Backtest Lab</div>
-            <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Validate the quantitative edge of predictions against a historical 52-week timeline.</p>
-            <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine runs a rigid deterministic simulation backward through 1 year of daily EOD ticks (`scan_results/backtest_results.json`). It records entry rules and executes standard portfolio matrix calculations to handle exit events (Take Profit hits, Stop Loss drops, Time-in-market expirations). Produces aggregate portfolio Expectancy, Profit Factor, and simulated Sharpe Ratios.</p>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
+<div class="card" style="border-left:4px solid #ec4899">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🤖 5. AI Picks</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Algorithmic conviction scoring producing absolute BUY, HOLD, or SELL mandates.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Evaluates the prevailing master trend (bull/bear/sideways regime) and cross-references it with localized Multi-Timeframe (MTF) EMA alignments. It dynamically computes Stop Loss based on Average True Range (ATR) multipliers, Take Profit ratios, Risk/Reward grids, and historical probability of success before finalizing a position tier.</p>
+</div>
+
+<div class="card" style="border-left:4px solid #14b8a6">
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🧪 6. Backtest Lab</div>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Validate the quantitative edge of predictions against a historical 52-week timeline.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine runs a rigid deterministic simulation backward through 1 year of daily EOD ticks (`scan_results/backtest_results.json`). It records entry rules and executes standard portfolio matrix calculations to handle exit events (Take Profit hits, Stop Loss drops, Time-in-market expirations). Produces aggregate portfolio Expectancy, Profit Factor, and simulated Sharpe Ratios.</p>
+</div>
+</div>''', unsafe_allow_html=True)
 
 # ─── Footer ───────────────────────────────────────────────────────────────────
 st.markdown("""
