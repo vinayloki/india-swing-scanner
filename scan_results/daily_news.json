@@ -1,5 +1,19 @@
 [
     {
+        "source": "Economic Times Stocks",
+        "title": "Meet broad-based rules while serving AIFs, Sebi clarifies",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/news/meet-broad-based-rules-while-serving-aifs-sebi-clarifies/articleshow/130184324.cms",
+        "time": "11 Apr 04:19",
+        "timestamp": 1775881182.0
+    },
+    {
+        "source": "Economic Times Stocks",
+        "title": "D-Street goes green after streak of red",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/news/d-street-goes-green-after-streak-of-red/articleshow/130184153.cms",
+        "time": "11 Apr 04:07",
+        "timestamp": 1775880423.0
+    },
+    {
         "source": "Livemint Markets",
         "title": "Global Funds Flee Indian Stocks at Record Pace on Growth Fears",
         "link": "https://www.livemint.com/market/global-funds-flee-indian-stocks-at-record-pace-on-growth-fears-11775878617032.html",
@@ -579,19 +593,5 @@
         "link": "https://economictimes.indiatimes.com/markets/stocks/stock-liveblog/bajaj-finance-share-price-today-live-10-apr-2026/liveblog/130157502.cms",
         "time": "10 Apr 02:36",
         "timestamp": 1775788575.0
-    },
-    {
-        "source": "Economic Times Stocks",
-        "title": "HDFC Bank Share Price Highlights: HDFC Bank Stock Price History",
-        "link": "https://economictimes.indiatimes.com/markets/stocks/stock-liveblog/hdfc-bank-share-price-today-live-10-apr-2026/liveblog/130157500.cms",
-        "time": "10 Apr 02:36",
-        "timestamp": 1775788570.0
-    },
-    {
-        "source": "Economic Times Stocks",
-        "title": "Grasim Inds Share Price Highlights: Grasim Inds. Stock Price History",
-        "link": "https://economictimes.indiatimes.com/markets/stocks/stock-liveblog/grasim-inds-share-price-live-updates-10-apr-2026/liveblog/130157493.cms",
-        "time": "10 Apr 02:35",
-        "timestamp": 1775788554.0
     }
 ]
