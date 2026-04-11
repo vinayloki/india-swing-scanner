@@ -24,16 +24,16 @@ SCAN_DIR = "scan_results"
 # ─── CSS ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
   --bg: #080c14; --bg2: #0d1420; --bg3: #111827;
   --border: #1e2a3a; --border2: #243044;
   --blue: #1a56db; --blue-light: #38bdf8; --blue-glow: rgba(26,86,219,0.25);
   --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --purple: #a78bfa;
-  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b; --text4: #475569;
+  --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b; --text4: #475569;
 }
-html, body, [class*="css"] { font-family: 'Roboto', sans-serif !important; background: var(--bg) !important; color: var(--text); }
+html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; background: var(--bg) !important; color: var(--text); }
 
 /* ── Tabs ────────────────────────────────────────── */
 .stTabs [data-baseweb="tab-list"] { gap:4px; background:var(--bg2); border-radius:14px; padding:6px; border:1px solid var(--border); }
@@ -159,7 +159,9 @@ def tv_link(ticker, label=None):
     lab = label or ticker
     return f'<a href="{tv(ticker)}" target="_blank" class="tv-link">{lab}</a>'
 def chart_btn(ticker):
-    return f'<a href="{tv(ticker)}" target="_blank" class="chart-btn">📊 Chart ↗</a>'
+    tv_lnk = f'<a href="{tv(ticker)}" target="_blank" class="chart-btn">📈 Chart ↗</a>'
+    scr_lnk = f'<a href="https://www.screener.in/company/{ticker}/" target="_blank" class="chart-btn" style="background:#22c55e11;border:1px solid #22c55e33;color:#4ade80;margin-left:6px">📊 Fundamentals ↗</a>'
+    return tv_lnk + scr_lnk
 
 def pct_fmt(v, dash="–"):
     if v is None or (isinstance(v, float) and math.isnan(v)): return f'<span class="neu">{dash}</span>'
@@ -230,125 +232,48 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ─── Tabs ─────────────────────────────────────────────────────────────────────
-t1, t2, t3, t4, t5, t6, t7 = st.tabs([
-    "🎯 Opportunities", "🏆 Top Movers", "📋 Full Scan",
-    "📰 News", "🤖 AI Picks", "🧪 Backtest Lab", "📘 Blueprint"
-])
+st.sidebar.markdown('<div style="font-size:22px;font-weight:900;color:#f1f5f9;margin-bottom:20px;text-align:center">📈 MarketPulse</div>', unsafe_allow_html=True)
 
+nav_pages = [
+    "🏠 Home Dashboard",
+    "🏆 Top Movers",
+    "📈 Trade Setups",
+    "🔍 Scanner Insights",
+    "📰 News",
+    "🧪 Backtest Lab",
+    "📘 Blueprint"
+]
+page = st.sidebar.radio("Navigation", nav_pages)
 
-# ══════════════════════════════════════════════════════════════════
-# TAB 1 — OPPORTUNITIES  (52W Breakout, Volume Spike, Momentum)
-# ══════════════════════════════════════════════════════════════════
-with t1:
-    st.markdown("""
-    <div class="info-box">💡 <b>Opportunities</b> are high-conviction technical setups ranked by AI Score.
-    Each has at least one confirmed signal: 52W Breakout, Volume Spike, or EMA Momentum.
-    Click <b>📊 Chart ↗</b> to open TradingView for detailed analysis.</div>
-    """, unsafe_allow_html=True)
+# Helper for Screener.in
+def screener_link(ticker):
+    return f'<a href="https://www.screener.in/company/{ticker}/" target="_blank" class="chart-btn" style="background:#22c55e11;border:1px solid #22c55e33;color:#4ade80;margin-left:6px">📊 Fundamentals ↗</a>'
 
-    # Filters
-    fc1, fc2, fc3, fc4 = st.columns([3,2,2,2])
-    with fc1: opp_search = st.text_input("🔍 Search ticker / name", placeholder="e.g. INOX, RELIANCE...", key="opp_s")
-    with fc2: opp_sig = st.selectbox("Signal Type", ["ALL","52W Breakout","Volume Spike","EMA Momentum"], key="opp_sig")
-    with fc3: opp_score = st.selectbox("Min Score", ["All","50+","70+","80+","90+"], key="opp_sc")
-    with fc4:
-        all_secs_opp = sorted(set(o.get("fundamental",{}).get("sector","") or "" for o in opps) - {""})
-        opp_sector = st.selectbox("Sector", ["All"] + all_secs_opp, key="opp_sec")
-
-    score_map = {"All":0,"50+":50,"70+":70,"80+":80,"90+":90}
-    sig_map = {"ALL":None,"52W Breakout":"52W_BREAKOUT","Volume Spike":"VOLUME_SPIKE","EMA Momentum":"EMA_MOMENTUM"}
-    min_opp_score = score_map.get(opp_score, 0)
-    sig_filter = sig_map.get(opp_sig)
-
-    filtered_opps = []
-    for o in opps:
-        if opp_search:
-            s = opp_search.upper()
-            if s not in o.get("ticker","").upper() and s not in (o.get("fundamental",{}).get("name","") or "").upper():
-                continue
-        if sig_filter and sig_filter not in o.get("signals",[]):
-            continue
-        if o.get("score",0) < min_opp_score:
-            continue
-        if opp_sector != "All" and (o.get("fundamental",{}).get("sector","") or "") != opp_sector:
-            continue
-        filtered_opps.append(o)
-
-    st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(filtered_opps)}</b> of {len(opps)} setups</div>', unsafe_allow_html=True)
-
-    if not filtered_opps:
-        st.info("No setups match your filters.")
-    else:
-        for o in filtered_opps:
-            score = o.get("score", 0)
-            ticker = o.get("ticker","")
-            rank = o.get("rank","?")
-            sigs = o.get("signals",[])
-            ind = o.get("indicators",{})
-            fund = o.get("fundamental",{})
-            sc = score_color(score)
-            price = ind.get("price", fund.get("price",0)) or 0
-            vol_ratio = ind.get("volume_ratio",0) or 0
-            chg_1d = ind.get("pct_change_1d")
-            high52 = ind.get("high_52w") or fund.get("52h")
-            low52 = fund.get("52l")
-            pe = fund.get("pe")
-            mcap = fund.get("mcap_cr")
-            name = fund.get("name","") or ticker
-            sector = fund.get("sector","") or ""
-
-            # 52W range bar
-            range_pct = 0
-            if high52 and low52 and high52 > low52:
-                range_pct = max(0, min(100, (price - low52) / (high52 - low52) * 100))
-
-            sigs_html = " ".join(sig_badge(s) for s in sigs)
-            pe_str = f"P/E {pe:.1f}x" if pe else "P/E –"
-            mcap_str = f"₹{mcap:,.0f} Cr" if mcap else ""
-            chg_html = pct_fmt(chg_1d) if chg_1d is not None else ""
-
-            st.markdown(f"""
-            <div class="opp-card">
-              <div style="display:flex;gap:14px;align-items:flex-start">
-                <div class="opp-score-ring" style="border-color:{sc};color:{sc};min-width:52px">{score}</div>
-                <div style="flex:1">
-                  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-                    <div>
-                      <span style="font-size:18px;font-weight:800;color:#f1f5f9;font-family:'Roboto Mono',monospace">
-                        {tv_link(ticker)}
-                      </span>
-                      <span style="font-size:12px;color:#64748b;margin-left:8px">#{rank} · {name}</span>
-                      <span style="font-size:12px;color:#94a3b8;margin-left:8px">{sector}</span>
-                    </div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                      {sigs_html}
-                      {chart_btn(ticker)}
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:20px;margin-top:10px;flex-wrap:wrap">
-                    <div><span style="color:#64748b;font-size:12px">Price: </span><b style="color:#f1f5f9;font-size:14px">{price_fmt(price)}</b></div>
-                    <div><span style="color:#64748b;font-size:12px">1D: </span>{chg_html}</div>
-                    <div><span style="color:#64748b;font-size:12px">Vol Ratio: </span><b style="color:#38bdf8">{vol_ratio:.2f}x</b></div>
-                    <div><span style="color:#64748b;font-size:12px">{pe_str}</span></div>
-                    <div><span style="color:#64748b;font-size:12px">{mcap_str}</span></div>
-                  </div>
-                  <div style="margin-top:8px">
-                    <span style="color:#64748b;font-size:11px">52W Range: {price_fmt(low52)} → {price_fmt(high52)}</span>
-                    <div class="p52w"><div class="p52w-fill" style="width:{range_pct:.0f}%"></div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown('<div class="disc">⚠️ These setups are algorithmically generated for educational purposes. Always do your own research before trading.</div>', unsafe_allow_html=True)
-
+if page == "🏠 Home Dashboard":
+    st.markdown('<div style="font-size:24px;font-weight:900;color:#f1f5f9;margin-bottom:16px">🏠 Overview Dashboard</div>', unsafe_allow_html=True)
+    st.markdown('<div class="info-box" style="margin-bottom:24px">Welcome to the quantitative evaluation platform. This dashboard provides a high-level summary of the entire NSE universe based on our nightly EOD scans. Navigate using the sidebar to explore actionable setups and historical simulation data.</div>', unsafe_allow_html=True)
+    
+    hc1, hc2, hc3 = st.columns(3)
+    with hc1:
+        st.markdown(f'<div class="card" style="border-top:4px solid {rc}"><div style="color:#94a3b8;font-size:13px;font-weight:700;text-transform:uppercase">Market Trend</div><div style="font-size:32px;font-weight:900;color:{rc}">{ri} {regime}</div></div>', unsafe_allow_html=True)
+    with hc2:
+        st.markdown(f'<div class="card" style="border-top:4px solid #38bdf8"><div style="color:#94a3b8;font-size:13px;font-weight:700;text-transform:uppercase">Total Signals</div><div style="font-size:32px;font-weight:900;color:#f1f5f9">{opp_count}</div></div>', unsafe_allow_html=True)
+    with hc3:
+        st.markdown(f'<div class="card" style="border-top:4px solid #f59e0b"><div style="color:#94a3b8;font-size:13px;font-weight:700;text-transform:uppercase">Universe Scanned</div><div style="font-size:32px;font-weight:900;color:#f1f5f9">{total_stocks:,}</div></div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown(f'<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:12px">🧠 Active Quantitative Breakdowns</div>', unsafe_allow_html=True)
+    bc1, bc2 = st.columns(2)
+    with bc1:
+        st.markdown(f'<div class="card" style="padding:20px;text-align:center"><div style="font-size:42px;font-weight:900;color:#22c55e;line-height:1">{buys}</div><div style="font-size:14px;color:#94a3b8;margin-top:8px">Strong Setups (Probability > 80%)</div></div>', unsafe_allow_html=True)
+    with bc2:
+        st.markdown(f'<div class="card" style="padding:20px;text-align:center"><div style="font-size:42px;font-weight:900;color:#ef4444;line-height:1">{sells}</div><div style="font-size:14px;color:#94a3b8;margin-top:8px">Weak/Sell Setups</div></div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════
-# TAB 2 — TOP MOVERS
+# TAB — TOP MOVERS
 # ══════════════════════════════════════════════════════════════════
-with t2:
-    tf_sel = st.radio("Timeframe", ["1W","2W","1M","3M"], horizontal=True, key="tf_mv")
+elif page == "🏆 Top Movers":
+    tf_sel = st.radio("Timeframe", ["1W","2W","1M","3M","6M","12M"], horizontal=True, key="tf_mv")
     mv_search = st.text_input("🔍 Search ticker", placeholder="e.g. STLTECH", key="mv_s")
 
     tf_data = top_data.get(tf_sel, {})
@@ -392,11 +317,10 @@ with t2:
               </div></div>"""
         st.markdown(rows_l, unsafe_allow_html=True)
 
-    # ── Fundamentals for top movers (Top Movers with full detail) ──
+    # ── Fundamentals for top movers ──
     st.markdown("---")
     st.markdown('<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-bottom:12px">📊 Detailed Fundamentals — Top Gainers</div>', unsafe_allow_html=True)
 
-    # Build enriched table from ai_picks for top gainers
     top_tickers = [g.get("ticker") for g in gainers[:20]]
     pick_map = {p.get("ticker"): p for p in picks}
 
@@ -410,6 +334,7 @@ with t2:
       <td>{pct_fmt(next((g.get(tf_sel) for g in gainers if g.get("ticker")==t), None))}</td>
       <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("1M",{}).get("pct"))}</td>
       <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("3M",{}).get("pct"))}</td>
+      <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("6M",{}).get("pct"))}</td>
       <td>{pct_fmt(pick_map.get(t,{}).get("tf_details",{}).get("12M",{}).get("pct"))}</td>
       <td>{chart_btn(t)}</td>
     </tr>
@@ -420,96 +345,209 @@ with t2:
     <table class="tv-table">
       <thead><tr>
         <th>Ticker</th><th>Price</th><th>Sector</th><th>P/E</th><th>Mkt Cap</th>
-        <th>{tf_sel} Ret</th><th>1M Ret</th><th>3M Ret</th><th>12M Ret</th><th>Chart</th>
+        <th>{tf_sel} Ret</th><th>1M Ret</th><th>3M Ret</th><th>6M Ret</th><th>12M Ret</th><th>Chart</th>
       </tr></thead>
       <tbody>{rows_html}</tbody>
     </table></div>
     """, unsafe_allow_html=True)
 
+# ══════════════════════════════════════════════════════════════════
+# TAB — TRADE SETUPS
+# ══════════════════════════════════════════════════════════════════
+elif page == "📈 Trade Setups":
+    st.markdown(f"""
+    <div class="info-box">
+      🤖 <b>Quantitative Rule-Engine v2</b> — {total_stocks:,} stocks analysed ·
+      <b style="color:#22c55e">{buys} BUY</b> ·
+      <b style="color:#fbbf24">{holds} HOLD</b> ·
+      <b style="color:#ef4444">{sells} SELL</b> ·
+      Avg Probability: <b style="color:#a78bfa">{summary.get("avg_confidence",0):.1f}%</b>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════
-# TAB 3 — FULL SCAN
+# SCANNER INSIGHTS (Consolidated Opportunities & Full Scan)
 # ══════════════════════════════════════════════════════════════════
-with t3:
-    st.markdown('<div class="info-box">📋 Complete scan of all NSE stocks. Click any ticker to open TradingView chart. Sortable by any column.</div>', unsafe_allow_html=True)
-
-    sc1, sc2, sc3 = st.columns([3,2,2])
-    with sc1: scan_search = st.text_input("🔍 Search ticker", placeholder="INFY, TCS...", key="sc_s")
-    with sc2: scan_filter = st.selectbox("Filter", ["All","Gainers Only","Losers Only"], key="sc_f")
-    with sc3: scan_cap = st.selectbox("Cap Size", ["All","Large Cap","Mid Cap","Small Cap"], key="sc_c")
-
-    if not scan_df.empty:
-        df = scan_df.copy()
-        str_cols = [c for c in df.columns if not c.startswith("Unnamed")]
-        df = df[str_cols]
-
-        # Rename columns for display
-        col_renames = {}
-        for c in df.columns:
-            cl = c.lower()
-            if "ticker" in cl or "symbol" in cl: col_renames[c]="Ticker"
-            elif "price" in cl or "close" in cl: col_renames[c]="Price"
-            elif "1w" in cl: col_renames[c]="1W%"
-            elif "2w" in cl: col_renames[c]="2W%"
-            elif "1m" in cl: col_renames[c]="1M%"
-            elif "3m" in cl: col_renames[c]="3M%"
-            elif "6m" in cl: col_renames[c]="6M%"
-            elif "12m" in cl or "1y" in cl: col_renames[c]="12M%"
-            elif "sector" in cl: col_renames[c]="Sector"
-            elif "cap" in cl: col_renames[c]="Cap"
-        df = df.rename(columns=col_renames)
-
-        if scan_search:
-            mask = df.astype(str).apply(lambda r: r.str.contains(scan_search.upper(), case=False, na=False)).any(axis=1)
-            df = df[mask]
-
-        if scan_filter == "Gainers Only" and "1W%" in df.columns:
-            df = df[pd.to_numeric(df["1W%"], errors="coerce") > 0]
-        elif scan_filter == "Losers Only" and "1W%" in df.columns:
-            df = df[pd.to_numeric(df["1W%"], errors="coerce") < 0]
-
-        if scan_cap != "All" and "Cap" in df.columns:
-            df = df[df["Cap"].astype(str).str.contains(scan_cap.split()[0], case=False, na=False)]
-
-        st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:8px">Showing <b style="color:#38bdf8">{len(df):,}</b> stocks</div>', unsafe_allow_html=True)
-
-        # Build HTML table with TV links (show first 200 rows for performance)
-        display_df = df.head(200)
-        ticker_col = "Ticker" if "Ticker" in display_df.columns else display_df.columns[0]
-        pct_cols = [c for c in display_df.columns if "%" in c]
-
-        # Add TradingView link column
-        if ticker_col in display_df.columns:
-            display_df = display_df.copy()
-            display_df["📊"] = display_df[ticker_col].apply(lambda t: f'<a href="{tv(str(t))}" target="_blank" class="chart-btn">Chart ↗</a>')
-            display_df[ticker_col] = display_df[ticker_col].apply(lambda t: f'<a href="{tv(str(t))}" target="_blank" class="tv-link">{t}</a>')
-
-        # Format pct columns
-        for c in pct_cols:
-            display_df[c] = display_df[c].apply(lambda v: pct_fmt(float(v)) if pd.notna(v) and str(v).strip() not in ["","–","nan"] else "–")
-
-        # Render table
-        th_cells = "".join(f"<th>{c}</th>" for c in display_df.columns)
-        td_rows = ""
-        for _, row in display_df.iterrows():
-            td_rows += "<tr>" + "".join(f"<td>{v}</td>" for v in row.values) + "</tr>"
-
-        st.markdown(f"""
-        <div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px">
-        <table class="tv-table"><thead><tr>{th_cells}</tr></thead><tbody>{td_rows}</tbody></table>
+elif page == "🔍 Scanner Insights":
+    insight_mode = st.radio("View Mode", ["🎯 Featured Setups", "📋 Full Universe Scan"], horizontal=True, key="ins_view")
+    
+    if insight_mode == "🎯 Featured Setups":
+        st.markdown("""
+        <div class="info-box">💡 <b>Featured Setups</b> are high-conviction technical opportunities ranked by Setup Score.
+        Each setup has at least one confirmed signal: 52W Breakout, Volume Spike, or EMA Momentum.
         </div>
         """, unsafe_allow_html=True)
 
-        if len(df) > 200:
-            st.caption(f"Showing first 200 of {len(df):,} results. Use search to narrow down.")
-    else:
-        st.info("Full scan data not available. Run the GitHub Actions workflow to generate it.")
+        fc1, fc2, fc3, fc4 = st.columns([3,2,2,2])
+        with fc1: opp_search = st.text_input("🔍 Search ticker / name", placeholder="e.g. INOX, RELIANCE...", key="opp_s")
+        with fc2: opp_sig = st.selectbox("Signal Type", ["ALL","52W Breakout","Volume Spike","EMA Momentum"], key="opp_sig", help="52W High: Breaking yearly peaks. Vol Spike: Significant accumulation. EMA Mom: Trend alignment.")
+        with fc3: opp_score = st.selectbox("Min Score", ["All","50+","70+","80+","90+"], key="opp_sc", help="Probabilistic setup score based on price action density.")
+        with fc4:
+            all_secs_opp = sorted(set(o.get("fundamental",{}).get("sector","") or "" for o in opps) - {""})
+            opp_sector = st.selectbox("Sector", ["All"] + all_secs_opp, key="opp_sec")
+
+        score_map = {"All":0,"50+":50,"70+":70,"80+":80,"90+":90}
+        sig_map = {"ALL":None,"52W Breakout":"52W_BREAKOUT","Volume Spike":"VOLUME_SPIKE","EMA Momentum":"EMA_MOMENTUM"}
+        min_opp_score = score_map.get(opp_score, 0)
+        sig_filter = sig_map.get(opp_sig)
+
+        filtered_opps = []
+        for o in opps:
+            if opp_search:
+                s = opp_search.upper()
+                if s not in o.get("ticker","").upper() and s not in (o.get("fundamental",{}).get("name","") or "").upper():
+                    continue
+            if sig_filter and sig_filter not in o.get("signals",[]):
+                continue
+            if o.get("score",0) < min_opp_score:
+                continue
+            if opp_sector != "All" and (o.get("fundamental",{}).get("sector","") or "") != opp_sector:
+                continue
+            filtered_opps.append(o)
+
+        st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(filtered_opps)}</b> of {len(opps)} setups</div>', unsafe_allow_html=True)
+
+        if not filtered_opps:
+            st.info("No setups match your filters.")
+        else:
+            for o in filtered_opps:
+                score = o.get("score", 0)
+                ticker = o.get("ticker","")
+                rank = o.get("rank","?")
+                sigs = o.get("signals",[])
+                ind = o.get("indicators",{})
+                fund = o.get("fundamental",{})
+                sc = score_color(score)
+                price = ind.get("price", fund.get("price",0)) or 0
+                vol_ratio = ind.get("volume_ratio",0) or 0
+                chg_1d = ind.get("pct_change_1d")
+                high52 = ind.get("high_52w") or fund.get("52h")
+                low52 = fund.get("52l")
+                pe = fund.get("pe")
+                mcap = fund.get("mcap_cr")
+                name = fund.get("name","") or ticker
+                sector = fund.get("sector","") or ""
+
+                range_pct = 0
+                if high52 and low52 and high52 > low52:
+                    range_pct = max(0, min(100, (price - low52) / (high52 - low52) * 100))
+
+                sigs_html = " ".join(sig_badge(s) for s in sigs)
+                pe_str = f"P/E {pe:.1f}x" if pe else "P/E –"
+                mcap_str = f"₹{mcap:,.0f} Cr" if mcap else ""
+                chg_html = pct_fmt(chg_1d) if chg_1d is not None else ""
+
+                st.markdown(f"""
+                <div class="opp-card">
+                  <div style="display:flex;gap:14px;align-items:flex-start">
+                    <div class="opp-score-ring" style="border-color:{sc};color:{sc};min-width:52px">{score}</div>
+                    <div style="flex:1">
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                        <div>
+                          <span style="font-size:18px;font-weight:800;color:#f1f5f9;font-family:'Roboto Mono',monospace">
+                            {tv_link(ticker)}
+                          </span>
+                          <span style="font-size:12px;color:#64748b;margin-left:8px">#{rank} · {name}</span>
+                          <span style="font-size:12px;color:#94a3b8;margin-left:8px">{sector}</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                          {sigs_html}
+                          {chart_btn(ticker)}
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:20px;margin-top:10px;flex-wrap:wrap">
+                        <div><span style="color:#64748b;font-size:12px">Price: </span><b style="color:#f1f5f9;font-size:14px">{price_fmt(price)}</b></div>
+                        <div><span style="color:#64748b;font-size:12px">1D: </span>{chg_html}</div>
+                        <div><span style="color:#64748b;font-size:12px">Vol Ratio: </span><b style="color:#38bdf8">{vol_ratio:.2f}x</b></div>
+                        <div><span style="color:#64748b;font-size:12px">{pe_str}</span></div>
+                        <div><span style="color:#64748b;font-size:12px">{mcap_str}</span></div>
+                      </div>
+                      <div style="margin-top:8px">
+                        <span style="color:#64748b;font-size:11px">52W Range: {price_fmt(low52)} → {price_fmt(high52)}</span>
+                        <div class="p52w"><div class="p52w-fill" style="width:{range_pct:.0f}%"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
+        st.markdown('<div class="disc">⚠️ These setups are algorithmically generated for educational purposes. Always do your own research before trading.</div>', unsafe_allow_html=True)
+
+    elif insight_mode == "📋 Full Universe Scan":
+        st.markdown('<div class="info-box">📋 Complete quantitative scan of all NSE stocks (~2,100+). Click any ticker to open TradingView or Screener.</div>', unsafe_allow_html=True)
+
+        sc1, sc2, sc3 = st.columns([3,2,2])
+        with sc1: scan_search = st.text_input("🔍 Search ticker", placeholder="INFY, TCS...", key="sc_s")
+        with sc2: scan_filter = st.selectbox("Trend Filter", ["All","Gainers Only","Losers Only"], key="sc_f")
+        with sc3: scan_cap = st.selectbox("Market Cap Size", ["All","Large Cap","Mid Cap","Small Cap"], key="sc_c")
+
+        if not scan_df.empty:
+            df = scan_df.copy()
+            str_cols = [c for c in df.columns if not c.startswith("Unnamed")]
+            df = df[str_cols]
+            
+            # Rename columns for display
+            col_renames = {}
+            for c in df.columns:
+                cl = c.lower()
+                if "ticker" in cl or "symbol" in cl: col_renames[c]="Ticker"
+                elif "price" in cl or "close" in cl: col_renames[c]="Price"
+                elif "1w" in cl: col_renames[c]="1W%"
+                elif "2w" in cl: col_renames[c]="2W%"
+                elif "1m" in cl: col_renames[c]="1M%"
+                elif "3m" in cl: col_renames[c]="3M%"
+                elif "6m" in cl: col_renames[c]="6M%"
+                elif "12m" in cl or "1y" in cl: col_renames[c]="12M%"
+                elif "sector" in cl: col_renames[c]="Sector"
+                elif "cap" in cl: col_renames[c]="Cap"
+            df = df.rename(columns=col_renames)
+
+            if scan_search:
+                mask = df.astype(str).apply(lambda r: r.str.contains(scan_search.upper(), case=False, na=False)).any(axis=1)
+                df = df[mask]
+            
+            if scan_filter == "Gainers Only" and "1W%" in df.columns:
+                df = df[pd.to_numeric(df["1W%"], errors="coerce") > 0]
+            elif scan_filter == "Losers Only" and "1W%" in df.columns:
+                df = df[pd.to_numeric(df["1W%"], errors="coerce") < 0]
+            
+            if scan_cap != "All" and "Cap" in df.columns:
+                df = df[df["Cap"].astype(str).str.contains(scan_cap.split()[0], case=False, na=False)]
+
+            st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:8px">Showing <b style="color:#38bdf8">{len(df):,}</b> stocks</div>', unsafe_allow_html=True)
+
+            # Build HTML table
+            display_df = df.head(200)
+            ticker_col = "Ticker" if "Ticker" in display_df.columns else display_df.columns[0]
+            pct_cols = [c for c in display_df.columns if "%" in c]
+
+            if ticker_col in display_df.columns:
+                display_df = display_df.copy()
+                display_df["📊"] = display_df[ticker_col].apply(lambda t: chart_btn(str(t)))
+                display_df[ticker_col] = display_df[ticker_col].apply(lambda t: f'<a href="{tv(str(t))}" target="_blank" class="tv-link">{t}</a>')
+
+            for c in pct_cols:
+                display_df[c] = display_df[c].apply(lambda v: pct_fmt(float(v)) if pd.notna(v) and str(v).strip() not in ["","–","nan"] else "–")
+
+            th_cells = "".join(f"<th>{c}</th>" for c in display_df.columns)
+            td_rows = ""
+            for _, row in display_df.iterrows():
+                td_rows += "<tr>" + "".join(f"<td>{v}</td>" for v in row.values) + "</tr>"
+
+            st.markdown(f"""
+            <div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px">
+            <table class="tv-table"><thead><tr>{th_cells}</tr></thead><tbody>{td_rows}</tbody></table>
+            </div>
+            """, unsafe_allow_html=True)
+            if len(df) > 200:
+                st.caption(f"Showing first 200 of {len(df):,} results. Use search to narrow down.")
+        else:
+            st.info("Full scan data not available. Run the GitHub Actions workflow to generate it.")
 
 
 # ══════════════════════════════════════════════════════════════════
 # TAB 4 — NEWS
 # ══════════════════════════════════════════════════════════════════
-with t4:
+elif page == "📰 News":
     st.markdown('<div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:12px">📰 Market News — NSE Intelligence Feed</div>', unsafe_allow_html=True)
 
     news_list = news_raw if isinstance(news_raw, list) else news_raw.get("articles", [])
@@ -534,138 +572,9 @@ with t4:
 
 
 # ══════════════════════════════════════════════════════════════════
-# TAB 5 — AI PICKS (Execute Mode)
-# ══════════════════════════════════════════════════════════════════
-with t5:
-    st.markdown(f"""
-    <div class="info-box">
-      🤖 <b>AI EOD Intelligence Engine v2</b> — {total_stocks:,} stocks analysed ·
-      <b style="color:#22c55e">{buys} BUY</b> ·
-      <b style="color:#fbbf24">{holds} HOLD</b> ·
-      <b style="color:#ef4444">{sells} SELL</b> ·
-      Avg Confidence: <b style="color:#a78bfa">{summary.get("avg_confidence",0):.1f}%</b>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Filters ──
-    af1, af2, af3, af4, af5 = st.columns([3,2,2,2,2])
-    with af1: ai_search = st.text_input("🔍 Search ticker / name", key="ai_s")
-    with af2: ai_rec = st.selectbox("Signal", ["All","BUY","HOLD","SELL"], key="ai_r")
-    with af3: ai_cap = st.selectbox("Cap Size", ["All","Large Cap","Mid Cap","Small Cap","Micro Cap"], key="ai_c")
-    with af4:
-        all_sectors = ["All"] + sorted(set(p.get("sector","") for p in picks if p.get("sector","")))
-        ai_sec = st.selectbox("Sector", all_sectors, key="ai_sec")
-    with af5: ai_conf = st.slider("Min Confidence", 0, 100, 60, 5, key="ai_conf")
-
-    # Filter
-    filtered = []
-    for p in picks:
-        if ai_search:
-            s = ai_search.upper()
-            if s not in p.get("ticker","").upper() and s not in p.get("name","").upper():
-                continue
-        if ai_rec != "All" and p.get("recommendation","").upper() != ai_rec:
-            continue
-        if ai_cap != "All" and p.get("cap_label","") != ai_cap:
-            continue
-        if ai_sec != "All" and p.get("sector","") != ai_sec:
-            continue
-        if p.get("confidence",0) < ai_conf:
-            continue
-        filtered.append(p)
-
-    st.markdown(f'<div style="color:#64748b;font-size:13px;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(filtered)}</b> stocks</div>', unsafe_allow_html=True)
-
-    # View toggle
-    view_mode = st.radio("View", ["Cards (Detailed)","Table (Compact)"], horizontal=True, key="ai_view")
-    show_n = st.select_slider("Show", [10,25,50,100,200,len(filtered)] if len(filtered) > 200 else [10,25,50,min(100,len(filtered)),len(filtered)], value=min(25,len(filtered)), key="ai_n")
-
-    if view_mode == "Table (Compact)":
-        # ── Compact table ──
-        th = "<tr><th>Ticker</th><th>Price</th><th>Signal</th><th>Confidence</th><th>Entry</th><th>Stop Loss</th><th>Target</th><th>R:R</th><th>P(Win)</th><th>1W</th><th>1M</th><th>3M</th><th>12M</th><th>Chart</th></tr>"
-        trs = ""
-        for p in filtered[:show_n]:
-            t = p.get("ticker","")
-            rec = p.get("recommendation","hold")
-            tf = p.get("tf_details",{})
-            trs += f"""<tr>
-              <td><a href="{tv(t)}" target="_blank" class="tv-link">{t}</a><br><span style="font-size:10px;color:#475569">{p.get('name','')[:20]}</span></td>
-              <td><b>{price_fmt(p.get('price'))}</b></td>
-              <td>{rec_badge(rec)}</td>
-              <td><b style="color:#a78bfa">{p.get('confidence',0)}%</b></td>
-              <td>{price_fmt(p.get('entry_price'))}</td>
-              <td><span class="neg">{price_fmt(p.get('stop_loss'))}</span></td>
-              <td><span class="pos">{price_fmt(p.get('take_profit'))}</span></td>
-              <td><b style="color:#38bdf8">1:{p.get('risk_reward',0):.1f}</b></td>
-              <td>{p.get('p_success',0):.1f}%</td>
-              <td>{pct_fmt(tf.get('1W',{}).get('pct'))}</td>
-              <td>{pct_fmt(tf.get('1M',{}).get('pct'))}</td>
-              <td>{pct_fmt(tf.get('3M',{}).get('pct'))}</td>
-              <td>{pct_fmt(tf.get('12M',{}).get('pct'))}</td>
-              <td><a href="{tv(t)}" target="_blank" class="chart-btn">Chart ↗</a></td>
-            </tr>"""
-        st.markdown(f'<div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px"><table class="tv-table"><thead>{th}</thead><tbody>{trs}</tbody></table></div>', unsafe_allow_html=True)
-
-    else:
-        # ── Detail cards ──
-        for p in filtered[:show_n]:
-            ticker = p.get("ticker","")
-            rec = p.get("recommendation","hold")
-            conf = p.get("confidence",0)
-            tf = p.get("tf_details",{})
-            reasons = p.get("reasons",[])
-            risks = p.get("risks",[])
-
-            tf_row = "".join([
-                f'<span style="color:{"#22c55e" if (tf.get(k,{}).get("pct") or 0)>=0 else "#ef4444"};font-size:11px;margin-right:10px">{k}: {pct_fmt(tf.get(k,{}).get("pct"))}</span>'
-                for k in ["1W","2W","1M","3M","6M","12M"]
-            ])
-            conf_bar = f'<div style="height:4px;background:#1e2a3a;border-radius:2px;margin-top:6px;margin-bottom:3px"><div style="height:100%;width:{conf}%;background:{"#22c55e" if conf>=75 else "#f59e0b" if conf>=55 else "#ef4444"};border-radius:2px;transition:width .3s"></div></div>'
-            reasons_h = "".join([f'<div style="color:#4ade80;font-size:11px;margin-top:2px">✓ {r}</div>' for r in reasons[:3]])
-            risks_h = "".join([f'<div style="color:#f87171;font-size:11px;margin-top:2px">⚠ {r}</div>' for r in risks[:2]])
-
-            st.markdown(f"""
-            <div class="pick {rec}">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-                <div>
-                  <span style="font-size:18px;font-weight:800;color:#f1f5f9;font-family:'Roboto Mono',monospace">
-                    {tv_link(ticker)}
-                  </span>
-                  <span style="font-size:12px;color:#64748b;margin-left:8px">{p.get("name","")}</span>
-                  <span style="font-size:12px;color:#94a3b8;margin-left:6px">· {p.get("sector","")}</span>
-                  <span style="font-size:11px;color:#475569;margin-left:6px">#{p.get("rank","?")}</span>
-                </div>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-                  {rec_badge(rec)}
-                  {cap_badge(p.get("mcap_code","S"), p.get("cap_label","Small Cap"))}
-                  <span class="badge" style="background:#1e3a5f;color:#38bdf8;font-size:10px">{regime}</span>
-                  <a href="{tv(ticker)}" target="_blank" class="chart-btn">📊 Chart ↗</a>
-                </div>
-              </div>
-              <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap">
-                <span style="font-size:12px;color:#64748b">Entry: <b style="color:#f1f5f9">{price_fmt(p.get("entry_price"))}</b></span>
-                <span style="font-size:12px;color:#64748b">SL: <b style="color:#ef4444">{price_fmt(p.get("stop_loss"))}</b> (-{p.get("sl_pct",0):.2f}%)</span>
-                <span style="font-size:12px;color:#64748b">Target: <b style="color:#22c55e">{price_fmt(p.get("take_profit"))}</b> (+{p.get("tp_pct",0):.2f}%)</span>
-                <span style="font-size:12px;color:#64748b">R:R <b style="color:#38bdf8">1:{p.get("risk_reward",0):.1f}</b></span>
-                <span style="font-size:12px;color:#64748b">P(Win): <b style="color:#a78bfa">{p.get("p_success",0):.1f}%</b></span>
-                <span style="font-size:12px;color:#64748b">Horizon: <b style="color:#94a3b8">{p.get("horizon","")}</b></span>
-              </div>
-              <div style="margin-top:8px">{tf_row}</div>
-              {conf_bar}
-              <span style="font-size:10px;color:#475569">Confidence {conf}% · AI Score {p.get("score",0):.1f}/100</span>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-                <div>{reasons_h}</div><div>{risks_h}</div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown('<div class="disc">⚠️ All AI signals are for educational research only. Not SEBI-registered advice. Past performance ≠ future results.</div>', unsafe_allow_html=True)
-
-
-# ══════════════════════════════════════════════════════════════════
 # TAB 6 — BACKTEST LAB  (with full trade log)
 # ══════════════════════════════════════════════════════════════════
-with t6:
+elif page == "🧪 Backtest Lab":
     st.markdown('<div class="info-box" style="margin-bottom:18px"><b style="color:#f8fafc">💡 Why 5 Years?</b> Strategy validation runs on <b>260 weeks (5 full years)</b> of historical data across the entire NSE universe. A strategy that only works during a 1-year bull run is inherently flawed. Testing across half a decade guarantees the algorithm is stress-tested against Bull cycles, Bear crashes, and prolonged Sideways chop.</div>', unsafe_allow_html=True)
     
     col_k1, col_k2 = st.columns(2)
@@ -830,7 +739,7 @@ with t6:
               <td>{result_icons.get(won, "–")}</td>
               <td>{reg_icon} {reg}</td>
               <td style="color:#a78bfa;font-weight:700">{tr.get("score","–")}</td>
-              <td><a href="{tv(t)}" target="_blank" class="chart-btn">📊 Chart ↗</a></td>
+              <td>{chart_btn(t)}</td>
             </tr>"""
 
         st.markdown(f"""
@@ -899,189 +808,197 @@ with t6:
     # ══════════════════════════════════════════════════════════════
     # SIMULATOR — with real company names from trade universe
     # ══════════════════════════════════════════════════════════════
-    st.markdown("---")
-    st.markdown("""
-    <div class="card" style="border-color:#7c3aed33">
-      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px">🎛️ Strategy Parameter Simulator</div>
-      <div style="color:#64748b;font-size:13px">Adjust TP/SL and simulate with real company names from the NSE universe. Each simulated trade shows the ticker it was assigned to.</div>
-    </div>
-    """,unsafe_allow_html=True)
-
-    # Collect real tickers for sampling
-    sim_ticker_pool = list(set(tr.get("ticker","") for tr in all_trades)) or [p.get("ticker","") for p in picks[:100]]
-    if not sim_ticker_pool:
-        sim_ticker_pool = ["RELIANCE","TCS","INFY","HDFCBANK","ICICIBANK","KOTAKBANK","BHARTIARTL","ITC","LT","SBIN"]
-
-    # Presets
-    st.markdown('<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Quick Presets</div>',unsafe_allow_html=True)
-    pb1,pb2,pb3,pb4,pb5 = st.columns(5)
-    preset = None
-    with pb1:
-        if st.button("🛡️ Conservative\n2%TP / 1.5%SL",key="p1"): preset={"tp":2.0,"sl":1.5,"w":26,"pool":20}
-    with pb2:
-        if st.button("⚡ Aggressive\n5%TP / 3%SL",key="p2"): preset={"tp":5.0,"sl":3.0,"w":52,"pool":20}
-    with pb3:
-        if st.button("🎯 Tight Scalp\n1.5%TP / 1%SL",key="p3"): preset={"tp":1.5,"sl":1.0,"w":12,"pool":10}
-    with pb4:
-        if st.button("🚀 High Conv.\n8%TP / 4%SL",key="p4"): preset={"tp":8.0,"sl":4.0,"w":52,"pool":10}
-    with pb5:
-        if st.button("🔄 Actual Params\n4%TP / 2%SL",key="p5"): preset={"tp":4.0,"sl":2.0,"w":52,"pool":20}
-
-    if preset:
-        st.session_state.update({"s_tp":preset["tp"],"s_sl":preset["sl"],"s_w":preset["w"],"s_pool":preset["pool"]})
-
-    sl1,sl2,sl3 = st.columns(3)
-    with sl1: tp_pct = st.slider("Take Profit %",1.0,15.0,st.session_state.get("s_tp",4.0),0.5,key="sl_tp")
-    with sl2: sl_pct = st.slider("Stop Loss %",0.5,10.0,st.session_state.get("s_sl",2.0),0.5,key="sl_sl")
-    with sl3: cap_sim = st.select_slider("Capital (₹)",[25000,50000,100000,250000,500000,1000000],100000,format_func=lambda x:f"₹{x:,}",key="sl_cap")
-    sl4,sl5 = st.columns(2)
-    with sl4: sim_w = st.slider("Backtest Weeks",4,52,st.session_state.get("s_w",12),4,key="sl_w")
-    with sl5: pool = st.slider("Picks/Week",5,30,st.session_state.get("s_pool",10),5,key="sl_pool")
-
-    rr = tp_pct / sl_pct if sl_pct > 0 else 0
-    st.markdown(f'<div style="padding:10px 14px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b;margin-bottom:8px">Config: TP <b style="color:#22c55e">{tp_pct}%</b> · SL <b style="color:#ef4444">{sl_pct}%</b> · R:R <b style="color:#38bdf8">1:{rr:.1f}</b> · {sim_w}w · {pool} picks/wk</div>',unsafe_allow_html=True)
-
-    run_btn = st.button("▶ Run Simulation", type="primary", use_container_width=False, key="runsim")
-    if run_btn:
-        prog = st.progress(0,"Running simulation...")
-        base_wr = 0.526
-        rr_adj = (rr - 1.78) * 0.03
-        adj_wr = min(0.75, max(0.30, base_wr + rr_adj))
-        equity = float(cap_sim)
-        eq_curve = [equity]
-        sim_trade_log = []  # Now stores dicts with ticker info
-        weekly_rets = []
-
-        for wk in range(sim_w):
-            prog.progress((wk+1)/sim_w, f"Week {wk+1}/{sim_w}...")
-            wk_eq = equity; wk_pnl = 0.0; trade_size = equity/pool
-            # Pick random tickers for this week
-            week_tickers = random.choices(sim_ticker_pool, k=pool)
-            for j in range(pool):
-                ticker_sim = week_tickers[j]
-                if random.random() < adj_wr:
-                    g = random.gauss(tp_pct, tp_pct*0.15)/100
-                    pnl_sim = trade_size * g
-                    wk_pnl += pnl_sim
-                    sim_trade_log.append({
-                        "week": wk+1, "ticker": ticker_sim, "result": "WIN",
-                        "return_pct": g*100, "pnl": pnl_sim, "exit": "TP",
-                        "alloc": trade_size
-                    })
-                else:
-                    lm = random.choice([1.0,1.0,1.2,1.5,2.0])
-                    l = -sl_pct*lm/100; l = max(l,-sl_pct*2.5/100)
-                    pnl_sim = trade_size * l
-                    wk_pnl += pnl_sim
-                    exit_type = "SL" if lm <= 1.2 else "TIME"
-                    sim_trade_log.append({
-                        "week": wk+1, "ticker": ticker_sim, "result": "LOSS",
-                        "return_pct": l*100, "pnl": pnl_sim, "exit": exit_type,
-                        "alloc": trade_size
-                    })
-            equity += wk_pnl; equity = max(equity,0)
-            eq_curve.append(equity)
-            weekly_rets.append(wk_pnl/wk_eq*100 if wk_eq>0 else 0)
-        prog.empty()
-
-        # Calculate stats
-        wins_r = [t["return_pct"] for t in sim_trade_log if t["result"]=="WIN"]
-        loss_r = [t["return_pct"] for t in sim_trade_log if t["result"]=="LOSS"]
-        s_wr = len(wins_r)/len(sim_trade_log)*100 if sim_trade_log else 0
-        s_aw = sum(wins_r)/len(wins_r) if wins_r else 0
-        s_al = sum(loss_r)/len(loss_r) if loss_r else 0
-        s_exp = (s_wr/100*s_aw)+((1-s_wr/100)*s_al)
-        s_ret = (equity-cap_sim)/cap_sim*100
-        s_sh = (np.mean(weekly_rets)/np.std(weekly_rets))*math.sqrt(52) if len(weekly_rets)>1 and np.std(weekly_rets)>0 else 0
-        peak_e=cap_sim; s_dd=0
-        for eq in eq_curve:
-            if eq>peak_e: peak_e=eq
-            s_dd=max(s_dd,(peak_e-eq)/peak_e*100 if peak_e>0 else 0)
-
-        ok = s_ret>5 and s_wr>55
-        st.markdown(f"""<div style="background:{'#14532d22' if ok else '#450a0a22'};border:1px solid {'#16653455' if ok else '#45100a55'};border-radius:10px;padding:14px 18px;margin:14px 0">
-          <span style="font-size:15px;font-weight:700;color:{'#4ade80' if ok else '#ef4444'}">{'✅ Strategy Viable!' if ok else '⚠ Needs Tuning'}</span>
-          <span style="font-size:13px;color:{'#86efac' if ok else '#fca5a5'};margin-left:10px">WR {s_wr:.1f}% · Exp/trade {s_exp:+.2f}% · Sharpe {s_sh:.2f}</span>
-        </div>""",unsafe_allow_html=True)
-
-        r1,r2,r3,r4 = st.columns(4)
-        src = "#22c55e" if s_ret>=0 else "#ef4444"
-        swc = "#22c55e" if s_wr>=60 else ("#f59e0b" if s_wr>=50 else "#ef4444")
-        sec = "#22c55e" if s_exp>=0 else "#ef4444"
-        ssc = "#22c55e" if s_sh>=0.5 else ("#f59e0b" if s_sh>=0 else "#ef4444")
-        with r1: st.markdown(metric_box("Total Return",f'<span style="color:{src}">{s_ret:+.1f}%</span>',f'₹{cap_sim:,}→₹{equity:,.0f}',src),unsafe_allow_html=True)
-        with r2: st.markdown(metric_box("Win Rate",f'<span style="color:{swc}">{s_wr:.1f}%</span>',"Target: >60%",swc),unsafe_allow_html=True)
-        with r3: st.markdown(metric_box("Expectancy",f'<span style="color:{sec}">{s_exp:+.2f}%</span>',"Target: >0%",sec),unsafe_allow_html=True)
-        with r4: st.markdown(metric_box("Sharpe Ratio",f'<span style="color:{ssc}">{s_sh:.2f}</span>',"Target: >0.5",ssc),unsafe_allow_html=True)
-
-        # Equity curve
-        eq_df = pd.DataFrame({"Week":range(len(eq_curve)),"Equity (₹)":eq_curve})
-        st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin:12px 0 6px">📈 Simulated Equity Curve</div>',unsafe_allow_html=True)
-        st.line_chart(eq_df.set_index("Week"), color=["#1a56db"])
-
-        # ── SIMULATED TRADE LOG — every trade with company name ──
-        st.markdown(f'<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin:16px 0 6px">📋 Simulated Trade Log — All {len(sim_trade_log)} Trades</div>', unsafe_allow_html=True)
-        st.markdown('<div style="color:#64748b;font-size:13px;margin-bottom:10px">Every simulated trade using real NSE tickers. Click any ticker for TradingView chart.</div>', unsafe_allow_html=True)
-
-        # Sim trade log filters
-        stl1, stl2 = st.columns([3,2])
-        with stl1:
-            stl_search = st.text_input("🔍 Search simulated ticker", placeholder="OMAXE, FORTIS...", key="stl_s")
-        with stl2:
-            stl_filter = st.selectbox("Show", ["All Trades","Winners Only","Losers Only"], key="stl_f")
-
-        display_trades = sim_trade_log
-        if stl_search:
-            display_trades = [t for t in display_trades if stl_search.upper() in t["ticker"].upper()]
-        if stl_filter == "Winners Only":
-            display_trades = [t for t in display_trades if t["result"]=="WIN"]
-        elif stl_filter == "Losers Only":
-            display_trades = [t for t in display_trades if t["result"]=="LOSS"]
-
-        # Summary for filtered sim trades
-        sim_f_wins = sum(1 for t in display_trades if t["result"]=="WIN")
-        sim_f_pnl = sum(t["pnl"] for t in display_trades)
-        st.markdown(f'<div style="padding:8px 14px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(display_trades)}</b> trades · Wins: <b class="pos">{sim_f_wins}</b> · Losses: <b class="neg">{len(display_trades)-sim_f_wins}</b> · P&L: <b style="color:{"#22c55e" if sim_f_pnl>=0 else "#ef4444"}">₹{sim_f_pnl:+,.0f}</b></div>', unsafe_allow_html=True)
-
-        sim_th = "<tr><th>#</th><th>Week</th><th>Ticker</th><th>Allocation ₹</th><th>Return %</th><th>P&L ₹</th><th>Exit</th><th>Result</th><th>Chart</th></tr>"
-        sim_rows = ""
-        for i, tr in enumerate(display_trades[:500], 1):
-            rc2 = "pos" if tr["result"]=="WIN" else "neg"
-            ex_icon2 = {"TP":"✅","SL":"🛑","TIME":"⏰"}.get(tr["exit"],"❓")
-            res_html = f'<span class="pos">✅ WIN</span>' if tr["result"]=="WIN" else f'<span class="neg">❌ LOSS</span>'
-            sim_rows += f"""<tr>
-              <td style="color:#475569">{i}</td>
-              <td style="color:#94a3b8">W{tr["week"]}</td>
-              <td><a href="{tv(tr['ticker'])}" target="_blank" class="tv-link">{tr["ticker"]}</a></td>
-              <td style="color:#94a3b8">₹{tr["alloc"]:,.0f}</td>
-              <td><span class="{rc2}">{tr["return_pct"]:+.2f}%</span></td>
-              <td><span class="{rc2}">₹{tr["pnl"]:+,.0f}</span></td>
-              <td>{ex_icon2} {tr["exit"]}</td>
-              <td>{res_html}</td>
-              <td><a href="{tv(tr['ticker'])}" target="_blank" class="chart-btn">📊 ↗</a></td>
-            </tr>"""
-
-        st.markdown(f"""
-        <div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px">
-        <table class="tv-table"><thead>{sim_th}</thead><tbody>{sim_rows}</tbody></table>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if len(display_trades) > 500:
-            st.caption(f"Showing first 500 of {len(display_trades)} trades.")
-
-        # Per-ticker performance summary
+    ENABLE_SIMULATOR = False
+    
+    if ENABLE_SIMULATOR:
         st.markdown("---")
-        st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📊 Per-Company Performance Summary</div>', unsafe_allow_html=True)
-        ticker_stats = {}
-        for tr in sim_trade_log:
-            tk = tr["ticker"]
-            if tk not in ticker_stats:
-                ticker_stats[tk] = {"trades":0,"wins":0,"pnl":0.0}
-            ticker_stats[tk]["trades"] += 1
-            ticker_stats[tk]["pnl"] += tr["pnl"]
-            if tr["result"]=="WIN":
-                ticker_stats[tk]["wins"] += 1
+        st.markdown("""
+        <div class="card" style="border-color:#7c3aed33">
+          <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px">🎛️ Strategy Parameter Simulator</div>
+          <div style="color:#64748b;font-size:13px">Adjust TP/SL and simulate with real company names from the NSE universe. Each simulated trade shows the ticker it was assigned to.</div>
+        </div>
+        """,unsafe_allow_html=True)
+    
+        # Collect real tickers for sampling
+        sim_ticker_pool = list(set(tr.get("ticker","") for tr in all_trades)) or [p.get("ticker","") for p in picks[:100]]
+        if not sim_ticker_pool:
+            sim_ticker_pool = ["RELIANCE","TCS","INFY","HDFCBANK","ICICIBANK","KOTAKBANK","BHARTIARTL","ITC","LT","SBIN"]
+    
+        # Presets
+        st.markdown('<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Quick Presets</div>',unsafe_allow_html=True)
+        pb1,pb2,pb3,pb4,pb5 = st.columns(5)
+        
+        # Helper to set slider state instantly
+        def set_preset(tp, sl, w, pool):
+            st.session_state["sl_tp"] = tp
+            st.session_state["sl_sl"] = sl
+            st.session_state["sl_w"] = w
+            st.session_state["sl_pool"] = pool
+            
+        with pb1:
+            if st.button("🛡️ Conservative\n2%TP / 1.5%SL",key="p1"): set_preset(2.0, 1.5, 26, 20)
+        with pb2:
+            if st.button("⚡ Aggressive\n5%TP / 3%SL",key="p2"): set_preset(5.0, 3.0, 52, 20)
+        with pb3:
+            if st.button("🎯 Tight Scalp\n1.5%TP / 1%SL",key="p3"): set_preset(1.5, 1.0, 12, 10)
+        with pb4:
+            if st.button("🚀 High Conv.\n8%TP / 4%SL",key="p4"): set_preset(8.0, 4.0, 52, 10)
+        with pb5:
+            if st.button("🔄 Actual Params\n4%TP / 2%SL",key="p5"): set_preset(4.0, 2.0, 52, 20)
+    
+        sl1,sl2,sl3 = st.columns(3)
+        with sl1: tp_pct = st.slider("Take Profit %",1.0,15.0,st.session_state.get("sl_tp",4.0),0.5,key="sl_tp")
+        with sl2: sl_pct = st.slider("Stop Loss %",0.5,10.0,st.session_state.get("sl_sl",2.0),0.5,key="sl_sl")
+        with sl3: cap_sim = st.select_slider("Capital (₹)",[25000,50000,100000,250000,500000,1000000],100000,format_func=lambda x:f"₹{x:,}",key="sl_cap")
+        sl4,sl5 = st.columns(2)
+        with sl4: sim_w = st.slider("Backtest Weeks",4,52,st.session_state.get("sl_w",12),4,key="sl_w")
+        with sl5: pool = st.slider("Picks/Week",5,30,st.session_state.get("sl_pool",10),5,key="sl_pool")
+
+        rr = tp_pct / sl_pct if sl_pct > 0 else 0
+        st.markdown(f'<div style="padding:10px 14px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b;margin-bottom:8px">Config: TP <b style="color:#22c55e">{tp_pct}%</b> · SL <b style="color:#ef4444">{sl_pct}%</b> · R:R <b style="color:#38bdf8">1:{rr:.1f}</b> · {sim_w}w · {pool} picks/wk</div>',unsafe_allow_html=True)
+    
+        run_btn = st.button("▶ Run Simulation", type="primary", use_container_width=False, key="runsim")
+        if run_btn:
+            prog = st.progress(0,"Running simulation...")
+            base_wr = 0.526
+            rr_adj = (rr - 1.78) * 0.03
+            adj_wr = min(0.75, max(0.30, base_wr + rr_adj))
+            equity = float(cap_sim)
+            eq_curve = [equity]
+            sim_trade_log = []  # Now stores dicts with ticker info
+            weekly_rets = []
+    
+            for wk in range(sim_w):
+                prog.progress((wk+1)/sim_w, f"Week {wk+1}/{sim_w}...")
+                wk_eq = equity; wk_pnl = 0.0; trade_size = equity/pool
+                # Pick random tickers for this week
+                week_tickers = random.choices(sim_ticker_pool, k=pool)
+                for j in range(pool):
+                    ticker_sim = week_tickers[j]
+                    if random.random() < adj_wr:
+                        g = random.gauss(tp_pct, tp_pct*0.15)/100
+                        pnl_sim = trade_size * g
+                        wk_pnl += pnl_sim
+                        sim_trade_log.append({
+                            "week": wk+1, "ticker": ticker_sim, "result": "WIN",
+                            "return_pct": g*100, "pnl": pnl_sim, "exit": "TP",
+                            "alloc": trade_size
+                        })
+                    else:
+                        lm = random.choice([1.0,1.0,1.2,1.5,2.0])
+                        l = -sl_pct*lm/100; l = max(l,-sl_pct*2.5/100)
+                        pnl_sim = trade_size * l
+                        wk_pnl += pnl_sim
+                        exit_type = "SL" if lm <= 1.2 else "TIME"
+                        sim_trade_log.append({
+                            "week": wk+1, "ticker": ticker_sim, "result": "LOSS",
+                            "return_pct": l*100, "pnl": pnl_sim, "exit": exit_type,
+                            "alloc": trade_size
+                        })
+                equity += wk_pnl; equity = max(equity,0)
+                eq_curve.append(equity)
+                weekly_rets.append(wk_pnl/wk_eq*100 if wk_eq>0 else 0)
+            prog.empty()
+    
+            # Calculate stats
+            wins_r = [t["return_pct"] for t in sim_trade_log if t["result"]=="WIN"]
+            loss_r = [t["return_pct"] for t in sim_trade_log if t["result"]=="LOSS"]
+            s_wr = len(wins_r)/len(sim_trade_log)*100 if sim_trade_log else 0
+            s_aw = sum(wins_r)/len(wins_r) if wins_r else 0
+            s_al = sum(loss_r)/len(loss_r) if loss_r else 0
+            s_exp = (s_wr/100*s_aw)+((1-s_wr/100)*s_al)
+            s_ret = (equity-cap_sim)/cap_sim*100
+            s_sh = (np.mean(weekly_rets)/np.std(weekly_rets))*math.sqrt(52) if len(weekly_rets)>1 and np.std(weekly_rets)>0 else 0
+            peak_e=cap_sim; s_dd=0
+            for eq in eq_curve:
+                if eq>peak_e: peak_e=eq
+                s_dd=max(s_dd,(peak_e-eq)/peak_e*100 if peak_e>0 else 0)
+    
+            ok = s_ret>5 and s_wr>55
+            st.markdown(f"""<div style="background:{'#14532d22' if ok else '#450a0a22'};border:1px solid {'#16653455' if ok else '#45100a55'};border-radius:10px;padding:14px 18px;margin:14px 0">
+              <span style="font-size:15px;font-weight:700;color:{'#4ade80' if ok else '#ef4444'}">{'✅ Strategy Viable!' if ok else '⚠ Needs Tuning'}</span>
+              <span style="font-size:13px;color:{'#86efac' if ok else '#fca5a5'};margin-left:10px">WR {s_wr:.1f}% · Exp/trade {s_exp:+.2f}% · Sharpe {s_sh:.2f}</span>
+            </div>""",unsafe_allow_html=True)
+    
+            r1,r2,r3,r4 = st.columns(4)
+            src = "#22c55e" if s_ret>=0 else "#ef4444"
+            swc = "#22c55e" if s_wr>=60 else ("#f59e0b" if s_wr>=50 else "#ef4444")
+            sec = "#22c55e" if s_exp>=0 else "#ef4444"
+            ssc = "#22c55e" if s_sh>=0.5 else ("#f59e0b" if s_sh>=0 else "#ef4444")
+            with r1: st.markdown(metric_box("Total Return",f'<span style="color:{src}">{s_ret:+.1f}%</span>',f'₹{cap_sim:,}→₹{equity:,.0f}',src),unsafe_allow_html=True)
+            with r2: st.markdown(metric_box("Win Rate",f'<span style="color:{swc}">{s_wr:.1f}%</span>',"Target: >60%",swc),unsafe_allow_html=True)
+            with r3: st.markdown(metric_box("Expectancy",f'<span style="color:{sec}">{s_exp:+.2f}%</span>',"Target: >0%",sec),unsafe_allow_html=True)
+            with r4: st.markdown(metric_box("Sharpe Ratio",f'<span style="color:{ssc}">{s_sh:.2f}</span>',"Target: >0.5",ssc),unsafe_allow_html=True)
+    
+            # Equity curve
+            eq_df = pd.DataFrame({"Week":range(len(eq_curve)),"Equity (₹)":eq_curve})
+            st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin:12px 0 6px">📈 Simulated Equity Curve</div>',unsafe_allow_html=True)
+            st.line_chart(eq_df.set_index("Week"), color=["#1a56db"])
+    
+            # ── SIMULATED TRADE LOG — every trade with company name ──
+            st.markdown(f'<div style="font-size:15px;font-weight:700;color:#f1f5f9;margin:16px 0 6px">📋 Simulated Trade Log — All {len(sim_trade_log)} Trades</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:#64748b;font-size:13px;margin-bottom:10px">Every simulated trade using real NSE tickers. Click any ticker for TradingView chart.</div>', unsafe_allow_html=True)
+    
+            # Sim trade log filters
+            stl1, stl2 = st.columns([3,2])
+            with stl1:
+                stl_search = st.text_input("🔍 Search simulated ticker", placeholder="OMAXE, FORTIS...", key="stl_s")
+            with stl2:
+                stl_filter = st.selectbox("Show", ["All Trades","Winners Only","Losers Only"], key="stl_f")
+    
+            display_trades = sim_trade_log
+            if stl_search:
+                display_trades = [t for t in display_trades if stl_search.upper() in t["ticker"].upper()]
+            if stl_filter == "Winners Only":
+                display_trades = [t for t in display_trades if t["result"]=="WIN"]
+            elif stl_filter == "Losers Only":
+                display_trades = [t for t in display_trades if t["result"]=="LOSS"]
+    
+            # Summary for filtered sim trades
+            sim_f_wins = sum(1 for t in display_trades if t["result"]=="WIN")
+            sim_f_pnl = sum(t["pnl"] for t in display_trades)
+            st.markdown(f'<div style="padding:8px 14px;background:#0d1728;border:1px solid #1e2a3a;border-radius:8px;font-size:12px;color:#64748b;margin-bottom:10px">Showing <b style="color:#38bdf8">{len(display_trades)}</b> trades · Wins: <b class="pos">{sim_f_wins}</b> · Losses: <b class="neg">{len(display_trades)-sim_f_wins}</b> · P&L: <b style="color:{"#22c55e" if sim_f_pnl>=0 else "#ef4444"}">₹{sim_f_pnl:+,.0f}</b></div>', unsafe_allow_html=True)
+    
+            sim_th = "<tr><th>#</th><th>Week</th><th>Ticker</th><th>Allocation ₹</th><th>Return %</th><th>P&L ₹</th><th>Exit</th><th>Result</th><th>Chart</th></tr>"
+            sim_rows = ""
+            for i, tr in enumerate(display_trades[:500], 1):
+                rc2 = "pos" if tr["result"]=="WIN" else "neg"
+                ex_icon2 = {"TP":"✅","SL":"🛑","TIME":"⏰"}.get(tr["exit"],"❓")
+                res_html = f'<span class="pos">✅ WIN</span>' if tr["result"]=="WIN" else f'<span class="neg">❌ LOSS</span>'
+                sim_rows += f"""<tr>
+                  <td style="color:#475569">{i}</td>
+                  <td style="color:#94a3b8">W{tr["week"]}</td>
+                  <td><a href="{tv(tr['ticker'])}" target="_blank" class="tv-link">{tr["ticker"]}</a></td>
+                  <td style="color:#94a3b8">₹{tr["alloc"]:,.0f}</td>
+                  <td><span class="{rc2}">{tr["return_pct"]:+.2f}%</span></td>
+                  <td><span class="{rc2}">₹{tr["pnl"]:+,.0f}</span></td>
+                  <td>{ex_icon2} {tr["exit"]}</td>
+                  <td>{res_html}</td>
+                  <td>{chart_btn(tr['ticker'])}</td>
+                </tr>"""
+    
+            st.markdown(f"""
+            <div style="overflow-x:auto;max-height:600px;border:1px solid #1e2a3a;border-radius:12px">
+            <table class="tv-table"><thead>{sim_th}</thead><tbody>{sim_rows}</tbody></table>
+            </div>
+            """, unsafe_allow_html=True)
+    
+            if len(display_trades) > 500:
+                st.caption(f"Showing first 500 of {len(display_trades)} trades.")
+    
+            # Per-ticker performance summary
+            st.markdown("---")
+            st.markdown('<div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📊 Per-Company Performance Summary</div>', unsafe_allow_html=True)
+            ticker_stats = {}
+            for tr in sim_trade_log:
+                tk = tr["ticker"]
+                if tk not in ticker_stats:
+                    ticker_stats[tk] = {"trades":0,"wins":0,"pnl":0.0}
+                ticker_stats[tk]["trades"] += 1
+                ticker_stats[tk]["pnl"] += tr["pnl"]
+                if tr["result"]=="WIN":
+                    ticker_stats[tk]["wins"] += 1
+
 
         ts_sorted = sorted(ticker_stats.items(), key=lambda x: x[1]["pnl"], reverse=True)
 
@@ -1097,7 +1014,7 @@ with t6:
               <td class="pos">{st_d["wins"]}</td>
               <td><span class="{wr_c}">{wr_tk:.0f}%</span></td>
               <td><span class="{pnl_c}">₹{st_d["pnl"]:+,.0f}</span></td>
-              <td><a href="{tv(tk)}" target="_blank" class="chart-btn">📊 ↗</a></td>
+              <td>{chart_btn(tk)}</td>
             </tr>"""
 
         st.markdown(f'<div style="overflow-x:auto;max-height:400px;border:1px solid #1e2a3a;border-radius:12px"><table class="tv-table"><thead>{ts_th}</thead><tbody>{ts_rows}</tbody></table></div>', unsafe_allow_html=True)
@@ -1105,15 +1022,15 @@ with t6:
 # ══════════════════════════════════════════════════════════════════
 # TAB 7 — BLUEPRINT
 # ══════════════════════════════════════════════════════════════════
-with t7:
+elif page == "📘 Blueprint":
     st.markdown('''<div style="max-width:900px;margin:0 auto">
 <div style="font-size:24px;font-weight:900;color:#f1f5f9;margin-bottom:8px">📘 Platform Blueprint & Architecture</div>
 <div style="color:#94a3b8;font-size:14px;margin-bottom:24px">Documentation of functional intent and core calculation logic for each module within the MarketPulse platform.</div>
 
 <div class="card" style="border-left:4px solid #38bdf8">
-<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🎯 1. Opportunities</div>
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🎯 1. Scanner Insights (Filtered Opportunities)</div>
 <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Surface high-conviction, immediate swing trade setups.</p>
-<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine filters the entire NSE universe for strong base constraints (e.g., Min Volume, Min Price) and evaluates them for categorical Alpha Signals (52-Week Breakouts, Volume Spikes, and strong EMA Momentum). Stocks passing these checks are given an AI Score out of 100 based on price action density. Only stocks with score >= 50 populate this tab.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine filters the entire NSE universe for strong base constraints (e.g., Min Volume, Min Price) and evaluates them for categorical Alpha Signals (52-Week Breakouts, Volume Spikes, and strong EMA Momentum). Stocks passing these checks are given a Setup Score out of 100 based on price action density. Only stocks with score >= 50 populate this tab.</p>
 </div>
 
 <div class="card" style="border-left:4px solid #22c55e">
@@ -1123,7 +1040,7 @@ with t7:
 </div>
 
 <div class="card" style="border-left:4px solid #f59e0b">
-<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📋 3. Full Scan</div>
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📋 3. Scanner Insights (Full Universe)</div>
 <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Complete transparency and visibility over the entire processed market universe (~2,100+ stocks).</p>
 <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Loads the `latest_full_scan.csv` containing normalized closing price adjustments up to the latest trading session. Exposes a localized Pandas dataframe layer allowing fast in-memory filtering by structural criteria (Gainers, Losers, Market Capitalization bins).</p>
 </div>
@@ -1135,15 +1052,15 @@ with t7:
 </div>
 
 <div class="card" style="border-left:4px solid #ec4899">
-<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🤖 5. AI Picks</div>
+<div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">📈 5. Trade Setups</div>
 <p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Algorithmic conviction scoring producing absolute BUY, HOLD, or SELL mandates.</p>
 <p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> Evaluates the prevailing master trend (bull/bear/sideways regime) and cross-references it with localized Multi-Timeframe (MTF) EMA alignments. It dynamically computes Stop Loss based on Average True Range (ATR) multipliers, Take Profit ratios, Risk/Reward grids, and historical probability of success before finalizing a position tier.</p>
 </div>
 
 <div class="card" style="border-left:4px solid #14b8a6">
 <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:8px">🧪 6. Backtest Lab</div>
-<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Validate the quantitative edge of predictions against a historical 52-week timeline.</p>
-<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine runs a rigid deterministic simulation backward through 1 year of daily EOD ticks (`scan_results/backtest_results.json`). It records entry rules and executes standard portfolio matrix calculations to handle exit events (Take Profit hits, Stop Loss drops, Time-in-market expirations). Produces aggregate portfolio Expectancy, Profit Factor, and simulated Sharpe Ratios.</p>
+<p style="color:#e2e8f0;font-size:14px;margin-bottom:6px"><b style="color:#94a3b8">Intent:</b> Validate the quantitative edge of predictions against a historical 260-week (5-Year) timeline.</p>
+<p style="color:#94a3b8;font-size:13px;line-height:1.5"><b>Calculation Logic:</b> The engine runs a rigid deterministic simulation backward through 5 years of daily EOD ticks (`scan_results/backtest_results.json`). It records entry rules and executes standard portfolio matrix calculations to handle exit events (Take Profit hits, Stop Loss drops, Time-in-market expirations). Produces aggregate portfolio Expectancy, Profit Factor, and simulated Sharpe Ratios.</p>
 </div>
 </div>''', unsafe_allow_html=True)
 
