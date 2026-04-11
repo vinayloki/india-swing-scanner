@@ -1,6 +1,6 @@
 {
   "generated": "11 Apr 2026",
-  "generated_ts": "2026-04-11_0524",
+  "generated_ts": "2026-04-11_0544",
   "engine_version": "2.0",
   "total_opportunities": 31,
   "opportunities": [
@@ -372,11 +372,11 @@
       },
       "fundamental": {
         "name": "ART NIRMAN LIMITED",
-        "sector": null,
-        "ind": null,
+        "sector": "Real Estate",
+        "ind": "Real Estate - Development",
         "mcap_cr": 123.1,
         "pe": 96.7,
-        "eps": null,
+        "eps": 0.51,
         "52h": 72.5,
         "52l": 29.39,
         "bv": 14.75,
@@ -476,15 +476,15 @@
       },
       "fundamental": {
         "name": "AVANTI FEEDS LIMITED",
-        "sector": null,
-        "ind": null,
+        "sector": "Consumer Defensive",
+        "ind": "Packaged Foods",
         "mcap_cr": 19879.6,
         "pe": 22.8,
-        "eps": null,
+        "eps": 64.05,
         "52h": 1489.0,
         "52l": 614.25,
         "bv": 220.94,
-        "dy": 70.0
+        "dy": 62.0
       }
     },
     {
@@ -614,7 +614,7 @@
         "52h": 257.5,
         "52l": 73.08,
         "bv": 37.77,
-        "dy": 16.0
+        "dy": 14.0
       }
     },
     {
@@ -640,7 +640,7 @@
         "52h": 712.8,
         "52l": 368.0,
         "bv": 39.47,
-        "dy": 55.0
+        "dy": 48.0
       }
     },
     {

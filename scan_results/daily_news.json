@@ -1,5 +1,12 @@
 [
     {
+        "source": "Economic Times Stocks",
+        "title": "Concurrent Gainers: 11 stocks that gained for five straight days, rallying 15–30%",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/news/concurrent-gainers-11-stocks-that-gained-for-five-straight-days-rallying-1530/slideshow/130185263.cms",
+        "time": "11 Apr 05:23",
+        "timestamp": 1775884993.0
+    },
+    {
         "source": "Livemint Markets",
         "title": "War? Inflation? The market is moving on.",
         "link": "https://www.livemint.com/market/war-inflation-the-market-is-moving-on-11775882374951.html",
@@ -586,12 +593,5 @@
         "link": "https://economictimes.indiatimes.com/markets/stocks/stock-liveblog/ltimindtree-stock-price-livestock-price-today-live-updates-10-apr-2026/liveblog/130157522.cms",
         "time": "10 Apr 02:37",
         "timestamp": 1775788628.0
-    },
-    {
-        "source": "Economic Times Stocks",
-        "title": "ICICI Bank Share Price Highlights: ICICI Bank Stock Price History",
-        "link": "https://economictimes.indiatimes.com/markets/stocks/stock-liveblog/icici-bank-share-price-today-live-updates-10-apr-2026/liveblog/130157517.cms",
-        "time": "10 Apr 02:36",
-        "timestamp": 1775788612.0
     }
 ]

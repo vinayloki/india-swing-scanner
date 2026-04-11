@@ -1,6 +1,6 @@
 {
   "scan_date": "11 Apr 2026",
-  "scan_timestamp": "2026-04-11_0524",
+  "scan_timestamp": "2026-04-11_0544",
   "total_stocks_scanned": 2107,
   "timeframes": [
     "1W",
@@ -53,11 +53,11 @@
     },
     "12M": {
       "advancing": 879,
-      "declining": 1067,
+      "declining": 1068,
       "unchanged": 0,
       "advance_decline_ratio": 0.82,
-      "avg_return_pct": 4.87,
-      "median_return_pct": -3.93
+      "avg_return_pct": 4.82,
+      "median_return_pct": -3.94
     }
   },
   "top_10_by_timeframe": {
