@@ -43,6 +43,9 @@ jobs:
       - name: Fetch Market News
         run: python news_fetcher.py
 
+      - name: Run AI EOD Intelligence Engine
+        run: python ai_engine.py
+
       - name: Commit and Push Results
         run: |
           git config --global user.name "github-actions[bot]"

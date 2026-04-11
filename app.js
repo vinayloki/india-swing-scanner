@@ -8,10 +8,11 @@
    GLOBALS
 ═══════════════════════════════════════════════════════════════ */
 let summaryData    = null;   // latest_scan_summary.json
-let fullScanData   = [];     // full_summary.json → stocks[]
-let fundamentals   = {};     // fundamentals.json → keyed by symbol
+let fullScanData   = [];     // full_summary.json -> stocks[]
+let fundamentals   = {};     // fundamentals.json -> keyed by symbol
 let newsData       = [];     // daily_news.json
-let opportunitiesData = [];  // opportunities.json → opportunities[]
+let opportunitiesData = [];  // opportunities.json -> opportunities[]
+let aiPicksData    = null;   // ai_picks.json -> full AI recommendations
 let currentTf      = '1M';
 
 // Full Scan table state
@@ -67,12 +68,13 @@ function initTabs() {
 ═══════════════════════════════════════════════════════════════ */
 async function loadEverything() {
   try {
-    const [summRes, fullRes, fundRes, newsRes, oppRes] = await Promise.allSettled([
+    const [summRes, fullRes, fundRes, newsRes, oppRes, aiRes] = await Promise.allSettled([
       fetch('scan_results/latest_scan_summary.json'),
       fetch('scan_results/full_summary.json'),
       fetch('scan_results/fundamentals.json'),
       fetch('scan_results/daily_news.json'),
       fetch('scan_results/opportunities.json'),
+      fetch('scan_results/ai_picks.json'),
     ]);
 
     // Parse summary
@@ -105,6 +107,14 @@ async function loadEverything() {
     if (oppRes && oppRes.status === 'fulfilled' && oppRes.value.ok) {
       const oj = await oppRes.value.json();
       opportunitiesData = oj.opportunities || [];
+    }
+
+    // Parse AI picks
+    if (aiRes && aiRes.status === 'fulfilled' && aiRes.value.ok) {
+      aiPicksData = await aiRes.value.json();
+      console.log(`✅ AI picks loaded: ${aiPicksData.total_stocks} stocks`);
+    } else {
+      console.warn('ai_picks.json not found — AI tab will show demo data');
     }
 
   } catch (err) {
@@ -562,197 +572,230 @@ function onOppChip(btn) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AI PICKS TAB — Static/Mock Data + Renderer
-   Structure designed for easy backend integration later:
-   replace AI_PICKS_DATA with an API fetch in loadEverything()
+   AI PICKS TAB — Live Data Renderer (real ai_picks.json)
+   Falls back to demo cards if ai_picks.json not yet generated.
 ═══════════════════════════════════════════════════════════════ */
 
-const AI_PICKS_DATA = [
-  {
-    ticker: 'RELIANCE',
-    name: 'Reliance Industries Ltd.',
-    price: '₹2,847.60',
-    recommendation: 'buy',
-    trend: 'up',
-    trendLabel: '↑ Uptrend',
-    horizon: 'Medium Term · 2 Months',
-    confidence: 82,
-    reasons: [
-      'Price above 200 DMA — sustained structural uptrend',
-      'Strong volume breakout on Friday\'s session (2.4× avg vol)',
-      'Momentum positive: 3-month return +14.2%',
-      'Revenue growth healthy at 11% YoY (Q3 FY25)',
-    ],
-    risks: [
-      'RSI(14) near overbought zone at 71.3 — pullback possible',
-    ],
-  },
-  {
-    ticker: 'HDFCBANK',
-    name: 'HDFC Bank Ltd.',
-    price: '₹1,612.30',
-    recommendation: 'hold',
-    trend: 'side',
-    trendLabel: '→ Sideways',
-    horizon: 'Short Term · 3 Weeks',
-    confidence: 61,
-    reasons: [
-      'Price consolidating between ₹1,580 and ₹1,650 support/resistance',
-      'EMA 9 and EMA 21 converging — trend resolution imminent',
-      'Fundamentals solid: P/E 18x, strong NII growth',
-    ],
-    risks: [
-      'Breakout direction unclear — wait for confirmation above ₹1,655',
-      'Broader market weakness could trigger range breakdown',
-    ],
-  },
-  {
-    ticker: 'ZOMATO',
-    name: 'Zomato Ltd.',
-    price: '₹208.45',
-    recommendation: 'buy',
-    trend: 'up',
-    trendLabel: '↑ Uptrend',
-    horizon: 'Short Term · 4 Weeks',
-    confidence: 74,
-    reasons: [
-      '52-week breakout confirmed on above-average volume',
-      'Momentum indicator (3M return: +38.7%) strongly bullish',
-      'Quick Commerce segment driving re-rating from analysts',
-      'EMA 9 crossed above EMA 21 last week — golden cross',
-    ],
-    risks: [
-      'High P/E (120x) leaves limited margin of safety',
-      'Profit booking likely near ₹225–230 resistance zone',
-    ],
-  },
-  {
-    ticker: 'TATASTEEL',
-    name: 'Tata Steel Ltd.',
-    price: '₹142.80',
-    recommendation: 'sell',
-    trend: 'down',
-    trendLabel: '↓ Downtrend',
-    horizon: 'Short Term · 3 Weeks',
-    confidence: 68,
-    reasons: [
-      'Price below 200 DMA for 3 consecutive weeks',
-      'Volume on down days 1.8× higher than up days — distribution pattern',
-      'European operations reporting losses; guidance cut in Q3',
-    ],
-    risks: [
-      'Any China steel demand pickup could reverse this call quickly',
-      'Partial hedge: core India ops remain profitable',
-    ],
-  },
-  {
-    ticker: 'INFY',
-    name: 'Infosys Ltd.',
-    price: '₹1,478.55',
-    recommendation: 'buy',
-    trend: 'up',
-    trendLabel: '↑ Uptrend',
-    horizon: 'Long Term · 9 Months',
-    confidence: 79,
-    reasons: [
-      'AI and cloud deal wins accelerating — deal TCV up 22% QoQ',
-      'Price above all key EMAs (9, 21, 50, 200)',
-      'Dividend yield 3.1% provides income cushion',
-      '12M return momentum positive at +19.4%',
-    ],
-    risks: [
-      'USD appreciation risk — revenue is USD-denominated',
-      'Macro slowdown in US/Europe could delay IT spend recovery',
-    ],
-  },
-  {
-    ticker: 'IRFC',
-    name: 'Indian Railway Finance Corp.',
-    price: '₹175.20',
-    recommendation: 'hold',
-    trend: 'side',
-    trendLabel: '→ Sideways',
-    horizon: 'Medium Term · 6 Weeks',
-    confidence: 55,
-    reasons: [
-      'Post-IPO run-up already priced in; valuation stretched vs peers',
-      'Railway capex cycle intact — long-term thesis valid',
-      'Dividend yield 1.1% provides some support',
-    ],
-    risks: [
-      'Government policy changes could affect loan disbursement pipeline',
-      'PSU sector rotation risk if broader market favors private banks',
-    ],
-  },
+// Filter + pagination state for AI picks table
+let _aiRec = '', _aiSearch = '', _aiSector = '', _aiCap = '', _aiPage = 0;
+const AI_PAGE = 50;
+
+const AI_DEMO_PICKS = [
+  { ticker:'RELIANCE', name:'Reliance Industries Ltd.', price:'2847.60', recommendation:'buy', trend:'up', trend_label:'↑ Uptrend', sector:'Energy', cap_label:'Large Cap', horizon:'Medium Term · 2 Months', confidence:82,
+    tf_details:{'1W':{pct:2.1},'2W':{pct:4.3},'1M':{pct:9.2},'3M':{pct:14.2},'6M':{pct:18.1},'12M':{pct:22.4}},
+    reasons:['Uptrend confirmed across 6 timeframes','Strong 3-month momentum: +14.2%','Solid long-term trend: +22.4% (12M)'],
+    risks:['RSI near overbought — short-term pullback possible'] },
+  { ticker:'HDFCBANK', name:'HDFC Bank Ltd.', price:'1612.30', recommendation:'hold', trend:'sideways', trend_label:'→ Sideways', sector:'Financial Services', cap_label:'Large Cap', horizon:'Short Term · 3 Weeks', confidence:61,
+    tf_details:{'1W':{pct:0.5},'2W':{pct:-1.2},'1M':{pct:1.8},'3M':{pct:3.1},'6M':{pct:5.0},'12M':{pct:8.4}},
+    reasons:['Price consolidating — no clear directional trend yet','Fundamentals solid: strong NII growth'],
+    risks:['Awaiting breakout direction confirmation'] },
+  { ticker:'ZOMATO', name:'Zomato Ltd.', price:'208.45', recommendation:'buy', trend:'up', trend_label:'↑ Uptrend', sector:'Consumer Services', cap_label:'Large Cap', horizon:'Short Term · 4 Weeks', confidence:74,
+    tf_details:{'1W':{pct:8.1},'2W':{pct:15.3},'1M':{pct:22.7},'3M':{pct:38.7},'6M':{pct:45.0},'12M':{pct:62.1}},
+    reasons:['52W breakout confirmed on volume','3M momentum: +38.7%','Quick Commerce re-rating underway'],
+    risks:['High P/E — limited margin of safety'] },
+  { ticker:'TATASTEEL', name:'Tata Steel Ltd.', price:'142.80', recommendation:'sell', trend:'down', trend_label:'↓ Downtrend', sector:'Metals', cap_label:'Large Cap', horizon:'Short Term · 3 Weeks', confidence:68,
+    tf_details:{'1W':{pct:-3.2},'2W':{pct:-6.1},'1M':{pct:-9.3},'3M':{pct:-14.8},'6M':{pct:-11.2},'12M':{pct:-18.0}},
+    reasons:['Downtrend confirmed across timeframes','Volume distribution pressure'],
+    risks:['China demand recovery could reverse call quickly'] },
 ];
 
-/**
- * Build the AI Picks tab in the DOM.
- * Called once on DOMContentLoaded — data is static for now.
- * To integrate backend: replace AI_PICKS_DATA with fetched JSON.
- */
 function buildAIPicksTab() {
   const grid = document.getElementById('aiPicksGrid');
   if (!grid) return;
+  if (aiPicksData) {
+    buildAIPicksLive();
+  } else {
+    grid.innerHTML = AI_DEMO_PICKS.map(p => buildAIPickCard(p, true)).join('');
+    animateConfBars(grid);
+  }
+}
 
-  grid.innerHTML = AI_PICKS_DATA.map(pick => buildAIPickCard(pick)).join('');
+// ── LIVE TABLE ─────────────────────────────────────────────────────────
+function buildAIPicksLive() {
+  const wrap = document.getElementById('aiPicksGrid');
+  if (!wrap) return;
+  const parentEl = wrap.closest('#tab-aipicks');
+  if (!parentEl) return;
 
-  // Animate confidence bars after paint
+  if (!parentEl.querySelector('#aiLiveTable')) {
+    const s = aiPicksData.summary;
+    wrap.style.display = 'none';
+    wrap.insertAdjacentHTML('afterend', `
+      <div id="aiLiveTable">
+        <div class="ai-live-summary">
+          <div class="ai-live-stat" style="color:var(--green)"><span class="ai-live-stat-val">${s.buy}</span><span class="ai-live-stat-lbl">🟢 BUY</span></div>
+          <div class="ai-live-stat" style="color:var(--amber)"><span class="ai-live-stat-val">${s.hold}</span><span class="ai-live-stat-lbl">🟡 HOLD</span></div>
+          <div class="ai-live-stat" style="color:var(--red)"><span class="ai-live-stat-val">${s.sell}</span><span class="ai-live-stat-lbl">🔴 SELL</span></div>
+          <div class="ai-live-stat" style="color:var(--blue)"><span class="ai-live-stat-val">${aiPicksData.total_stocks}</span><span class="ai-live-stat-lbl">Stocks</span></div>
+          <div class="ai-live-stat" style="color:var(--primary)"><span class="ai-live-stat-val">${s.avg_confidence}%</span><span class="ai-live-stat-lbl">Avg Confidence</span></div>
+        </div>
+        <div class="ai-filter-bar">
+          <input class="ai-filter-input" id="aiSearchInput" type="text" placeholder="🔍 Search ticker or name..." oninput="onAiSearch()">
+          <div class="opp-chips" id="aiRecChips">
+            <button class="chip active" id="aiChipAll"  onclick="onAiRec('')">ALL</button>
+            <button class="chip"        id="aiChipBuy"  onclick="onAiRec('buy')">🟢 BUY ${s.buy}</button>
+            <button class="chip"        id="aiChipHold" onclick="onAiRec('hold')">🟡 HOLD ${s.hold}</button>
+            <button class="chip"        id="aiChipSell" onclick="onAiRec('sell')">🔴 SELL ${s.sell}</button>
+          </div>
+          <select class="opp-select" id="aiSectorSel" onchange="onAiSector()"><option value="">All Sectors</option></select>
+          <select class="opp-select" id="aiCapSel" onchange="onAiCap()">
+            <option value="">All Cap Sizes</option>
+            <option value="L">Large Cap</option>
+            <option value="M">Mid Cap</option>
+            <option value="S">Small Cap</option>
+          </select>
+          <span class="opp-count" id="aiPickCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="text-align:left">Ticker</th>
+              <th style="text-align:left">Sector / Name</th>
+              <th>Rec</th>
+              <th>Conf</th>
+              <th>Trend</th>
+              <th>1W</th><th>2W</th><th>1M</th><th>3M</th><th>6M</th><th>12M</th>
+              <th>Horizon</th>
+            </tr></thead>
+            <tbody id="aiPicksTbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="aiPicksPag"></div>
+      </div>`);
+
+    const sectors = [...new Set(aiPicksData.picks.map(p => p.sector).filter(Boolean))].sort();
+    const secSel = document.getElementById('aiSectorSel');
+    sectors.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; secSel.appendChild(o); });
+  }
+
+  renderAIPicksTable();
+}
+
+function renderAIPicksTable() {
+  if (!aiPicksData) return;
+  let data = aiPicksData.picks;
+
+  if (_aiRec)    data = data.filter(p => p.recommendation === _aiRec);
+  if (_aiSearch) data = data.filter(p => p.ticker.includes(_aiSearch) || (p.name||'').toUpperCase().includes(_aiSearch));
+  if (_aiSector) data = data.filter(p => p.sector === _aiSector);
+  if (_aiCap)    data = data.filter(p => p.mcap_code === _aiCap);
+
+  const total = data.length;
+  const page  = data.slice(_aiPage * AI_PAGE, (_aiPage + 1) * AI_PAGE);
+
+  const countEl = document.getElementById('aiPickCount');
+  if (countEl) countEl.textContent = `${total.toLocaleString()} stocks`;
+
+  const pct = v => v == null
+    ? '<td class="na">—</td>'
+    : `<td class="${v >= 8 ? 'pos bold-md' : v >= 2 ? 'pos' : v <= -8 ? 'neg bold-md' : v <= -2 ? 'neg' : ''}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v).toFixed(1)}%</td>`;
+
+  const trendCls = { up:'trend-up', down:'trend-down', sideways:'trend-side' };
+  const recColor = { buy:'var(--green)', hold:'var(--amber)', sell:'var(--red)' };
+
+  const tbodyEl = document.getElementById('aiPicksTbody');
+  if (!tbodyEl) return;
+  tbodyEl.innerHTML = page.map(p => {
+    const td = p.tf_details || {};
+    const displayName = (p.name && p.name !== p.ticker) ? p.name : '';
+    return `<tr>
+      <td class="td-ticker"><a href="https://in.tradingview.com/chart/?symbol=NSE:${p.ticker}" target="_blank" rel="noopener">${p.ticker}</a></td>
+      <td style="text-align:left;max-width:180px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${displayName}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25)">${p.sector||p.cap_label}</div>
+      </td>
+      <td style="text-align:center"><span class="ai-rec-badge ${p.recommendation}" style="font-size:10px;padding:2px 8px">${p.recommendation.toUpperCase()}</span></td>
+      <td style="font-family:var(--mono);text-align:center;color:${recColor[p.recommendation]}">${p.confidence}%</td>
+      <td style="text-align:center"><span class="ai-trend-chip ${trendCls[p.trend]||'trend-side'}" style="font-size:9px;padding:2px 7px">${p.trend_label}</span></td>
+      ${pct(td['1W']?.pct)}${pct(td['2W']?.pct)}${pct(td['1M']?.pct)}${pct(td['3M']?.pct)}${pct(td['6M']?.pct)}${pct(td['12M']?.pct)}
+      <td style="font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap">${p.horizon}</td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const totalPages = Math.ceil(total / AI_PAGE);
+  const pag = document.getElementById('aiPicksPag');
+  if (!pag) return;
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+  const pages = [];
+  pages.push(`<button class="pg-btn" onclick="aiGo(Math.max(0,${_aiPage}-1))">← Prev</button>`);
+  const s = Math.max(0, _aiPage - 2), e = Math.min(totalPages, _aiPage + 5);
+  if (s > 0) pages.push(`<button class="pg-btn" onclick="aiGo(0)">1</button><span style="color:rgba(255,255,255,0.2)">…</span>`);
+  for (let i = s; i < e; i++) pages.push(`<button class="pg-btn ${i === _aiPage ? 'active' : ''}" onclick="aiGo(${i})">${i+1}</button>`);
+  if (e < totalPages) pages.push(`<span style="color:rgba(255,255,255,0.2)">…</span><button class="pg-btn" onclick="aiGo(${totalPages-1})">${totalPages}</button>`);
+  pages.push(`<button class="pg-btn" onclick="aiGo(Math.min(${totalPages-1},${_aiPage}+1))">Next →</button>`);
+  pag.innerHTML = pages.join('');
+}
+
+function aiGo(p)     { _aiPage = p; renderAIPicksTable(); window.scrollTo({top:400,behavior:'smooth'}); }
+function onAiSearch(){ _aiSearch = document.getElementById('aiSearchInput').value.toUpperCase().trim(); _aiPage=0; renderAIPicksTable(); }
+function onAiSector(){ _aiSector = document.getElementById('aiSectorSel').value; _aiPage=0; renderAIPicksTable(); }
+function onAiCap()   { _aiCap = document.getElementById('aiCapSel').value; _aiPage=0; renderAIPicksTable(); }
+function onAiRec(r)  {
+  _aiRec = r; _aiPage = 0;
+  ['aiChipAll','aiChipBuy','aiChipHold','aiChipSell'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const idMap = {'':'aiChipAll','buy':'aiChipBuy','hold':'aiChipHold','sell':'aiChipSell'};
+  const t = document.getElementById(idMap[r]);
+  if (t) t.classList.add('active');
+  renderAIPicksTable();
+}
+
+// ── CARD BUILDER (demo + can be reused for future card view) ───────────
+function buildAIPickCard(pick, isDemo = false) {
+  const trendCls = { up:'trend-up', down:'trend-down', sideways:'trend-side', side:'trend-side' }[pick.trend] || 'trend-side';
+  const rec = pick.recommendation;
+  const recColor = rec === 'buy' ? 'var(--green)' : rec === 'sell' ? 'var(--red)' : 'var(--amber)';
+  const reasons = (pick.reasons||[]).map(r => `<li>${r}</li>`).join('');
+  const risks   = (pick.risks||[]).map(r => `<div class="ai-risk-item">${r}</div>`).join('');
+  const tfd = pick.tf_details || {};
+  const tfRow = ['1W','2W','1M','3M','6M','12M'].map(tf => {
+    const d = tfd[tf];
+    if (!d || d.pct == null) return `<div class="mc-tf-cell na">—</div>`;
+    return `<div class="mc-tf-cell ${d.pct >= 0 ? 'up' : 'dn'}">${d.pct >= 0 ? '+' : ''}${d.pct.toFixed(1)}%</div>`;
+  }).join('');
+
+  return `
+  <div class="ai-pick-card ${rec}">
+    <div class="ai-pick-header">
+      <div class="ai-rec-badge ${rec}">${rec.toUpperCase()}</div>
+      <div class="ai-pick-meta">
+        <div class="ai-pick-ticker"><a href="https://in.tradingview.com/chart/?symbol=NSE:${pick.ticker}" target="_blank" rel="noopener" style="color:#fff">${pick.ticker}</a></div>
+        <div class="ai-pick-name">${(pick.name && pick.name !== pick.ticker) ? pick.name : (pick.sector||pick.cap_label||'')}</div>
+      </div>
+      <div class="ai-pick-price" style="color:${recColor}">₹${pick.price}</div>
+    </div>
+    <div class="ai-pick-row">
+      <span class="ai-trend-chip ${trendCls}">${pick.trend_label||pick.trendLabel||''}</span>
+      <span class="ai-horizon-chip">⏱ ${pick.horizon}</span>
+    </div>
+    <div class="ai-conf-wrap">
+      <div class="ai-conf-label"><span>AI Confidence</span><strong>${pick.confidence}%</strong></div>
+      <div class="ai-conf-track">
+        <div class="ai-conf-fill ${rec}" data-confidence="${pick.confidence}" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="mc-tf-header">${['1W','2W','1M','3M','6M','12M'].map(tf=>`<div class="mc-tf-h">${tf}</div>`).join('')}</div>
+    <div class="mc-tfs" style="margin-bottom:10px">${tfRow}</div>
+    <hr class="ai-pick-divider">
+    <div class="ai-pick-section-title">Why</div>
+    <ul class="ai-pick-reasons">${reasons}</ul>
+    <hr class="ai-pick-divider">
+    <div class="ai-pick-section-title">Risk Indicators</div>
+    ${risks}
+    <div class="ai-pick-footer">
+      <a class="ai-chart-link" href="https://in.tradingview.com/chart/?symbol=NSE:${pick.ticker}" target="_blank" rel="noopener">📊 Chart ↗</a>
+      ${isDemo ? '<span class="ai-pick-demo-tag">Demo</span>' : ''}
+    </div>
+  </div>`;
+}
+
+function animateConfBars(parentEl) {
   requestAnimationFrame(() => {
-    grid.querySelectorAll('.ai-conf-fill').forEach(el => {
+    (parentEl || document).querySelectorAll('.ai-conf-fill').forEach(el => {
       el.style.width = el.dataset.confidence + '%';
     });
   });
-}
-
-function buildAIPickCard(pick) {
-  const trendCls = { up: 'trend-up', down: 'trend-down', side: 'trend-side' }[pick.trend] || 'trend-side';
-  const recLabel = pick.recommendation.toUpperCase();
-
-  const reasons = pick.reasons.map(r => `<li>${r}</li>`).join('');
-  const risks   = pick.risks.map(r => `<div class="ai-risk-item">${r}</div>`).join('');
-
-  return `
-  <div class="ai-pick-card ${pick.recommendation}">
-    <div class="ai-pick-header">
-      <div class="ai-rec-badge ${pick.recommendation}">${recLabel}</div>
-      <div class="ai-pick-meta">
-        <div class="ai-pick-ticker">
-          <a href="https://in.tradingview.com/chart/?symbol=NSE:${pick.ticker}" target="_blank" rel="noopener" style="color:#fff;">${pick.ticker}</a>
-        </div>
-        <div class="ai-pick-name">${pick.name}</div>
-      </div>
-      <div class="ai-pick-price" style="color:${pick.recommendation === 'buy' ? 'var(--green)' : pick.recommendation === 'sell' ? 'var(--red)' : 'var(--amber)'}">${pick.price}</div>
-    </div>
-
-    <div class="ai-pick-row">
-      <span class="ai-trend-chip ${trendCls}">${pick.trendLabel}</span>
-      <span class="ai-horizon-chip">⏱ ${pick.horizon}</span>
-    </div>
-
-    <div class="ai-conf-wrap">
-      <div class="ai-conf-label">
-        <span>AI Confidence</span>
-        <strong>${pick.confidence}%</strong>
-      </div>
-      <div class="ai-conf-track">
-        <div class="ai-conf-fill ${pick.recommendation}" data-confidence="${pick.confidence}" style="width:0%"></div>
-      </div>
-    </div>
-
-    <hr class="ai-pick-divider">
-
-    <div class="ai-pick-section-title">Why</div>
-    <ul class="ai-pick-reasons">${reasons}</ul>
-
-    <hr class="ai-pick-divider">
-
-    <div class="ai-pick-section-title">Risk Indicators</div>
-    ${risks}
-
-    <div class="ai-pick-footer">
-      <a class="ai-chart-link" href="https://in.tradingview.com/chart/?symbol=NSE:${pick.ticker}" target="_blank" rel="noopener">📊 Chart ↗</a>
-      <span class="ai-pick-demo-tag">Demo Data</span>
-    </div>
-  </div>`;
 }

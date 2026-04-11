@@ -719,6 +719,36 @@
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .ai-steps-grid { grid-template-columns: 1fr; }
     }
+
+    /* === AI PICKS LIVE TABLE STYLES === */
+    .ai-live-summary {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px;
+      align-items: center;
+    }
+    .ai-live-stat { display: flex; flex-direction: column; align-items: center; min-width: 64px; }
+    .ai-live-stat-val { font-size: 22px; font-weight: 800; font-family: var(--mono); }
+    .ai-live-stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .ai-filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .ai-filter-input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; color: #fff; font-size: 13px; outline: none; min-width: 200px; }
+    .ai-filter-input:focus { border-color: var(--primary); }
+    #aiLiveTable .table-wrap { overflow-x: auto; }
+    #aiLiveTable table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    #aiLiveTable thead th { background: var(--surface); color: rgba(255,255,255,0.4); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    #aiLiveTable tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background .15s; }
+    #aiLiveTable tbody tr:hover { background: rgba(255,255,255,0.03); }
+    #aiLiveTable tbody td { padding: 7px 10px; text-align: center; vertical-align: middle; }
+    .mc-tf-h { font-size: 9px; color: rgba(255,255,255,0.3); text-align:center; flex:1; }
+    .mc-tf-header { display: flex; gap: 4px; padding: 0 2px; margin-bottom: 4px; }
+    .mc-tf-cell { font-family: var(--mono); font-size: 10px; text-align:center; padding: 3px 6px; border-radius: 4px; flex:1; background: rgba(255,255,255,0.03); }
+    .mc-tf-cell.up { color: var(--green); }
+    .mc-tf-cell.dn { color: var(--red); }
+    .mc-tf-cell.na { color: rgba(255,255,255,0.18); }
+    .mc-tfs { display: flex; gap: 4px; }
+    .bold-md { font-weight: 700; }
+    .td-ticker a { font-weight: 700; color: var(--blue); text-decoration: none; }
+    .td-ticker a:hover { color: var(--primary); }
   </style>
 </head>
 <body>
