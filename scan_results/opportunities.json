@@ -1,6 +1,6 @@
 {
   "generated": "11 Apr 2026",
-  "generated_ts": "2026-04-11_0503",
+  "generated_ts": "2026-04-11_0524",
   "engine_version": "2.0",
   "total_opportunities": 31,
   "opportunities": [
@@ -120,7 +120,7 @@
         "52h": 1848.0,
         "52l": 509.55,
         "bv": 154.84,
-        "dy": 32.0
+        "dy": 30.0
       }
     },
     {
@@ -372,11 +372,11 @@
       },
       "fundamental": {
         "name": "ART NIRMAN LIMITED",
-        "sector": "Real Estate",
-        "ind": "Real Estate - Development",
+        "sector": null,
+        "ind": null,
         "mcap_cr": 123.1,
         "pe": 96.7,
-        "eps": 0.51,
+        "eps": null,
         "52h": 72.5,
         "52l": 29.39,
         "bv": 14.75,
@@ -476,11 +476,11 @@
       },
       "fundamental": {
         "name": "AVANTI FEEDS LIMITED",
-        "sector": "Consumer Defensive",
-        "ind": "Packaged Foods",
+        "sector": null,
+        "ind": null,
         "mcap_cr": 19879.6,
         "pe": 22.8,
-        "eps": 64.05,
+        "eps": null,
         "52h": 1489.0,
         "52l": 614.25,
         "bv": 220.94,
@@ -739,8 +739,8 @@
         "sector": "Consumer Cyclical",
         "ind": "Furnishings, Fixtures & Appliances",
         "mcap_cr": 69.2,
-        "pe": 39.9,
-        "eps": 1.3,
+        "pe": 43.9,
+        "eps": 1.18,
         "52h": 107.09,
         "52l": 31.5,
         "bv": 55.47,
