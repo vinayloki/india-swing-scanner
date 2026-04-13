@@ -1,7 +1,7 @@
 {
-  "scan_date": "11 Apr 2026",
-  "scan_timestamp": "2026-04-11_0652",
-  "total_stocks_scanned": 2107,
+  "scan_date": "13 Apr 2026",
+  "scan_timestamp": "2026-04-13_0005",
+  "total_stocks_scanned": 2110,
   "timeframes": [
     "1W",
     "2W",
@@ -12,52 +12,52 @@
   ],
   "market_breadth": {
     "1W": {
-      "advancing": 1958,
-      "declining": 146,
+      "advancing": 1960,
+      "declining": 147,
       "unchanged": 3,
-      "advance_decline_ratio": 13.41,
+      "advance_decline_ratio": 13.33,
       "avg_return_pct": 7.6,
       "median_return_pct": 6.79
     },
     "2W": {
-      "advancing": 2046,
-      "declining": 60,
+      "advancing": 2048,
+      "declining": 61,
       "unchanged": 1,
-      "advance_decline_ratio": 34.1,
-      "avg_return_pct": 17.66,
-      "median_return_pct": 16.08
+      "advance_decline_ratio": 33.57,
+      "avg_return_pct": 17.6,
+      "median_return_pct": 16.05
     },
     "1M": {
-      "advancing": 1437,
-      "declining": 667,
+      "advancing": 1439,
+      "declining": 668,
       "unchanged": 3,
       "advance_decline_ratio": 2.15,
-      "avg_return_pct": 4.53,
-      "median_return_pct": 3.28
+      "avg_return_pct": 4.51,
+      "median_return_pct": 3.27
     },
     "3M": {
-      "advancing": 640,
-      "declining": 1447,
+      "advancing": 638,
+      "declining": 1450,
       "unchanged": 4,
       "advance_decline_ratio": 0.44,
-      "avg_return_pct": -4.72,
-      "median_return_pct": -6.27
+      "avg_return_pct": -4.75,
+      "median_return_pct": -6.28
     },
     "6M": {
-      "advancing": 407,
-      "declining": 1635,
+      "advancing": 409,
+      "declining": 1634,
       "unchanged": 1,
       "advance_decline_ratio": 0.25,
-      "avg_return_pct": -12.94,
-      "median_return_pct": -16.38
+      "avg_return_pct": -12.85,
+      "median_return_pct": -16.29
     },
     "12M": {
-      "advancing": 879,
-      "declining": 1068,
+      "advancing": 881,
+      "declining": 1067,
       "unchanged": 0,
-      "advance_decline_ratio": 0.82,
-      "avg_return_pct": 4.82,
-      "median_return_pct": -3.94
+      "advance_decline_ratio": 0.83,
+      "avg_return_pct": 4.94,
+      "median_return_pct": -3.92
     }
   },
   "top_10_by_timeframe": {
@@ -192,11 +192,6 @@
         "1M": 49.28
       },
       {
-        "ticker": "LIKHITHA",
-        "last_close": 221.86,
-        "1M": 48.89
-      },
-      {
         "ticker": "PRITI",
         "last_close": 51.81,
         "1M": 45.94
@@ -215,6 +210,11 @@
         "ticker": "SOLEX",
         "last_close": 1282.4,
         "1M": 44.05
+      },
+      {
+        "ticker": "AURIGROW",
+        "last_close": 0.31,
+        "1M": 40.91
       }
     ],
     "3M": [
