@@ -1,7 +1,7 @@
 {
-  "scan_date": "13 Apr 2026",
-  "scan_timestamp": "2026-04-13_1204",
-  "total_stocks_scanned": 2111,
+  "scan_date": "14 Apr 2026",
+  "scan_timestamp": "2026-04-14_1156",
+  "total_stocks_scanned": 2112,
   "timeframes": [
     "1W",
     "2W",
@@ -12,7 +12,7 @@
   ],
   "market_breadth": {
     "1W": {
-      "advancing": 1918,
+      "advancing": 1919,
       "declining": 189,
       "unchanged": 4,
       "advance_decline_ratio": 10.15,
@@ -20,24 +20,24 @@
       "median_return_pct": 6.46
     },
     "2W": {
-      "advancing": 2032,
+      "advancing": 2033,
       "declining": 78,
       "unchanged": 1,
-      "advance_decline_ratio": 26.05,
+      "advance_decline_ratio": 26.06,
       "avg_return_pct": 17.34,
       "median_return_pct": 15.65
     },
     "1M": {
-      "advancing": 1734,
+      "advancing": 1735,
       "declining": 376,
       "unchanged": 1,
       "advance_decline_ratio": 4.61,
       "avg_return_pct": 7.83,
-      "median_return_pct": 6.47
+      "median_return_pct": 6.45
     },
     "3M": {
       "advancing": 666,
-      "declining": 1427,
+      "declining": 1428,
       "unchanged": 0,
       "advance_decline_ratio": 0.47,
       "avg_return_pct": -4.3,
@@ -45,11 +45,11 @@
     },
     "6M": {
       "advancing": 426,
-      "declining": 1618,
+      "declining": 1619,
       "unchanged": 0,
       "advance_decline_ratio": 0.26,
-      "avg_return_pct": -12.43,
-      "median_return_pct": -15.57
+      "avg_return_pct": -12.44,
+      "median_return_pct": -15.58
     },
     "12M": {
       "advancing": 824,
