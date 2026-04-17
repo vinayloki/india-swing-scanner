@@ -1,11 +1,11 @@
 {
-  "generated": "16 Apr 2026 19:16",
+  "generated": "17 Apr 2026 13:46",
   "regime": "Sideways",
   "size_multiplier": 0.5,
-  "nifty_close": 24231.3,
-  "ema_200": 24767.91,
-  "pct_vs_ema200": -2.17,
-  "last_date": "2026-04-15",
+  "nifty_close": 24353.55,
+  "ema_200": 24758.16,
+  "pct_vs_ema200": -1.63,
+  "last_date": "2026-04-17",
   "regime_breakdown_52w": {
     "Bull": {
       "days": 177,
