@@ -1,0 +1,1937 @@
+{
+  "generated": "17 Apr 2026",
+  "run_at": "2026-04-17 07:01",
+  "backtest_weeks": 26,
+  "regime": "Sideways",
+  "method": "rule_based",
+  "accuracy": {
+    "total_predictions": 36693,
+    "correct_predictions": 19762,
+    "overall_accuracy_pct": 53.86,
+    "precision": {
+      "buy_pct": 3.85,
+      "sell_pct": 0.51,
+      "hold_pct": 97.46
+    },
+    "recall": {
+      "buy_pct": 15.58,
+      "sell_pct": 20.06,
+      "hold_pct": 54.95
+    },
+    "win_rate": {
+      "buy_pct": 44.5,
+      "sell_pct": 54.9,
+      "overall_pct": 53.11
+    },
+    "avg_return_per_prediction": {
+      "buy_pct": -0.527,
+      "sell_pct": -0.09,
+      "hold_pct": -0.59
+    },
+    "class_counts": {
+      "buy": 2854,
+      "sell": 13747,
+      "hold": 20092
+    },
+    "confusion_matrix": {
+      "BUY": {
+        "BUY": 110,
+        "SELL": 98,
+        "HOLD": 2646
+      },
+      "SELL": {
+        "BUY": 267,
+        "SELL": 70,
+        "HOLD": 13410
+      },
+      "HOLD": {
+        "BUY": 329,
+        "SELL": 181,
+        "HOLD": 19582
+      }
+    },
+    "accuracy_timeline": [
+      {
+        "month": "2025-10",
+        "accuracy_pct": 72.1,
+        "trades": 4187
+      },
+      {
+        "month": "2025-11",
+        "accuracy_pct": 66.4,
+        "trades": 5594
+      },
+      {
+        "month": "2025-12",
+        "accuracy_pct": 57.4,
+        "trades": 5625
+      },
+      {
+        "month": "2026-01",
+        "accuracy_pct": 46.9,
+        "trades": 7100
+      },
+      {
+        "month": "2026-02",
+        "accuracy_pct": 56.2,
+        "trades": 5732
+      },
+      {
+        "month": "2026-03",
+        "accuracy_pct": 31.2,
+        "trades": 5668
+      },
+      {
+        "month": "2026-04",
+        "accuracy_pct": 53.1,
+        "trades": 2787
+      }
+    ],
+    "confidence_calibration": [
+      {
+        "conf_band": "<40",
+        "acc": 97.5,
+        "n": 14480
+      },
+      {
+        "conf_band": "40-50",
+        "acc": 97.5,
+        "n": 5612
+      },
+      {
+        "conf_band": "60-70",
+        "acc": 2.5,
+        "n": 118
+      },
+      {
+        "conf_band": "70-80",
+        "acc": 1.6,
+        "n": 6186
+      },
+      {
+        "conf_band": ">80",
+        "acc": 0.7,
+        "n": 10297
+      }
+    ],
+    "weekly_log": [
+      {
+        "week": "2026-04-10",
+        "ticker": "RELCHEMQ",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.588,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DTIL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.812,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DPABHUSHAN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -3.358,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DPSCLTD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.086,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DPWIRES",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 3.287,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DRCSYSTEMS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.731,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DREAMFOLKS",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 9.904,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DREDGECORP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.36,
+        "correct": true,
+        "confidence": 33
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DRREDDY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.169,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DSSL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.701,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DVL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 6.38,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DOMS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.847,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DWARKESH",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 4.292,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DYCL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.383,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DYNAMATECH",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 0.237,
+        "correct": false,
+        "confidence": 79
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DYNPRO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 12.083,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EASEMYTRIP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.499,
+        "correct": true,
+        "confidence": 32
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ECLERX",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": -0.627,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ECOSMOBLTY",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 3.567,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EDELWEISS",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 0.789,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DONEAR",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.089,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DOLPHIN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.224,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIDPARRY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.375,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIVGIITTS",
+        "predicted": "HOLD",
+        "actual": "BUY",
+        "return_pct": 15.487,
+        "correct": false,
+        "confidence": 34
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIAMINESQ",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.884,
+        "correct": true,
+        "confidence": 44
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIAMONDYD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -4.063,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DICIND",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.765,
+        "correct": true,
+        "confidence": 43
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIFFNKG",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.43,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIGIDRIVE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.143,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIGISPICE",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 1.625,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIGJAMLMTD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 9.859,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DISHTV",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 11.184,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIVISLAB",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.997,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DOLLAR",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 7.34,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIXON",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.676,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DLF",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.134,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DLINKINDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.587,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DMART",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 1.652,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DMCC",
+        "predicted": "HOLD",
+        "actual": "BUY",
+        "return_pct": 29.964,
+        "correct": false,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DNAMEDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.088,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DODLA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -2.408,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DOLATALGO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.94,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EICHERMOT",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -3.987,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIEL",
+        "predicted": "HOLD",
+        "actual": "BUY",
+        "return_pct": 23.384,
+        "correct": false,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CHOLAHLDNG",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -2.048,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESABINDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.939,
+        "correct": true,
+        "confidence": 43
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ENGINERSIN",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.873,
+        "correct": false,
+        "confidence": 77
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ENIL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 6.687,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ENTERO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.815,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EPACK",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.5,
+        "correct": true,
+        "confidence": 30
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EPIGRAL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 10.038,
+        "correct": true,
+        "confidence": 43
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EPL",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 0.188,
+        "correct": false,
+        "confidence": 77
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EQUITASBNK",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.389,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ERIS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.833,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESAFSFB",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.094,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ENDURANCE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.847,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESCORTS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.121,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESSARSHPNG",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -2.837,
+        "correct": true,
+        "confidence": 30
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESSENTIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.222,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ESTER",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.654,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ETERNAL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.191,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ETHOSLTD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.2,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EUREKAFORB",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.273,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EUROBOND",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.415,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ENERGYDEV",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.844,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMUDHRA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.478,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIFFL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.241,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELGIEQUIP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.549,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIHAHOTELS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.655,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIHOTEL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.913,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EIMCOELECO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -7.539,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EKC",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.829,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELDEHSG",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -4.68,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELECON",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.585,
+        "correct": true,
+        "confidence": 44
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELECTCAST",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.081,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELECTHERM",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.508,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELGIRUBCO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 17.069,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMSLIMITED",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 8.316,
+        "correct": false,
+        "confidence": 72
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "ELIN",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 2.863,
+        "correct": false,
+        "confidence": 74
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMAMILTD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.083,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMAMIPAP",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 6.069,
+        "correct": false,
+        "confidence": 72
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMAMIREAL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.03,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMCURE",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.405,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMIL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.182,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMKAY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 8.525,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EMMBI",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.748,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DIACABS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.049,
+        "correct": true,
+        "confidence": 34
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHUNINV",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 3.781,
+        "correct": false,
+        "confidence": 76
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHRUV",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.945,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CROWN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.139,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COUNCODOS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 6.237,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CPCAP",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 12.642,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CRAFTSMAN",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 0.047,
+        "correct": false,
+        "confidence": 72
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CREATIVEYE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -2.128,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CREDITACC",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.957,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CREST",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.255,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CRISIL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.642,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CROMPTON",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.577,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CSBBANK",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.815,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COROMANDEL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -3.026,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CSLFINANCE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.163,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CTE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.378,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CUB",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.979,
+        "correct": true,
+        "confidence": 34
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CUBEXTUB",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.342,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CUMMINSIND",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -2.633,
+        "correct": false,
+        "confidence": 87
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CUPID",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -0.352,
+        "correct": false,
+        "confidence": 79
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CYBERMEDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.197,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CYBERTECH",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.017,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COSMOFIRST",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.675,
+        "correct": true,
+        "confidence": 44
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CORDSCABLE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.385,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHARMAJ",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.18,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COCHINSHIP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.997,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CINELINE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.182,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CINEVISTA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.661,
+        "correct": true,
+        "confidence": 34
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CIPLA",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": -0.203,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CLEAN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.907,
+        "correct": true,
+        "confidence": 32
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CLSEL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.324,
+        "correct": true,
+        "confidence": 30
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CMSINFO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.445,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COALINDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.392,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COASTCORP",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.115,
+        "correct": false,
+        "confidence": 82
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COFFEEDAY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 7.208,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CORALFINAC",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.008,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COFORGE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.77,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COLPAL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.392,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COMPUSOFT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.507,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "COMSYN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.059,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CONCOR",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.137,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CONCORDBIO",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": -1.867,
+        "correct": false,
+        "confidence": 87
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CONFIPET",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -6.003,
+        "correct": false,
+        "confidence": 79
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CONTROLPR",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.323,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CYIENT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.78,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "CYIENTDLM",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 3.498,
+        "correct": false,
+        "confidence": 74
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DABUR",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.562,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DELTAMAGNT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.05,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DECCANCE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.687,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEEDEV",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 11.47,
+        "correct": false,
+        "confidence": 87
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEEPAKFERT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 11.324,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEEPAKNTR",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.166,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEEPINDS",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 7.187,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DELHIVERY",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -2.201,
+        "correct": false,
+        "confidence": 83
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DELPHIFX",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 8.296,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DELTACORP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.089,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEN",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.276,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DALBHARAT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.3,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DENORA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.22,
+        "correct": true,
+        "confidence": 33
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DENTA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 7.182,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEVIT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -4.49,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DEVYANI",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": -1.032,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DGCONTENT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.103,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHAMPURSUG",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.033,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHANBANK",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 1.024,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DHANUKA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.293,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DDEVPLSTIK",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 4.875,
+        "correct": false,
+        "confidence": 76
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCXINDIA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 8.49,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCW",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 8.38,
+        "correct": false,
+        "confidence": 73
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCMSRIND",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.225,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DALMIASUG",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 2.02,
+        "correct": false,
+        "confidence": 72
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DAMCAPITAL",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 8.744,
+        "correct": false,
+        "confidence": 75
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DAMODARIND",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.184,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DANGEE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -4.142,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DATAMATICS",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.47,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DATAPATTNS",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 5.554,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DAVANGERE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.27,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DBCORP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -1.339,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DBEIL",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 7.288,
+        "correct": false,
+        "confidence": 78
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DBL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.144,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DBREALTY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 9.001,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DBSTOCKBRO",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.731,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCAL",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 4.715,
+        "correct": false,
+        "confidence": 80
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCBBANK",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 0.074,
+        "correct": false,
+        "confidence": 78
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCM",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.25,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCMNVL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.923,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "DCMSHRIRAM",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 5.232,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EUROTEXIND",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.377,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EVEREADY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.513,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "EVERESTIND",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 20.555,
+        "correct": false,
+        "confidence": 78
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRINDWELL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.542,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRAPHITE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.321,
+        "correct": true,
+        "confidence": 31
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRASIM",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.044,
+        "correct": true,
+        "confidence": 43
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRAVITA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.773,
+        "correct": true,
+        "confidence": 40
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GREAVESCOT",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.344,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GREENLAM",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 0.69,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GREENPANEL",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.038,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GREENPLY",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -0.301,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GREENPOWER",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.196,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRINFRA",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 5.035,
+        "correct": false,
+        "confidence": 76
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GPTINFRA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.55,
+        "correct": true,
+        "confidence": 42
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRMOVER",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": -1.797,
+        "correct": false,
+        "confidence": 74
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GROBTEA",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 2.874,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRPLTD",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 8.686,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRSE",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.028,
+        "correct": true,
+        "confidence": 30
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRWRHITECH",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 7.624,
+        "correct": false,
+        "confidence": 71
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GSFC",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 3.157,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GSLSU",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 9.887,
+        "correct": false,
+        "confidence": 83
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GSPL",
+        "predicted": "SELL",
+        "actual": "HOLD",
+        "return_pct": 0.667,
+        "correct": false,
+        "confidence": 86
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GRANULES",
+        "predicted": "BUY",
+        "actual": "HOLD",
+        "return_pct": 3.276,
+        "correct": false,
+        "confidence": 80
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GPTHEALTH",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": -3.393,
+        "correct": true,
+        "confidence": 41
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GNFC",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 4.127,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GODREJPROP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 1.363,
+        "correct": true,
+        "confidence": 39
+      },
+      {
+        "week": "2026-04-10",
+        "ticker": "GOCLCORP",
+        "predicted": "HOLD",
+        "actual": "HOLD",
+        "return_pct": 6.437,
+        "correct": true,
+        "confidence": 41
+      }
+    ]
+  },
+  "benchmarks": {
+    "prediction_strategy": {
+      "total_return_pct": -1.52,
+      "sharpe_like": -0.343,
+      "n_trades": 16601
+    },
+    "equal_weight_benchmark": {
+      "total_return_pct": -8.99,
+      "sharpe_like": -1.059
+    },
+    "buy_and_hold_nifty": {
+      "total_return_pct": null,
+      "sharpe_like": null
+    },
+    "outperformance_vs_eq_pct": 7.47,
+    "statistical_significance": "Statistically significant (p<0.01) — model has real edge (z=8.02)"
+  }
+}

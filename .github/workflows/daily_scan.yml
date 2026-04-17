@@ -57,6 +57,12 @@ jobs:
       - name: Run AI EOD Intelligence Engine
         run: python ai_engine.py
         continue-on-error: true   # non-fatal — scanner data is already written
+        timeout-minutes: 10
+
+      - name: Run Prediction Engine
+        run: python prediction_engine.py --backtest-weeks 52
+        continue-on-error: true   # non-fatal — predictions augment but don't replace scanner data
+        timeout-minutes: 15
 
       - name: Commit and Push Results
         run: |

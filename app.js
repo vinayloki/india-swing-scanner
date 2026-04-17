@@ -15,7 +15,13 @@ let opportunitiesData = [];  // opportunities.json -> opportunities[]
 let aiPicksData    = null;   // ai_picks.json -> full AI recommendations
 let backtestData   = null;   // performance_report.json -> backtest stats
 let regimeData     = null;   // market_regime.json -> current regime
+let predictionsData   = null;  // predictions.json -> next-week signals
+let predAccuracyData  = null;  // prediction_accuracy.json -> accuracy metrics
 let currentTf      = '1M';
+
+// Prediction tab filter state
+let _predFilter = '', _predSignal = '', _predConf = 50, _predRegime = '', _predPage = 0;
+const PRED_PAGE = 80;
 
 // Full Scan table state
 let _fsSortCol = '1M', _fsSortAsc = false, _fsFilter = '', _fsTfFilter = '', _fsMcapFilter = '', _fsPage = 0;
@@ -70,7 +76,7 @@ function initTabs() {
 ═══════════════════════════════════════════════════════════════ */
 async function loadEverything() {
   try {
-    const [summRes, fullRes, fundRes, newsRes, oppRes, aiRes, btRes, regRes] = await Promise.allSettled([
+    const [summRes, fullRes, fundRes, newsRes, oppRes, aiRes, btRes, regRes, predRes, predAccRes] = await Promise.allSettled([
       fetch('scan_results/latest_scan_summary.json'),
       fetch('scan_results/full_summary.json'),
       fetch('scan_results/fundamentals.json'),
@@ -79,6 +85,8 @@ async function loadEverything() {
       fetch('scan_results/ai_picks.json'),
       fetch('scan_results/performance_report.json'),
       fetch('scan_results/market_regime.json'),
+      fetch('scan_results/predictions.json'),
+      fetch('scan_results/prediction_accuracy.json'),
     ]);
 
     // Parse summary
@@ -137,13 +145,25 @@ async function loadEverything() {
 
 
     // Parse market regime
-
     if (regRes && regRes.status === 'fulfilled' && regRes.value.ok) {
-
       regimeData = await regRes.value.json();
-
       console.log('Market regime: ' + regimeData.regime);
+    }
 
+    // Parse predictions
+    if (predRes && predRes.status === 'fulfilled' && predRes.value.ok) {
+      predictionsData = await predRes.value.json();
+      const predBadge = document.getElementById('predBadge');
+      if (predBadge && predictionsData.summary) {
+        predBadge.textContent = (predictionsData.summary.buy || 0) + ' BUY';
+      }
+      console.log('Predictions loaded: ' + (predictionsData.total_stocks || 0) + ' stocks');
+    }
+
+    // Parse prediction accuracy
+    if (predAccRes && predAccRes.status === 'fulfilled' && predAccRes.value.ok) {
+      predAccuracyData = await predAccRes.value.json();
+      console.log('Prediction accuracy loaded');
     }
   } catch (err) {
     // Network failure — show inline warning banner; AI Picks still works (static data)
@@ -184,6 +204,7 @@ function buildDashboard() {
   buildNews();
   buildAIPicksTab();
   buildBacktestTab();
+  buildPredictionTab();
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1058,4 +1079,484 @@ function buildBacktestTab() {
       .regime-pill-sm.regime-bear{background:rgba(239,68,68,0.15);color:#ef4444}
       .regime-pill-sm.regime-side{background:rgba(245,158,11,0.15);color:#f59e0b}
     </style>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PREDICTIONS TAB
+   4 sections:
+     1. Prediction Table  — next-week BUY/SELL/HOLD for all stocks
+     2. Accuracy Dashboard — precision, win rate, avg return
+     3. Confusion Matrix   — 3x3 heatmap
+     4. Weekly Log         — paginated prediction history
+═══════════════════════════════════════════════════════════════ */
+
+let _predLogPage = 0;
+const PRED_LOG_PAGE = 50;
+
+function buildPredictionTab() {
+  const el = document.getElementById('tab-predictions');
+  if (!el) return;
+
+  if (!predictionsData) {
+    el.innerHTML = `<div style="padding:60px;text-align:center;color:rgba(255,255,255,0.3)">
+      <div style="font-size:48px;margin-bottom:16px">🔮</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:8px">No Prediction Data Yet</div>
+      <div style="font-size:14px">Run <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px">python prediction_engine.py</code> to generate next-week signals.</div>
+    </div>`;
+    return;
+  }
+
+  const acc   = predAccuracyData?.accuracy  || {};
+  const bench = predAccuracyData?.benchmarks || {};
+  const preds = predictionsData.predictions  || [];
+  const sum   = predictionsData.summary      || {};
+  const regime = predictionsData.regime      || '—';
+  const method = predictionsData.method      || 'rule_based';
+  const methodLabel = method === 'random_forest' ? '🧠 Random Forest'
+                    : method === 'fallback_ai_score' ? '⚠️ Fallback (AI Score)'
+                    : '📍 Rule-Based';
+
+  el.innerHTML = `
+    <div class="pred-container">
+
+      <!-- Hero banner -->
+      <div class="pred-hero">
+        <div class="pred-hero-left">
+          <div class="pred-method-badge">${methodLabel}</div>
+          <h2 class="pred-hero-title">🔮 Next-Week Signal Engine</h2>
+          <p class="pred-hero-sub">
+            Walk-forward prediction of BUY / SELL / HOLD for the coming week,
+            calibrated to the <strong>${regime}</strong> market regime.
+            Use high-confidence BUY signals as entry candidates, not standalone buy orders.
+          </p>
+        </div>
+        <div class="pred-hero-stats">
+          <div class="pred-hero-stat" style="color:var(--green)">
+            <span class="pred-hero-val">${sum.buy || 0}</span>
+            <span class="pred-hero-lbl">🟢 BUY</span>
+          </div>
+          <div class="pred-hero-stat" style="color:var(--amber)">
+            <span class="pred-hero-val">${sum.hold || 0}</span>
+            <span class="pred-hero-lbl">🟡 HOLD</span>
+          </div>
+          <div class="pred-hero-stat" style="color:var(--red)">
+            <span class="pred-hero-val">${sum.sell || 0}</span>
+            <span class="pred-hero-lbl">🔴 SELL</span>
+          </div>
+          <div class="pred-hero-stat" style="color:var(--blue)">
+            <span class="pred-hero-val">${sum.avg_confidence || '—'}%</span>
+            <span class="pred-hero-lbl">Avg Conf</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SECTION 2: ACCURACY DASHBOARD ═══ -->
+      ${renderAccuracyDashboard(acc, bench)}
+
+      <!-- ═══ SECTION 3: CONFUSION MATRIX ═══ -->
+      ${renderConfusionMatrix(predAccuracyData?.accuracy?.confusion_matrix)}
+
+      <!-- ═══ SECTION 1: PREDICTION TABLE ═══ -->
+      <div class="pred-section">
+        <div class="pred-section-title">📊 Next-Week Predictions</div>
+        <div class="pred-controls">
+          <input class="pred-input" id="predSearch" type="text" placeholder="🔍 Search ticker..." oninput="onPredSearch()">
+          <div class="opp-chips" id="predSignalChips">
+            <button class="chip active" onclick="onPredSignal('')">ALL</button>
+            <button class="chip" onclick="onPredSignal('BUY')">🟢 BUY</button>
+            <button class="chip" onclick="onPredSignal('SELL')">🔴 SELL</button>
+            <button class="chip" onclick="onPredSignal('HOLD')">🟡 HOLD</button>
+          </div>
+          <select class="opp-select" id="predRegime" onchange="onPredFilter()">
+            <option value="">All Regimes</option>
+            <option value="Bull">Bull</option>
+            <option value="Sideways">Sideways</option>
+            <option value="Bear">Bear</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.4)">
+            <span>Confidence ≥</span>
+            <input type="range" id="predConfSlider" min="0" max="95" value="50"
+              style="width:100px;accent-color:var(--purple);cursor:pointer"
+              oninput="onPredConf(this.value)">
+            <span id="predConfVal" style="color:var(--purple);font-family:var(--mono);min-width:30px">50%</span>
+          </div>
+          <span class="opp-count" id="predCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="predTable">
+            <thead><tr>
+              <th style="text-align:left">Ticker</th>
+              <th>Signal</th>
+              <th>Confidence</th>
+              <th>Exp. Return</th>
+              <th>Price</th>
+              <th style="text-align:left;min-width:200px">Reasoning</th>
+            </tr></thead>
+            <tbody id="predTbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="predPag"></div>
+      </div>
+
+      <!-- ═══ SECTION 4: WEEKLY LOG ═══ -->
+      ${renderWeeklyLog(predAccuracyData?.accuracy?.weekly_log)}
+
+    </div>
+
+    <style>
+      .pred-container{padding:20px 0;max-width:1400px;margin:0 auto}
+      .pred-hero{display:flex;gap:24px;align-items:flex-start;background:linear-gradient(135deg,rgba(167,139,250,0.07),rgba(61,142,244,0.05));border:1px solid rgba(167,139,250,0.15);border-radius:16px;padding:28px 32px;margin-bottom:24px;flex-wrap:wrap}
+      .pred-hero-left{flex:1;min-width:240px}
+      .pred-method-badge{display:inline-block;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);color:var(--purple);font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:10px;letter-spacing:.04em}
+      .pred-hero-title{font-family:var(--heading);font-size:22px;font-weight:800;color:#fff;margin-bottom:8px}
+      .pred-hero-sub{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;max-width:520px}
+      .pred-hero-stats{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+      .pred-hero-stat{display:flex;flex-direction:column;align-items:center;min-width:64px}
+      .pred-hero-val{font-size:26px;font-weight:800;font-family:var(--mono)}
+      .pred-hero-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.35);margin-top:2px}
+      .pred-section{margin-bottom:28px}
+      .pred-section-title{font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+      .pred-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+      .pred-input{padding:7px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:#fff;font-size:12px;font-family:var(--font);outline:none;width:160px}
+      .pred-input:focus{border-color:var(--purple)}
+      /* Accuracy dashboard */
+      .pred-acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+      .pred-acc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;transition:border-color .2s}
+      .pred-acc-card:hover{border-color:rgba(167,139,250,0.3)}
+      .pred-acc-val{font-size:22px;font-weight:800;font-family:var(--mono);margin-bottom:4px}
+      .pred-acc-lbl{font-size:10px;color:rgba(255,255,255,0.35)}
+      .pred-bench-banner{background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.15);border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+      .pred-bench-item{display:flex;flex-direction:column;gap:2px}
+      .pred-bench-label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em}
+      .pred-bench-val{font-size:14px;font-weight:700;font-family:var(--mono)}
+      /* Confusion matrix */
+      .pred-cm-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;overflow-x:auto}
+      .pred-cm-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px}
+      .pred-cm-grid{display:grid;grid-template-columns:80px repeat(3,1fr);gap:4px;max-width:500px}
+      .pred-cm-head{font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-align:center;padding:6px}
+      .pred-cm-row-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);display:flex;align-items:center;padding:6px 8px}
+      .pred-cm-cell{border-radius:6px;padding:10px 6px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:700}
+      .pred-cm-cell.diag{background:rgba(63,185,80,0.15);color:var(--green)}
+      .pred-cm-cell.off{background:rgba(248,81,73,0.08);color:rgba(248,81,73,0.7);font-weight:500}
+      .pred-cm-cell.zero{background:transparent;color:rgba(255,255,255,0.1)}
+      /* Timeline sparkline */
+      .pred-timeline-wrap{margin-bottom:20px}
+      /* Prediction signal badge */
+      .pred-sig-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:5px;font-family:var(--mono)}
+      .pred-sig-badge.BUY{background:rgba(63,185,80,0.15);color:var(--green);border:1px solid rgba(63,185,80,0.3)}
+      .pred-sig-badge.SELL{background:rgba(248,81,73,0.15);color:var(--red);border:1px solid rgba(248,81,73,0.3)}
+      .pred-sig-badge.HOLD{background:rgba(245,166,35,0.12);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
+      /* Expected return heatmap */
+      .pred-ret-pos{color:var(--green);font-family:var(--mono);font-weight:600}
+      .pred-ret-neg{color:var(--red);font-family:var(--mono);font-weight:600}
+      .pred-ret-neu{color:rgba(255,255,255,0.3);font-family:var(--mono)}
+      /* Reasoning tooltip */
+      .pred-reason{font-size:11px;color:rgba(255,255,255,0.45);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:help}
+      /* Weekly log */
+      .pred-log-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+      .pred-correct{color:var(--green)}
+      .pred-wrong{color:var(--red)}
+      /* Accuracy timeline chart */
+      .pred-timeline-svg{width:100%;height:60px;background:rgba(255,255,255,0.02);border-radius:6px;overflow:visible}
+      @media(max-width:768px){
+        .pred-hero{flex-direction:column;padding:20px}
+        .pred-cm-grid{max-width:100%}
+      }
+    </style>`;
+
+  // Populate prediction table
+  window._predData = preds;
+  renderPredictionTable();
+
+  // Render accuracy timeline sparkline
+  renderAccuracyTimeline();
+}
+
+// ── Accuracy Dashboard ────────────────────────────────────────────────────────
+function renderAccuracyDashboard(acc, bench) {
+  if (!acc || !acc.overall_accuracy_pct) {
+    return `<div class="pred-section"><div class="pred-section-title">🎯 Accuracy Dashboard</div>
+      <div style="padding:24px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px">
+        Run walk-forward backtest to see accuracy metrics here.
+      </div></div>`;
+  }
+
+  const p = acc.precision || {};
+  const wr = acc.win_rate || {};
+  const ar = acc.avg_return_per_prediction || {};
+  const fmt = v => v != null ? v + '%' : '—';
+  const fmtR = v => v != null ? (v >= 0 ? '+' : '') + v + '%' : '—';
+  const col = v => v == null ? 'var(--blue)' : v >= 60 ? 'var(--green)' : v >= 50 ? 'var(--amber)' : 'var(--red)';
+
+  const card = (val, lbl, c) => `<div class="pred-acc-card">
+    <div class="pred-acc-val" style="color:${c}">${val}</div>
+    <div class="pred-acc-lbl">${lbl}</div>
+  </div>`;
+
+  // Benchmark banner
+  let benchHtml = '';
+  if (bench && bench.prediction_strategy) {
+    const ps  = bench.prediction_strategy;
+    const eq  = bench.equal_weight_benchmark || {};
+    const bh  = bench.buy_and_hold_nifty || {};
+    const out = bench.outperformance_vs_eq_pct;
+    const sig = bench.statistical_significance || '';
+    benchHtml = `<div class="pred-bench-banner">
+      <div class="pred-bench-item">
+        <div class="pred-bench-label">Strategy Return</div>
+        <div class="pred-bench-val" style="color:${(ps.total_return_pct||0)>=0?'var(--green)':'var(--red)'}">
+          ${fmtR(ps.total_return_pct)}</div>
+      </div>
+      <div class="pred-bench-item">
+        <div class="pred-bench-label">vs Equal Weight</div>
+        <div class="pred-bench-val" style="color:${(out||0)>=0?'var(--green)':'var(--red)'}">
+          ${out!=null?(out>=0?'+':'')+out+'%':'—'}</div>
+      </div>
+      ${bh.total_return_pct!=null?`<div class="pred-bench-item">
+        <div class="pred-bench-label">vs NIFTY Buy &amp; Hold</div>
+        <div class="pred-bench-val">${fmtR(bh.total_return_pct)}</div>
+      </div>`:''}
+      <div class="pred-bench-item" style="margin-left:auto;max-width:240px">
+        <div class="pred-bench-label">Significance</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5">${sig}</div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="pred-section">
+    <div class="pred-section-title">🎯 Historical Accuracy Dashboard
+      <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3);margin-left:8px">
+        ${predAccuracyData?.backtest_weeks || '?'} weeks · ${acc.total_predictions?.toLocaleString() || '?'} predictions
+      </span>
+    </div>
+    ${benchHtml}
+    <div class="pred-acc-grid">
+      ${card(fmt(acc.overall_accuracy_pct),  'Overall Accuracy',   col(acc.overall_accuracy_pct))}
+      ${card(fmt(p.buy_pct),  'BUY Precision',   col(p.buy_pct))}
+      ${card(fmt(p.sell_pct), 'SELL Precision',  col(p.sell_pct))}
+      ${card(fmt(p.hold_pct), 'HOLD Precision',  col(p.hold_pct))}
+      ${card(fmt(wr.buy_pct),    'BUY Win Rate',  col(wr.buy_pct))}
+      ${card(fmt(wr.sell_pct),   'SELL Win Rate', col(wr.sell_pct))}
+      ${card(fmtR(ar.buy_pct),   'Avg BUY Return',  (ar.buy_pct||0)>=0?'var(--green)':'var(--red)')}
+      ${card(fmtR(ar.sell_pct),  'Avg SELL Return', (ar.sell_pct||0)>=0?'var(--green)':'var(--red)')}
+    </div>
+    <div class="pred-timeline-wrap" id="predTimelineWrap"></div>
+  </div>`;
+}
+
+// ── Confusion Matrix ──────────────────────────────────────────────────────────
+function renderConfusionMatrix(cm) {
+  if (!cm) return '';
+  const LABELS = ['BUY', 'SELL', 'HOLD'];
+  const labelColors = { BUY: 'var(--green)', SELL: 'var(--red)', HOLD: 'var(--amber)' };
+
+  // Row totals for percentage labels
+  const rowTotals = {};
+  LABELS.forEach(pred => {
+    rowTotals[pred] = LABELS.reduce((s, act) => s + (cm[pred]?.[act] || 0), 0);
+  });
+
+  let cells = '';
+  // Header row
+  cells += `<div class="pred-cm-head" style="grid-column:1"></div>`;
+  LABELS.forEach(a => {
+    cells += `<div class="pred-cm-head">Actual<br><span style="color:${labelColors[a]};font-weight:700">${a}</span></div>`;
+  });
+  // Data rows
+  LABELS.forEach(pred => {
+    cells += `<div class="pred-cm-row-label">Pred<br><span style="color:${labelColors[pred]};font-weight:700">${pred}</span></div>`;
+    const rowTotal = rowTotals[pred] || 1;
+    LABELS.forEach(act => {
+      const count = cm[pred]?.[act] || 0;
+      const pct   = Math.round(count / rowTotal * 100);
+      const cls   = count === 0 ? 'zero' : pred === act ? 'diag' : 'off';
+      const opacity = Math.max(0.3, pct / 100);
+      cells += `<div class="pred-cm-cell ${cls}" title="${pred} predicted, ${act} actual: ${count} (${pct}%)">
+        ${count}<span style="font-size:9px;font-weight:400;opacity:.6;margin-left:2px">${pct}%</span>
+      </div>`;
+    });
+  });
+
+  return `<div class="pred-section">
+    <div class="pred-section-title">📊 Confusion Matrix <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3);margin-left:8px">Predicted → Actual outcomes</span></div>
+    <div class="pred-cm-wrap">
+      <div class="pred-cm-title">ROWS = PREDICTED · COLUMNS = ACTUAL · Diagonal (green) = Correct</div>
+      <div class="pred-cm-grid">${cells}</div>
+    </div>
+  </div>`;
+}
+
+// ── Prediction Table ──────────────────────────────────────────────────────────
+function renderPredictionTable() {
+  let data = window._predData || [];
+
+  if (_predFilter)  data = data.filter(p => p.ticker?.includes(_predFilter));
+  if (_predSignal)  data = data.filter(p => p.prediction === _predSignal);
+  if (_predConf > 0) data = data.filter(p => (p.confidence || 0) >= _predConf);
+
+  const total = data.length;
+  const countEl = document.getElementById('predCount');
+  if (countEl) countEl.textContent = total.toLocaleString() + ' stocks';
+
+  const page = data.slice(_predPage * PRED_PAGE, (_predPage + 1) * PRED_PAGE);
+
+  const tbody = document.getElementById('predTbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = page.map(p => {
+    const ret = p.expected_return_pct;
+    const retCls = ret > 1 ? 'pred-ret-pos' : ret < -1 ? 'pred-ret-neg' : 'pred-ret-neu';
+    const retStr = ret != null ? (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%' : '—';
+    const narrative = p.reasoning?.narrative || '';
+    const confColor = (p.confidence || 0) >= 70 ? 'var(--green)' : (p.confidence || 0) >= 50 ? 'var(--amber)' : 'var(--red)';
+    const confBarW  = (p.confidence || 0) + '%';
+    return `<tr>
+      <td class="td-ticker"><a href="https://in.tradingview.com/chart/?symbol=NSE:${p.ticker}" target="_blank" rel="noopener">${p.ticker}</a></td>
+      <td style="text-align:center"><span class="pred-sig-badge ${p.prediction}">${p.prediction}</span></td>
+      <td style="text-align:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${confColor}">${p.confidence || '—'}%</span>
+          <div style="width:60px;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden">
+            <div style="width:${confBarW};height:100%;background:${confColor};border-radius:2px;transition:width .4s"></div>
+          </div>
+        </div>
+      </td>
+      <td style="text-align:center"><span class="${retCls}">${retStr}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.5);text-align:right">${p.price ? '₹' + p.price.toFixed(2) : '—'}</td>
+      <td><div class="pred-reason" title="${narrative.replace(/"/g, '&quot;')}">${narrative || '—'}</div></td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const totalPages = Math.ceil(total / PRED_PAGE);
+  const pag = document.getElementById('predPag');
+  if (!pag) return;
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+  const pages = [];
+  pages.push(`<button class="pg-btn" onclick="predGo(Math.max(0,${_predPage}-1))">← Prev</button>`);
+  const s = Math.max(0, _predPage - 2), e = Math.min(totalPages, _predPage + 5);
+  if (s > 0) pages.push(`<button class="pg-btn" onclick="predGo(0)">1</button><span style="color:rgba(255,255,255,0.2)">…</span>`);
+  for (let i = s; i < e; i++) pages.push(`<button class="pg-btn ${i === _predPage ? 'active' : ''}" onclick="predGo(${i})">${i + 1}</button>`);
+  if (e < totalPages) pages.push(`<span style="color:rgba(255,255,255,0.2)">…</span><button class="pg-btn" onclick="predGo(${totalPages - 1})">${totalPages}</button>`);
+  pages.push(`<button class="pg-btn" onclick="predGo(Math.min(${totalPages - 1},${_predPage}+1))">Next →</button>`);
+  pag.innerHTML = pages.join('');
+}
+
+function predGo(p) { _predPage = p; renderPredictionTable(); window.scrollTo({ top: 400, behavior: 'smooth' }); }
+function onPredSearch() { _predFilter = document.getElementById('predSearch').value.toUpperCase().trim(); _predPage = 0; renderPredictionTable(); }
+function onPredFilter() { _predRegime = document.getElementById('predRegime').value; _predPage = 0; renderPredictionTable(); }
+function onPredConf(v) {
+  _predConf = parseInt(v); _predPage = 0;
+  const el = document.getElementById('predConfVal');
+  if (el) el.textContent = v + '%';
+  renderPredictionTable();
+}
+function onPredSignal(sig) {
+  _predSignal = sig; _predPage = 0;
+  document.querySelectorAll('#predSignalChips .chip').forEach(c => c.classList.remove('active'));
+  const active = [...document.querySelectorAll('#predSignalChips .chip')].find(c => c.textContent.trim().endsWith(sig) || (sig === '' && c.textContent.trim() === 'ALL'));
+  if (active) active.classList.add('active');
+  renderPredictionTable();
+}
+
+// ── Weekly Log ────────────────────────────────────────────────────────────────
+function renderWeeklyLog(logEntries) {
+  if (!logEntries || !logEntries.length) return '';
+
+  const page = logEntries.slice(_predLogPage * PRED_LOG_PAGE, (_predLogPage + 1) * PRED_LOG_PAGE);
+  const rows = page.map(r => {
+    const retStr = r.return_pct != null ? (r.return_pct >= 0 ? '+' : '') + r.return_pct.toFixed(2) + '%' : '—';
+    const retCls = (r.return_pct || 0) >= 0 ? 'pos' : 'neg';
+    return `<tr>
+      <td class="td-date">${r.week}</td>
+      <td class="td-ticker"><a href="https://in.tradingview.com/chart/?symbol=NSE:${r.ticker}" target="_blank">${r.ticker}</a></td>
+      <td style="text-align:center"><span class="pred-sig-badge ${r.predicted}">${r.predicted}</span></td>
+      <td style="text-align:center"><span class="pred-sig-badge ${r.actual}">${r.actual}</span></td>
+      <td class="${retCls}" style="text-align:right;font-family:var(--mono);font-size:11px">${retStr}</td>
+      <td style="text-align:center;font-size:16px">${r.correct ? '✅' : '❌'}</td>
+      <td style="text-align:center;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3)">${r.confidence || '—'}%</td>
+    </tr>`;
+  }).join('');
+
+  const totalPages = Math.ceil(logEntries.length / PRED_LOG_PAGE);
+  let pag = '';
+  if (totalPages > 1) {
+    for (let i = 0; i < totalPages; i++) pag += `<button class="pg-btn ${i === _predLogPage ? 'active' : ''}" onclick="predLogGo(${i})">${i + 1}</button>`;
+  }
+
+  return `<div class="pred-section">
+    <div class="pred-section-title">📆 Historical Prediction Log
+      <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3);margin-left:8px">
+        ${logEntries.length.toLocaleString()} entries (latest first)
+      </span>
+    </div>
+    <div class="pred-log-wrap">
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th style="text-align:left">Week</th>
+          <th style="text-align:left">Ticker</th>
+          <th>Predicted</th>
+          <th>Actual</th>
+          <th>Return</th>
+          <th>Result</th>
+          <th>Conf</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+      </div>
+      <div class="pagination" style="margin-top:12px">${pag}</div>
+    </div>
+  </div>`;
+}
+
+function predLogGo(p) {
+  _predLogPage = p;
+  // Re-render the full tab (simplest approach since log is static per load)
+  buildPredictionTab();
+}
+
+// ── Accuracy Timeline Sparkline ───────────────────────────────────────────────
+function renderAccuracyTimeline() {
+  const wrap = document.getElementById('predTimelineWrap');
+  if (!wrap) return;
+  const timeline = predAccuracyData?.accuracy?.accuracy_timeline;
+  if (!timeline || timeline.length < 2) { wrap.innerHTML = ''; return; }
+
+  const accs = timeline.map(t => t.accuracy_pct);
+  const maxA = Math.max(...accs, 70);
+  const minA = Math.min(...accs, 40);
+  const range = maxA - minA || 1;
+  const w = 600, h = 60;
+
+  const pts = timeline.map((t, i) => {
+    const x = (i / (timeline.length - 1)) * w;
+    const y = h - ((t.accuracy_pct - minA) / range) * h;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  // 50% reference line
+  const y50 = h - ((50 - minA) / range) * h;
+
+  const labels = timeline.filter((_, i) => i % Math.max(1, Math.floor(timeline.length / 6)) === 0)
+    .map(t => `<text x="${((timeline.indexOf(t)) / (timeline.length - 1) * w).toFixed(0)}" y="${h + 14}" font-size="9" fill="rgba(255,255,255,0.25)" text-anchor="middle">${t.month}</text>`).join('');
+
+  wrap.innerHTML = `
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:6px">
+      Monthly Accuracy % (${timeline.length} months)
+    </div>
+    <svg viewBox="0 0 ${w} ${h + 20}" class="pred-timeline-svg">
+      <!-- 50% baseline -->
+      <line x1="0" y1="${y50.toFixed(1)}" x2="${w}" y2="${y50.toFixed(1)}"
+        stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="4" y="${(y50 - 3).toFixed(1)}" font-size="8" fill="rgba(255,255,255,0.2)">50%</text>
+      <!-- Accuracy line -->
+      <polyline points="${pts}" fill="none" stroke="var(--purple)" stroke-width="2"/>
+      <!-- Dots -->
+      ${timeline.map((t, i) => {
+        const x = (i / (timeline.length - 1)) * w;
+        const y = h - ((t.accuracy_pct - minA) / range) * h;
+        const c = t.accuracy_pct >= 55 ? 'var(--green)' : t.accuracy_pct >= 45 ? 'var(--amber)' : 'var(--red)';
+        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${c}">
+          <title>${t.month}: ${t.accuracy_pct}% (${t.trades} trades)</title></circle>`;
+      }).join('')}
+      ${labels}
+    </svg>`;
 }
