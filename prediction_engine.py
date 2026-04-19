@@ -217,12 +217,13 @@ def main():
 
     prediction_records = []
     for ticker, row in preds_df.iterrows():
+        raw_price = close_prices.get(ticker, 0)
         rec = {
             "ticker":              ticker,
             "prediction":          str(row["prediction"]),
             "confidence":          int(row["confidence"]),
-            "expected_return_pct": float(row["expected_return_pct"]),
-            "price":               round(float(close_prices.get(ticker, 0)), 2),
+            "expected_return_pct": _safe_float(row["expected_return_pct"]),
+            "price":               _safe_float(raw_price, default=0, ndigits=2),
             "reasoning":           row["reasoning"],
         }
         prediction_records.append(rec)
@@ -255,7 +256,7 @@ def main():
     }
 
     with open(PREDICTIONS_OUT, "w", encoding="utf-8") as fh:
-        json.dump(predictions_output, fh, separators=(",", ":"), ensure_ascii=False)
+        json.dump(predictions_output, fh, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
     log.info(
         f"[OK] predictions.json → {PREDICTIONS_OUT} "
         f"({PREDICTIONS_OUT.stat().st_size // 1024} KB)"
@@ -303,7 +304,7 @@ def main():
     }
 
     with open(PRED_ACCURACY_OUT, "w", encoding="utf-8") as fh:
-        json.dump(accuracy_output, fh, indent=2, ensure_ascii=False, default=str)
+        json.dump(accuracy_output, fh, indent=2, ensure_ascii=False, default=str, allow_nan=False)
     log.info(
         f"[OK] prediction_accuracy.json → {PRED_ACCURACY_OUT} "
         f"({PRED_ACCURACY_OUT.stat().st_size // 1024} KB)"
@@ -313,6 +314,18 @@ def main():
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _safe_float(value, default=None, ndigits: int | None = None):
+    """Convert a value to a JSON-safe float, replacing NaN/Inf with `default`."""
+    try:
+        f = float(value)
+        if not (f == f) or f in (float("inf"), float("-inf")):
+            # NaN check: NaN != NaN is True
+            return default
+        return round(f, ndigits) if ndigits is not None else f
+    except (TypeError, ValueError):
+        return default
+
 
 def _load_last_accuracy() -> float | None:
     if PRED_ACCURACY_OUT.exists():
