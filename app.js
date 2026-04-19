@@ -76,17 +76,18 @@ function initTabs() {
 ═══════════════════════════════════════════════════════════════ */
 async function loadEverything() {
   try {
+    const cb = '?cb=' + new Date().getTime();
     const [summRes, fullRes, fundRes, newsRes, oppRes, aiRes, btRes, regRes, predRes, predAccRes] = await Promise.allSettled([
-      fetch('scan_results/latest_scan_summary.json'),
-      fetch('scan_results/full_summary.json'),
-      fetch('scan_results/fundamentals.json'),
-      fetch('scan_results/daily_news.json'),
-      fetch('scan_results/opportunities.json'),
-      fetch('scan_results/ai_picks.json'),
-      fetch('scan_results/performance_report.json'),
-      fetch('scan_results/market_regime.json'),
-      fetch('scan_results/predictions.json'),
-      fetch('scan_results/prediction_accuracy.json'),
+      fetch('scan_results/latest_scan_summary.json' + cb),
+      fetch('scan_results/full_summary.json' + cb),
+      fetch('scan_results/fundamentals.json' + cb),
+      fetch('scan_results/daily_news.json' + cb),
+      fetch('scan_results/opportunities.json' + cb),
+      fetch('scan_results/ai_picks.json' + cb),
+      fetch('scan_results/performance_report.json' + cb),
+      fetch('scan_results/market_regime.json' + cb),
+      fetch('scan_results/predictions.json' + cb),
+      fetch('scan_results/prediction_accuracy.json' + cb),
     ]);
 
     // Parse summary
