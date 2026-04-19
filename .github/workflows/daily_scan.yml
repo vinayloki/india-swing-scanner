@@ -60,7 +60,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Run Prediction Engine
-        run: python prediction_engine.py --backtest-weeks 52
+        run: python prediction_engine.py --backtest-weeks 12
         continue-on-error: true   # non-fatal — predictions augment but don't replace scanner data
         timeout-minutes: 15
 
