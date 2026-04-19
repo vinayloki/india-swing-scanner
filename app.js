@@ -1389,9 +1389,12 @@ function buildPredictionTab() {
               <th style="text-align:left">Ticker</th>
               <th>Signal</th>
               <th>Confidence</th>
-              <th>Exp. Return</th>
-              <th>Price</th>
-              <th style="text-align:left;min-width:200px">Reasoning</th>
+              <th>Entry ₹</th>
+              <th title="Stop-Loss price — set your stop here to limit loss">SL ₹ 🛑</th>
+              <th title="Target price — your profit exit level">Target ₹ ✅</th>
+              <th title="Risk/Reward Ratio: 3.0+ is professional grade">R:R</th>
+              <th title="Expected return if the prediction is correct">Exp. Return</th>
+              <th style="text-align:left;min-width:180px">Why</th>
             </tr></thead>
             <tbody id="predTbody"></tbody>
           </table>
@@ -1611,6 +1614,19 @@ function renderPredictionTable() {
     const narrative = p.reasoning?.narrative || '';
     const confColor = (p.confidence || 0) >= 70 ? 'var(--green)' : (p.confidence || 0) >= 50 ? 'var(--amber)' : 'var(--red)';
     const confBarW  = (p.confidence || 0) + '%';
+
+    // TP/SL/R:R columns
+    const priceFmt = v => v != null && v > 0 ? '₹' + Number(v).toLocaleString('en-IN', {maximumFractionDigits:2}) : '—';
+    const rrVal    = p.rr;
+    const rrStr    = rrVal != null ? '1:' + rrVal : '—';
+    const rrColor  = rrVal >= 3 ? 'var(--green)' : rrVal >= 2 ? 'var(--amber)' : 'var(--red)';
+
+    // Signal badges (BB Squeeze, Vol Contraction)
+    const tags = [];
+    if (p.bb_squeeze === 1) tags.push('<span title="Bollinger Band Squeeze — volatility compressed, breakout likely" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(167,139,250,0.15);color:var(--purple);font-weight:700">🗜 SQUEEZE</span>');
+    if (p.vol_contraction === 1) tags.push('<span title="Volume Contraction — quiet accumulation pattern" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(61,142,244,0.12);color:var(--blue);font-weight:700">📉 QUIET</span>');
+    if (p.sector_rs_pct != null && p.sector_rs_pct > 5) tags.push('<span title="Outperforming broader market by ' + p.sector_rs_pct.toFixed(1) + '%" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,245,168,0.1);color:var(--primary);font-weight:700">🏆 LEADER</span>');
+
     return `<tr>
       <td class="td-ticker"><a href="https://in.tradingview.com/chart/?symbol=NSE:${p.ticker}" target="_blank" rel="noopener">${p.ticker}</a></td>
       <td style="text-align:center"><span class="pred-sig-badge ${p.prediction}">${p.prediction}</span></td>
@@ -1622,9 +1638,19 @@ function renderPredictionTable() {
           </div>
         </div>
       </td>
+      <td style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.6);text-align:right">${priceFmt(p.price)}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--red);text-align:right;font-weight:600">${priceFmt(p.sl_price)}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--green);text-align:right;font-weight:600">${priceFmt(p.tp_price)}</td>
+      <td style="text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:${p.rr ? rrColor : 'rgba(255,255,255,0.2)'}">
+        ${rrStr}
+      </td>
       <td style="text-align:center"><span class="${retCls}">${retStr}</span></td>
-      <td style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.5);text-align:right">${p.price ? '₹' + p.price.toFixed(2) : '—'}</td>
-      <td><div class="pred-reason" title="${narrative.replace(/"/g, '&quot;')}">${narrative || '—'}</div></td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div class="pred-reason" title="${narrative.replace(/"/g, '&quot;')}">${narrative || '—'}</div>
+          ${tags.length ? '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">' + tags.join('') + '</div>' : ''}
+        </div>
+      </td>
     </tr>`;
   }).join('');
 

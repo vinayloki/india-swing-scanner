@@ -153,6 +153,16 @@ def _rule_predict_row(row: pd.Series, regime: str = "Bull") -> dict:
         buy_score += 8
     if macd > 0:
         buy_score += 7
+    # P3 Professional features
+    bb_squeeze  = int(row.get("bb_squeeze", 0))
+    vol_contr   = int(row.get("vol_contraction", 0))
+    sector_rs   = float(row.get("sector_rs_pct", 0))
+    if bb_squeeze == 1 and mom > 10:
+        buy_score += 15  # coiled-spring: volatility compressed + momentum rising
+    if sector_rs > 5:
+        buy_score += 10  # stock outperforming broader market — sector leader
+    if vol_contr == 1 and buy_score > 40:
+        buy_score += 5   # quiet accumulation in a bullish setup = extra conviction
 
     # ── SELL signals ──────────────────────────────────────────────────────
     sell_score = 0.0

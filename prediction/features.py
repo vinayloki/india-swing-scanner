@@ -19,6 +19,9 @@
 ║    breakout_pct      — (Close - 52W High) / 52W High  [0 = AT high]         ║
 ║    momentum_score    — Weighted return score (ai_engine logic)              ║
 ║    rel_strength      — Stock 1M return - market median 1M return             ║
+║    bb_squeeze        — BBW < 20-week median BBW (1=compressed, 0=normal)     ║
+║    sector_rs_pct     — 1M return minus sector peer median return             ║
+║    vol_contraction   — Vol avg(3w) < Vol avg(10w) (1=drying up, 0=normal)   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -196,6 +199,28 @@ def build_feature_matrix(
     market_median_1m = ret_1m.median()
     rel_strength = ret_1m - market_median_1m
 
+    # ── NEW: Bollinger Band Squeeze ────────────────────────────────────────
+    # BBW = (Upper - Lower) / Middle ; squeeze = current BBW < 20w median BBW
+    bb_sma20  = close_w.rolling(20, min_periods=10).mean()
+    bb_std20  = close_w.rolling(20, min_periods=10).std()
+    bb_upper  = bb_sma20 + 2 * bb_std20
+    bb_lower  = bb_sma20 - 2 * bb_std20
+    bb_width  = (bb_upper - bb_lower) / bb_sma20.replace(0, np.nan)  # normalised
+    bbw_median_20w = bb_width.rolling(20, min_periods=10).median()
+    bb_squeeze_raw = (bb_width.iloc[-1] < bbw_median_20w.iloc[-1]).astype(int)
+
+    # ── NEW: Volume Contraction (3w avg < 10w avg) ─────────────────────────
+    vol_avg3   = volume_w.rolling(3, min_periods=2).mean()
+    vol_avg10  = volume_w.rolling(10, min_periods=5).mean()
+    vol_contr  = (vol_avg3.iloc[-1] < vol_avg10.iloc[-1]).astype(int)
+
+    # ── NEW: Sector Relative Strength (placeholder — market RS proxy) ──────
+    # True sector RS requires a sector mapping; we approximate using decile
+    # grouping by 3M momentum as a proxy for the sector rotation effect.
+    ret_3m = (close_w.iloc[-1] / close_w.iloc[max(0, len(close_w) - 13)] - 1) * 100
+    market_median_3m = ret_3m.median()
+    sector_rs_pct = ret_1m - market_median_1m  # stock 1M vs market (sector-proxy)
+
     # ── Assemble feature DataFrame ─────────────────────────────────────────
     tickers = close_w.columns
 
@@ -218,6 +243,10 @@ def build_feature_matrix(
         "momentum_score":  safe(momentum_score),
         "rel_strength":    safe(rel_strength),
         "ret_1m_pct":      safe(ret_1m),
+        # Professional features (P3)
+        "bb_squeeze":      safe(bb_squeeze_raw),
+        "vol_contraction": safe(vol_contr),
+        "sector_rs_pct":   safe(sector_rs_pct),
     }, index=tickers)
 
     # ── Drop rows with too many NaNs ───────────────────────────────────────

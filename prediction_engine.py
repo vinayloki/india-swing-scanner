@@ -218,15 +218,51 @@ def main():
     prediction_records = []
     for ticker, row in preds_df.iterrows():
         raw_price = close_prices.get(ticker, 0)
+        price     = _safe_float(raw_price, default=0, ndigits=2)
+        pred      = str(row["prediction"])
+        atr_pct   = _safe_float(row.get("atr_pct", 3.0) if "atr_pct" in preds_df.columns
+                                 else features_df.loc[ticker, "atr_pct"]
+                                 if ticker in features_df.index else 3.0, default=3.0)
+
+        # ── TP / SL / R:R calculation ────────────────────────────────────────
+        sl_pct, tp_pct, sl_price, tp_price, rr = None, None, None, None, None
+        if pred == "BUY" and price and price > 0:
+            sl_pct   = round(atr_pct * 1.5, 2)                              # SL = 1.5× ATR
+            tp_pct   = round(sl_pct * 3.0, 2)                               # TP = 3× SL → R:R 1:3
+            rr       = round(tp_pct / sl_pct, 1) if sl_pct else 3.0
+            sl_price = round(price * (1 - sl_pct / 100), 2)
+            tp_price = round(price * (1 + tp_pct / 100), 2)
+        elif pred == "SELL" and price and price > 0:
+            sl_pct   = round(atr_pct * 1.5, 2)
+            tp_pct   = round(sl_pct * 2.0, 2)
+            rr       = 2.0
+
         rec = {
             "ticker":              ticker,
-            "prediction":          str(row["prediction"]),
+            "prediction":          pred,
             "confidence":          int(row["confidence"]),
             "expected_return_pct": _safe_float(row["expected_return_pct"]),
-            "price":               _safe_float(raw_price, default=0, ndigits=2),
+            "price":               price,
+            # Risk management fields (P3)
+            "sl_pct":              sl_pct,
+            "tp_pct":              tp_pct,
+            "sl_price":            sl_price,
+            "tp_price":            tp_price,
+            "rr":                  rr,
+            # Professional signal features (P3)
+            "bb_squeeze":     int(features_df.loc[ticker, "bb_squeeze"])
+                              if ticker in features_df.index and "bb_squeeze" in features_df.columns
+                              else None,
+            "vol_contraction": int(features_df.loc[ticker, "vol_contraction"])
+                               if ticker in features_df.index and "vol_contraction" in features_df.columns
+                               else None,
+            "sector_rs_pct":  _safe_float(features_df.loc[ticker, "sector_rs_pct"], ndigits=2)
+                               if ticker in features_df.index and "sector_rs_pct" in features_df.columns
+                               else None,
             "reasoning":           row["reasoning"],
         }
         prediction_records.append(rec)
+
 
     # Sort: BUY by confidence desc, then SELL, then HOLD
     order = {"BUY": 0, "SELL": 1, "HOLD": 2}
