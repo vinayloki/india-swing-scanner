@@ -1173,116 +1173,220 @@
     <!-- TAB: ABOUT & GUIDE -->
     <div class="tab-panel" id="tab-about">
       <div class="section-head">
-        <h2>📖 Learn & Guide</h2>
-        <span class="sh-sub">Everything you need to know about MarketPulse India</span>
+        <h2>&#128214; Learn &amp; Guide</h2>
+        <span class="sh-sub">How every tab works &middot; What every number means &middot; How to use it to trade</span>
       </div>
       <div style="background:rgba(16,245,168,0.04);border:1px solid rgba(16,245,168,0.1);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:12.5px;color:rgba(255,255,255,0.5);line-height:1.7">
-        <strong style="color:var(--primary)">💡 What to expect here:</strong> This section explains how every tab works, what each data point means, and where the data comes from. <strong style="color:rgba(255,255,255,0.7)">Read this first if you're new</strong> — it covers the scanning schedule, data sources, auto-tags, and important limitations.
+        <strong style="color:var(--primary)">&#128161; New here?</strong> Start with <em>&ldquo;What is MarketPulse&rdquo;</em> then jump to the section for whichever tab confuses you. Everything is in plain English &mdash; no finance jargon required.
       </div>
 
       <div class="about-grid">
 
         <!-- WHAT IS THIS -->
         <div class="info-card">
-          <h3><span class="ic-icon">🎯</span> What is SwingScan India?</h3>
-          <p>SwingScan India is a <strong>free, automated stock scanner</strong> that tracks the performance of <strong>2,200+ NSE-listed stocks</strong> across 6 timeframes (1 week to 12 months). It identifies the strongest momentum movers and enriches them with fundamental data like P/E, Market Cap, Sector, and 52-week range.</p>
-          <p style="margin-top:8px;">Built for swing traders and investors who want a quick, data-driven view of which NSE stocks are moving — and whether they're backed by solid fundamentals.</p>
+          <h3><span class="ic-icon">&#127919;</span> What is MarketPulse India?</h3>
+          <p>A <strong>free, fully-automated NSE stock intelligence dashboard</strong> that tracks 2,200+ NSE stocks across 6 timeframes, identifies high-conviction trade setups, forecasts next-week direction, and shows which sectors lead or lag &mdash; updated every weekday at 4:00 PM IST.</p>
+          <ul style="margin-top:10px">
+            <li>&#9989; 2,200+ NSE stocks scanned daily</li>
+            <li>&#9989; 6-timeframe performance (1W &rarr; 12M)</li>
+            <li>&#9989; Scored trade setups (Breakout &middot; Volume &middot; EMA)</li>
+            <li>&#9989; Next-week BUY/SELL/HOLD forecast + SL + Target</li>
+            <li>&#9989; Stock states: SQUEEZE &middot; QUIET &middot; LEADER</li>
+            <li>&#9989; Daily sector rotation heatmap (last 10 days)</li>
+            <li>&#9989; 15 canonical sector labels across all data</li>
+          </ul>
         </div>
 
         <!-- HOW IT WORKS -->
         <div class="info-card">
-          <h3><span class="ic-icon">⚙️</span> How It Works</h3>
+          <h3><span class="ic-icon">&#9881;&#65039;</span> How It Works &mdash; The Full Pipeline</h3>
           <ul>
-            <li><strong>1.</strong> Every weekday at <strong>4:45 PM IST</strong>, an automated bot fetches all NSE tickers from the official NSE API.</li>
-            <li><strong>2.</strong> It downloads 13 months of daily closing prices from <strong>Yahoo Finance</strong> for every stock.</li>
-            <li><strong>3.</strong> It calculates % change across 6 timeframes: <strong>1W, 2W, 1M, 3M, 6M, 12M</strong>.</li>
-            <li><strong>4.</strong> For the top ~85 movers, it fetches <strong>fundamental data</strong> (P/E, Market Cap, Sector, EPS, etc.) in parallel.</li>
-            <li><strong>5.</strong> It scrapes the latest <strong>market news</strong> from LiveMint and Economic Times RSS feeds.</li>
-            <li><strong>6.</strong> All data is pushed to this website automatically — <strong>no manual intervention</strong>.</li>
+            <li><strong>4:00 PM IST:</strong> GitHub Actions triggers the scanner (Mon&ndash;Fri)</li>
+            <li><strong>Step 1:</strong> All 2,200+ NSE tickers fetched from NSE API</li>
+            <li><strong>Step 2:</strong> 13 months OHLCV downloaded from Yahoo Finance for every stock</li>
+            <li><strong>Step 3:</strong> % returns computed: 1W, 2W, 1M, 3M, 6M, 12M</li>
+            <li><strong>Step 4:</strong> Fundamentals fetched for top ~85 movers (P/E, MCap, Sector, EPS)</li>
+            <li><strong>Step 5:</strong> Sector labels normalized to 15 canonical India-standard categories</li>
+            <li><strong>Step 6:</strong> Trade Setup engine scores every stock (52W breakout, volume, EMA)</li>
+            <li><strong>Step 7:</strong> Prediction engine generates BUY/SELL/HOLD + confidence + SL/TP</li>
+            <li><strong>Step 8:</strong> Stock state classified: SQUEEZE / QUIET / LEADER via ATR, BB, RSI, EMA</li>
+            <li><strong>Step 9:</strong> Sector heatmap computed: equal-weighted avg return per sector per day</li>
+            <li><strong>Step 10:</strong> All JSON files committed &rarr; GitHub Pages serves them statically</li>
+            <li>&#128197; Data typically live by <strong>~4:15 PM IST</strong>. Hard-refresh (Ctrl+Shift+R) after that.</li>
           </ul>
+        </div>
+
+        <!-- STOCK STATES -->
+        <div class="info-card">
+          <h3><span class="ic-icon">&#128220;</span> Stock States: SQUEEZE &middot; QUIET &middot; LEADER</h3>
+          <p>Every stock in the <strong>Next-Week Forecast</strong> tab is classified into one of 4 states. Filter chips let you show only stocks in a specific state.</p>
+          <table class="info-table" style="margin-top:10px">
+            <thead><tr><th>State</th><th>Definition</th><th>Trading Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td nowrap><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(224,123,0,0.18);color:#e07b00;font-weight:700">&#128220; SQUEEZE</span></td>
+                <td>Bollinger Band width &lt; 20th percentile AND ATR is low. Stock is <strong>coiling</strong> &mdash; a directional breakout is building.</td>
+                <td>Wait for breakout above upper BB on strong volume. Enter on the breakout candle; stop below recent swing low.</td>
+              </tr>
+              <tr>
+                <td nowrap><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(107,114,128,0.18);color:#9ca3af;font-weight:700">&#128201; QUIET</span></td>
+                <td>ATR &lt; 1.5% of price AND volume below 70% of 20-day avg. <strong>Low-activity phase</strong> &mdash; possible accumulation or distribution.</td>
+                <td>Watchlist only. Enter when volume expands to 2&times;+ average &mdash; that&#39;s the wakeup signal.</td>
+              </tr>
+              <tr>
+                <td nowrap><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(16,245,168,0.12);color:var(--primary);font-weight:700">&#127942; LEADER</span></td>
+                <td>1M return &gt; Nifty 50 AND RSI(14) &gt; 55 AND price above 50-EMA. <strong>Confirmed relative strength</strong> &mdash; outperforming the index.</td>
+                <td>Highest priority. Buy on pullbacks to 20-EMA. Institutions are actively accumulating these.</td>
+              </tr>
+              <tr>
+                <td><span style="font-size:10px;color:rgba(255,255,255,0.2)">&mdash; NEUTRAL</span></td>
+                <td>No strong signal in either direction. Normal trading range.</td>
+                <td>Lower priority. Screen after LEADER and SQUEEZE.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3)">&#128161; <strong>Bull market:</strong> Focus on LEADER stocks &mdash; proven outperformers. <strong>Sideways market:</strong> Focus on SQUEEZE &mdash; the next directional move candidates.</p>
+        </div>
+
+        <!-- SECTOR PULSE -->
+        <div class="info-card">
+          <h3><span class="ic-icon">&#128202;</span> Sector Pulse Heatmap</h3>
+          <p>In the <strong>Market Overview</strong> tab. Each cell = equal-weighted avg daily return for all tracked stocks in that sector, on that day. Last 10 trading days.</p>
+          <table class="info-table" style="margin-top:10px">
+            <thead><tr><th>Color</th><th>Meaning</th><th>Threshold</th></tr></thead>
+            <tbody>
+              <tr><td><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Dark Green</td><td>Strong gain</td><td>&gt; +1.5%</td></tr>
+              <tr><td><span style="display:inline-block;width:10px;height:10px;background:rgba(34,197,94,0.3);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Light Green</td><td>Positive</td><td>+0.3% to +1.5%</td></tr>
+              <tr><td><span style="display:inline-block;width:10px;height:10px;background:rgba(255,255,255,0.07);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Gray</td><td>Flat</td><td>-0.3% to +0.3%</td></tr>
+              <tr><td><span style="display:inline-block;width:10px;height:10px;background:rgba(239,68,68,0.25);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Light Red</td><td>Negative</td><td>-1.5% to -0.3%</td></tr>
+              <tr><td><span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Dark Red</td><td>Strong loss</td><td>&lt; -1.5%</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:10px"><strong>Sector Rank Strip</strong> (above Trade Setups): Today&#39;s sectors ranked best&rarr;worst as pills. &#127942;=best today &middot; &#128249;=worst today. Hover for stock count.</p>
+          <p style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.3)">&#128161; <strong>Rotation signal:</strong> 3+ consecutive green days in a sector = sector rotation in play. Cross-check with LEADER filter in Forecast to find the best individual stocks in that sector.</p>
+        </div>
+
+        <!-- TRADE SETUPS -->
+        <div class="info-card">
+          <h3><span class="ic-icon">&#127919;</span> Trade Setups &mdash; Score &amp; Signal Tags</h3>
+          <p>Cards that passed multiple technical filters. <strong>Score 0&ndash;100</strong> = how many signals align.</p>
+          <ul style="margin-top:8px">
+            <li><strong>Score 75+:</strong> &#128293; High conviction &mdash; multiple strong signals aligned. Act on these first.</li>
+            <li><strong>Score 50&ndash;74:</strong> Solid setup. Validate on TradingView before entry.</li>
+            <li><strong>Score &lt;50:</strong> Weak &mdash; only 1&ndash;2 signals. Lower priority.</li>
+          </ul>
+          <p style="margin-top:10px"><strong>Signal tags:</strong></p>
+          <ul>
+            <li>&#128200; <strong>52W BREAKOUT:</strong> Closed above 52-week high &mdash; classic institutional momentum signal.</li>
+            <li>&#128202; <strong>VOLUME SPIKE:</strong> Volume &ge; 2&times; 20-day average &mdash; strong participation confirms the move.</li>
+            <li>&#128640; <strong>EMA MOMENTUM:</strong> 20-EMA crossed above 50-EMA &mdash; medium-term trend just turned bullish.</li>
+            <li>&#128202; <strong>HIGH VOLUME:</strong> Volume meaningfully above average &mdash; active buyer interest.</li>
+          </ul>
+          <p style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3)">&#128161; Check the Sector Rank Strip first. If the card&#39;s sector is green in the heatmap, you have sector tailwind + stock momentum &mdash; strongest possible combination.</p>
+        </div>
+
+        <!-- FORECAST -->
+        <div class="info-card">
+          <h3><span class="ic-icon">&#128302;</span> Next-Week Forecast &mdash; Column Guide</h3>
+          <table class="info-table" style="margin-top:8px">
+            <thead><tr><th>Column</th><th>What It Means</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Signal</strong></td><td>BUY / SELL / HOLD &mdash; predicted direction for next week</td></tr>
+              <tr><td><strong>State</strong></td><td>Technical structure &mdash; SQUEEZE / QUIET / LEADER / NEUTRAL</td></tr>
+              <tr><td><strong>Confidence</strong></td><td>Model certainty. &gt;70% = high conviction. Bar shows visually.</td></tr>
+              <tr><td><strong>Entry &#8377;</strong></td><td>Last closing price &mdash; your potential entry reference</td></tr>
+              <tr><td><strong>SL &#8377; &#128721;</strong></td><td>Stop-loss. Exit here to cap loss if trade goes wrong.</td></tr>
+              <tr><td><strong>Target &#8377; &#9989;</strong></td><td>Profit target. Exit here to lock in gains.</td></tr>
+              <tr><td><strong>R:R</strong></td><td>Risk-to-Reward. <strong>Minimum 2.0, ideal 3.0+.</strong></td></tr>
+              <tr><td><strong>Exp. Return</strong></td><td>Expected % return if prediction is correct.</td></tr>
+              <tr><td><strong>Why</strong></td><td>Plain-English reason. Hover for full narrative.</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:10px"><strong>Best workflow:</strong></p>
+          <ol style="margin-top:6px">
+            <li>Filter: &#127942; Leader + &#128994; BUY + Confidence &ge; 65%</li>
+            <li>Sort by R:R &mdash; pick &ge; 2.0</li>
+            <li>Validate on TradingView: above 50-EMA, volume confirming</li>
+            <li>Confirm sector is green in heatmap (sector tailwind)</li>
+            <li>Risk max 2% of capital per trade using the SL price</li>
+          </ol>
         </div>
 
         <!-- DATA SOURCES -->
         <div class="info-card">
-          <h3><span class="ic-icon">📊</span> Data Sources</h3>
+          <h3><span class="ic-icon">&#128257;</span> Data Sources &amp; Refresh Schedule</h3>
           <table class="info-table">
-            <thead><tr><th>Data</th><th>Source</th><th>Update Frequency</th></tr></thead>
+            <thead><tr><th>Data</th><th>Source</th><th>Refresh</th></tr></thead>
             <tbody>
-              <tr><td>Stock Universe</td><td><a href="https://www.nseindia.com" target="_blank">NSE India</a> (via stock-nse-india API)</td><td>Daily at 4:45 PM IST</td></tr>
-              <tr><td>Price Data</td><td><a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> (yfinance)</td><td>Daily at 4:45 PM IST</td></tr>
-              <tr><td>Fundamentals</td><td><a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> (P/E, MCap, EPS, etc.)</td><td>Daily (top ~85 stocks)</td></tr>
-              <tr><td>Market News</td><td><a href="https://www.livemint.com" target="_blank">LiveMint</a> · <a href="https://economictimes.indiatimes.com" target="_blank">Economic Times</a></td><td>Daily (last 36h of articles)</td></tr>
-              <tr><td>Charts</td><td><a href="https://www.tradingview.com" target="_blank">TradingView</a> (external link)</td><td>Real-time on click</td></tr>
+              <tr><td>Stock Universe</td><td><a href="https://www.nseindia.com" target="_blank">NSE India</a></td><td>Daily 4:00 PM IST</td></tr>
+              <tr><td>Price / OHLCV</td><td><a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a></td><td>Daily 4:00 PM IST</td></tr>
+              <tr><td>Fundamentals</td><td>Yahoo Finance (P/E, MCap, EPS&hellip;)</td><td>Daily (top ~85 stocks)</td></tr>
+              <tr><td>Sector Heatmap</td><td>Computed from OHLCV</td><td>Daily 4:00 PM IST</td></tr>
+              <tr><td>Predictions</td><td>Rule-based + Random Forest</td><td>Daily 4:00 PM IST</td></tr>
+              <tr><td>Market News</td><td>LiveMint &middot; Economic Times RSS</td><td>Daily (last 36h)</td></tr>
+              <tr><td>Charts</td><td><a href="https://www.tradingview.com" target="_blank">TradingView</a></td><td>Real-time on click</td></tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- REFRESH TIMELINE -->
-        <div class="info-card">
-          <h3><span class="ic-icon">🔄</span> Refresh Schedule</h3>
-          <table class="info-table">
+          <table class="info-table" style="margin-top:12px">
             <thead><tr><th>Event</th><th>Time (IST)</th><th>Notes</th></tr></thead>
             <tbody>
-              <tr><td>NSE Market Close</td><td>3:30 PM</td><td>Final closing prices available</td></tr>
-              <tr><td>Scanner Runs</td><td>4:45 PM</td><td>Automated via GitHub Actions</td></tr>
-              <tr><td>Data Available</td><td>~4:50 PM</td><td>Website auto-updates (refresh page)</td></tr>
-              <tr><td>Weekends / Holidays</td><td>—</td><td>No scan — last trading day data persists</td></tr>
+              <tr><td>NSE Market Close</td><td>3:30 PM</td><td>Final prices available</td></tr>
+              <tr><td>Scanner Runs</td><td><strong>4:00 PM</strong></td><td>GitHub Actions (Mon&ndash;Fri, auto)</td></tr>
+              <tr><td>Data Live</td><td>~4:10&ndash;4:15 PM</td><td>Hard-refresh page after this</td></tr>
+              <tr><td>Weekends / Holidays</td><td>No scan</td><td>Last trading day data persists</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:10px; font-size:11px; color:rgba(255,255,255,0.3);">💡 <strong>Tip:</strong> Refresh this page after 4:50 PM IST on weekdays to see the latest data. The page loads data from static JSON files — no server-side processing on your end.</p>
-        </div>
-
-        <!-- HOW TO READ -->
-        <div class="info-card">
-          <h3><span class="ic-icon">📖</span> How to Read the Data</h3>
-          <ul>
-            <li><strong>% Change columns (1W–12M):</strong> Shows how much a stock's price moved over that period. Formula: <code style="font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">((Today - Past) / Past) × 100</code></li>
-            <li><strong>Green ▲</strong> = price went UP · <strong>Red ▼</strong> = price went DOWN</li>
-            <li><strong>Bold numbers</strong> = strong moves (>10% medium bold, >50% extra bold)</li>
-            <li><strong>P/E Ratio:</strong> Price-to-Earnings — lower generally means "cheaper" relative to earnings</li>
-            <li><strong>Market Cap:</strong> Total company value (in ₹ Crores)</li>
-            <li><strong>EPS:</strong> Earnings Per Share (TTM) — how much the company earned per share</li>
-            <li><strong>52W Range:</strong> The stock's lowest and highest price in the last 52 weeks</li>
-            <li><strong>Dividend Yield:</strong> Annual dividend as a % of stock price</li>
-            <li><strong>Book Value:</strong> Net asset value per share on the balance sheet</li>
-          </ul>
-        </div>
-
-        <!-- AUTO TAGS -->
-        <div class="info-card">
-          <h3><span class="ic-icon">🏷️</span> Auto-Tag Legend</h3>
-          <p>Stocks on the Top Movers tab are automatically tagged based on their data:</p>
-          <ul style="margin-top:8px;">
-            <li><span class="tag-example tag-value">Value</span> <strong>P/E below 15</strong> — Stock is priced cheaply relative to earnings. May indicate undervaluation.</li>
-            <li><span class="tag-example tag-highpe">High P/E</span> <strong>P/E above 50</strong> — Expensive relative to earnings. Could signal overvaluation or growth premium.</li>
-            <li><span class="tag-example tag-income">Income</span> <strong>Dividend Yield above 3%</strong> — Pays meaningful dividends. Attractive for income-seeking investors.</li>
-            <li><span class="tag-example tag-multi">Multibagger</span> <strong>12-month return above 100%</strong> — Stock has more than doubled in the last year.</li>
-            <li><span class="tag-example tag-breakout">Breakout</span> <strong>1-week return above 20%</strong> — Sharp recent surge. Could indicate a breakout or momentum event.</li>
-          </ul>
         </div>
 
         <!-- MARKET CAP -->
         <div class="info-card">
-          <h3><span class="ic-icon">📐</span> Market Cap Categories</h3>
+          <h3><span class="ic-icon">&#128208;</span> Market Cap Categories</h3>
           <table class="info-table">
-            <thead><tr><th>Category</th><th>Range</th><th>Characteristics</th></tr></thead>
+            <thead><tr><th>Badge</th><th>Category</th><th>Basis</th><th>Characteristics</th></tr></thead>
             <tbody>
-              <tr><td>Large Cap</td><td>>₹20,000 Cr</td><td>Blue-chip, lower risk, higher liquidity</td></tr>
-              <tr><td>Mid Cap</td><td>₹5,000–₹20,000 Cr</td><td>Growth potential with moderate risk</td></tr>
-              <tr><td>Small Cap</td><td><₹5,000 Cr</td><td>High growth potential, higher risk & volatility</td></tr>
+              <tr><td>&#128309; <strong>L</strong></td><td>Large Cap</td><td>Nifty 100</td><td>Blue-chip, high liquidity, lower risk</td></tr>
+              <tr><td>&#128993; <strong>M</strong></td><td>Mid Cap</td><td>Nifty 150</td><td>Growth + moderate risk</td></tr>
+              <tr><td>&#128994; <strong>S</strong></td><td>Small Cap</td><td>All others</td><td>High growth potential, higher risk</td></tr>
             </tbody>
           </table>
+          <p style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3)">&#128161; New traders: start with <strong>Large Cap BUY + LEADER</strong> setups &mdash; lower volatility, more reliable signals.</p>
         </div>
 
-        <!-- WHAT'S NOT INCLUDED -->
+        <!-- SECTOR LABELS -->
         <div class="info-card">
-          <h3><span class="ic-icon">🚫</span> Limitations</h3>
+          <h3><span class="ic-icon">&#128450;&#65039;</span> 15 Canonical Sector Labels</h3>
+          <p>All Yahoo Finance sector strings (US-style) are automatically mapped to these 15 India-standard labels across the entire platform:</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:5px;margin-top:10px">
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">IT &amp; Technology</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Banking &amp; Finance</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Pharma &amp; Healthcare</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">FMCG &amp; Consumer</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Auto &amp; Auto Ancillaries</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Capital Goods &amp; Engineering</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Metals &amp; Mining</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Oil, Gas &amp; Energy</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Real Estate</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Chemicals &amp; Specialty</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Infrastructure</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Telecom &amp; Media</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Textiles &amp; Apparel</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Agri &amp; Food Processing</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:11px">Others</span>
+          </div>
+          <p style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.3)">Examples: &ldquo;Consumer Defensive&rdquo; &rarr; FMCG &amp; Consumer &middot; &ldquo;Industrials&rdquo; &rarr; Capital Goods &amp; Engineering &middot; &ldquo;Financial Services&rdquo; &rarr; Banking &amp; Finance</p>
+        </div>
+
+        <!-- LIMITATIONS -->
+        <div class="info-card">
+          <h3><span class="ic-icon">&#128683;</span> Limitations &mdash; What This Is Not</h3>
           <ul>
-            <li><strong>No intraday data:</strong> Scanner uses daily closing prices only — not live/real-time quotes.</li>
-            <li><strong>~80 fundamentals only:</strong> Fundamental data (P/E, Sector, etc.) is fetched for the top ~85 movers, not all 2,200 stocks.</li>
-            <li><strong>No buy/sell signals:</strong> This is a momentum + fundamentals scanner, not a trading algorithm. It shows data, not recommendations.</li>
-            <li><strong>Yahoo Finance data:</strong> Occasionally incomplete for small/micro-cap stocks. Some fields may show "—".</li>
-            <li><strong>No BSE stocks:</strong> Only NSE-listed equities are scanned.</li>
+            <li><strong>No intraday data:</strong> End-of-day closing prices only &mdash; not live quotes.</li>
+            <li><strong>~85 fundamentals only:</strong> P/E, Sector etc. for the top ~85 movers. Most small-caps show &ldquo;&mdash;&rdquo;.</li>
+            <li><strong>Sector heatmap coverage:</strong> Based on ~85 stocks with known fundamentals &mdash; indicative, not market-wide.</li>
+            <li><strong>ATR proxy for SQUEEZE:</strong> Uses ATR-based proxy (not full ADX). Validate on a live chart before acting.</li>
+            <li><strong>Predictions are probabilistic:</strong> Check Accuracy Dashboard. Use signals most confidently when precision &gt;55%.</li>
+            <li><strong>Yahoo Finance data:</strong> Occasionally incomplete for small/micro-cap stocks.</li>
+            <li><strong>NSE equities only:</strong> No BSE-only stocks, no F&amp;O, no ETFs, no indices.</li>
           </ul>
         </div>
 
@@ -1290,10 +1394,10 @@
 
       <!-- DISCLAIMER -->
       <div class="info-disclaimer">
-        <h3><span class="ic-icon">⚖️</span> Important Disclaimer</h3>
-        <p style="margin-top:8px;">This scanner is built strictly for <strong>educational and informational purposes</strong>. The creators are <strong>not SEBI-registered investment advisors</strong>. Nothing on this website constitutes a buy, sell, or hold recommendation for any security.</p>
-        <p style="margin-top:8px;">Stock market investments are subject to market risks. <strong>Past performance does not guarantee future results.</strong> Always consult a qualified, SEBI-registered financial advisor before making investment decisions. Always do your own research (DYOR).</p>
-        <p style="margin-top:8px;">Data is sourced from third-party providers (Yahoo Finance, NSE India) and may contain inaccuracies or delays. The scanner is provided <strong>"as is"</strong> with no warranty of accuracy, completeness, or fitness for any particular purpose.</p>
+        <h3><span class="ic-icon">&#9878;&#65039;</span> Important Disclaimer</h3>
+        <p style="margin-top:8px">This scanner is built strictly for <strong>educational and informational purposes</strong>. The creators are <strong>not SEBI-registered investment advisors</strong>. Nothing on this website constitutes a buy, sell, or hold recommendation for any security.</p>
+        <p style="margin-top:8px">Stock market investments are subject to market risks. <strong>Past performance does not guarantee future results.</strong> Always consult a qualified, SEBI-registered financial advisor before making investment decisions. Always do your own research (DYOR).</p>
+        <p style="margin-top:8px">Data is sourced from third-party providers (Yahoo Finance, NSE India) and may contain inaccuracies or delays. Provided <strong>&ldquo;as is&rdquo;</strong> with no warranty of accuracy or fitness for any purpose.</p>
       </div>
 
     </div>

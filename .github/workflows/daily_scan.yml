@@ -2,9 +2,9 @@ name: Daily NSE Market Scan
 
 on:
   schedule:
-    # 5:30 PM IST (12:00 UTC) Mon–Fri
-    # NSE closes at 3:30 PM IST — extra buffer ensures yfinance has final EOD data
-    - cron: '0 12 * * 1-5'
+    # 4:00 PM IST (10:30 UTC) Mon–Fri
+    # NSE closes at 3:30 PM IST — 30 min buffer for yfinance to publish final EOD data
+    - cron: '30 10 * * 1-5'
   workflow_dispatch:   # manual trigger anytime
 
 # Prevent two daily runs from pushing at the same time
