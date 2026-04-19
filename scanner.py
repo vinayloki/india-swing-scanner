@@ -464,6 +464,126 @@ def compute_sector_daily_performance(
         log.warning(f"   ⚠️ Sector heatmap failed (non-fatal): {exc}")
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  STEP 8: Market Regime Detection
+# ═══════════════════════════════════════════════════════════════════
+
+_REGIME_SIGNALS = {
+    "Bull": {
+        "context": "Strong bull phase. All signal types have elevated reliability. Prioritise LEADER + BUY setups.",
+        "action":  "Trade full-size. Use LEADER + BUY filter. Hold winners longer.",
+    },
+    "Bear": {
+        "context": "Bear phase active. BUY signals are lower reliability. Prioritise SELL signals and cash.",
+        "action":  "Reduce position sizes. Only trade HIGH-confidence (>70%) BUY signals. Favour SELL setups.",
+    },
+    "Sideways": {
+        "context": "Sideways/recovery market. Mixed signals. SQUEEZE setups are highest priority — they break out first.",
+        "action":  "Prioritise SQUEEZE + LEADER setups. Skip NEUTRAL signals. Use tight stop-losses.",
+    },
+}
+
+
+def compute_market_regime(
+    breadth_data: dict,
+    ohlcv: pd.DataFrame,
+) -> None:
+    """
+    Classify the current market regime (Bull / Bear / Sideways) using:
+      - 1W advance-decline ratio from breadth_data
+      - 1M average return from breadth_data
+      - Nifty 50 price vs 200-day EMA (computed from ohlcv if NIFTY is included,
+        otherwise fetched from yfinance ^NSEI)
+
+    Writes scan_results/market_regime.json.
+    """
+    log.info("📊 Computing market regime...")
+    try:
+        import yfinance as yf
+
+        # ── Get breadth metrics from scan summary ────────────────────
+        breadth_1w = breadth_data.get("1W", {})
+        breadth_1m = breadth_data.get("1M", {})
+        ad_ratio_1w  = float(breadth_1w.get("advance_decline_ratio", 1.0))
+        avg_ret_1m   = float(breadth_1m.get("avg_return_pct", 0.0))
+        avg_ret_1w   = float(breadth_1w.get("avg_return_pct", 0.0))
+
+        # ── Nifty 50 vs 200-EMA ─────────────────────────────────
+        nifty_close  = None
+        ema_200      = None
+        pct_vs_ema   = None
+
+        # Try to extract Nifty from OHLCV cache first (fastest)
+        nifty_ticker = None
+        for candidate in ["^NSEI", "NIFTY50", "NIFTY"]:
+            if "Close" in ohlcv.columns.get_level_values(0):
+                if candidate in ohlcv["Close"].columns:
+                    nifty_ticker = candidate
+                    break
+
+        if nifty_ticker:
+            nc = ohlcv["Close"][nifty_ticker].dropna()
+            nifty_close = float(nc.iloc[-1])
+            ema_200 = float(nc.ewm(span=200, adjust=False).mean().iloc[-1])
+        else:
+            # Fetch Nifty from yfinance (fast — just 1 ticker, 1 year)
+            try:
+                nifi = yf.download("^NSEI", period="1y", interval="1d",
+                                   progress=False, auto_adjust=True)
+                if not nifi.empty:
+                    nc = nifi["Close"].dropna()
+                    nifty_close = float(nc.iloc[-1])
+                    ema_200 = float(nc.ewm(span=200, adjust=False).mean().iloc[-1])
+            except Exception as e:
+                log.warning(f"   ⚠️ Nifty fetch failed: {e}")
+
+        if nifty_close and ema_200:
+            pct_vs_ema = round((nifty_close - ema_200) / ema_200 * 100, 2)
+            above_ema200 = nifty_close > ema_200
+        else:
+            pct_vs_ema   = None
+            above_ema200 = (avg_ret_1m > 0)  # fallback heuristic
+
+        # ── Classify regime ────────────────────────────────────────
+        if ad_ratio_1w > 1.5 and avg_ret_1m > 2.0 and above_ema200:
+            regime = "Bull"
+        elif ad_ratio_1w < 1.0 and avg_ret_1m < -2.0 and not above_ema200:
+            regime = "Bear"
+        else:
+            regime = "Sideways"
+
+        signals = _REGIME_SIGNALS[regime]
+
+        output = {
+            "generated":     datetime.now().strftime("%d %b %Y"),
+            "run_at":        datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "regime":        regime,
+            "nifty_close":   round(nifty_close, 2) if nifty_close else None,
+            "ema_200":       round(ema_200, 2) if ema_200 else None,
+            "pct_vs_ema200": pct_vs_ema,
+            "ad_ratio_1w":   round(ad_ratio_1w, 2),
+            "avg_return_1w": round(avg_ret_1w, 2),
+            "avg_return_1m": round(avg_ret_1m, 2),
+            "signal_context": signals["context"],
+            "action_guide":   signals["action"],
+        }
+
+        regime_path = OUTPUT_DIR / "market_regime.json"
+        with open(regime_path, "w", encoding="utf-8") as f:
+            json.dump(output, f, separators=(",", ":"), ensure_ascii=False)
+
+        log.info(
+            f"   ✅ market_regime.json — Regime: {regime} | "
+            f"A/D: {ad_ratio_1w:.2f} | 1M avg: {avg_ret_1m:+.1f}% | "
+            f"Nifty vs EMA200: {pct_vs_ema:+.2f}%" if pct_vs_ema else
+            f"   ✅ market_regime.json — Regime: {regime} | A/D: {ad_ratio_1w:.2f}"
+        )
+
+    except Exception as exc:
+        log.warning(f"   ⚠️ Market regime computation failed (non-fatal): {exc}")
+
+
+
 # ═══════════════════════════════════════════════════════════════════════
 #  MAIN ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════
@@ -501,6 +621,20 @@ def main():
 
     # Step 7: Sector daily performance heatmap (non-fatal)
     compute_sector_daily_performance(ohlcv, fundamentals)
+
+    # Step 8: Market Regime detection (non-fatal)
+    # Reads breadth data from latest_scan_summary.json (written in Step 4)
+    try:
+        summary_path = OUTPUT_DIR / "latest_scan_summary.json"
+        if summary_path.exists():
+            with open(summary_path, encoding="utf-8") as sf:
+                scan_summary = json.load(sf)
+            breadth_data = scan_summary.get("market_breadth", {})
+        else:
+            breadth_data = {}
+        compute_market_regime(breadth_data, ohlcv)
+    except Exception as e:
+        log.warning(f"   ⚠️ Market regime step failed (non-fatal): {e}")
 
     elapsed = time.time() - start
     log.info(f"⏱️  Total time: {elapsed:.1f}s")

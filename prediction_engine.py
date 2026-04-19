@@ -185,8 +185,8 @@ def classify_stock_state(feat_row: "pd.Series") -> tuple[str, str]:
 
 def main():
     parser = argparse.ArgumentParser(description="MarketPulse India — Prediction Engine")
-    parser.add_argument("--backtest-weeks", type=int, default=52,
-                        help="Number of historical weeks for accuracy backtest (default: 52)")
+    parser.add_argument("--backtest-weeks", type=int, default=26,
+                        help="Number of historical weeks for accuracy backtest (default: 26, auto-capped to available data)")
     parser.add_argument("--force-download", action="store_true",
                         help="Force re-download of OHLCV data (ignore cache)")
     parser.add_argument("--no-backtest", action="store_true",
@@ -386,17 +386,32 @@ def main():
 
     from backtest.walk_forward import run_prediction_backtest
     from backtest.metrics import compute_accuracy_metrics, compute_benchmarks
+    from prediction.features import resample_to_weekly
     try:
-        log.info(f"\n[STEP 5] Walk-forward accuracy backtest ({args.backtest_weeks} weeks)...")
-        bt_results = run_prediction_backtest(
-            ohlcv,
-            backtest_weeks=args.backtest_weeks,
-            regime=regime,
-            prefer_ml=prefer_ml,
+        # Auto-cap backtest weeks to what's actually available
+        # Formula: usable_weeks = total_weekly_bars - 30 (warm-up) - 1 (forward label)
+        weekly_bars = len(resample_to_weekly(ohlcv))
+        max_backtest = max(0, weekly_bars - 31)
+        actual_weeks = min(args.backtest_weeks, max_backtest)
+        log.info(
+            f"\n[STEP 5] Walk-forward accuracy backtest "
+            f"({actual_weeks} weeks of {weekly_bars} weekly bars available)..."
         )
+        if actual_weeks < 4:
+            log.warning("[WARN] Fewer than 4 usable backtest weeks — skipping")
+            bt_results = []
+        else:
+            bt_results = run_prediction_backtest(
+                ohlcv,
+                backtest_weeks=actual_weeks,
+                regime=regime,
+                prefer_ml=prefer_ml,
+            )
     except Exception as exc:
         log.error(f"[FAIL] Accuracy backtest failed: {exc}")
+        import traceback; traceback.print_exc()
         bt_results = []
+        actual_weeks = 0
 
     # ── Step 6: Metrics + benchmarks ──────────────────────────────────────────
     try:
@@ -409,13 +424,18 @@ def main():
 
     # ── Write prediction_accuracy.json ────────────────────────────────────────
     accuracy_output = {
-        "generated":     datetime.now().strftime("%d %b %Y"),
-        "run_at":        datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "backtest_weeks": args.backtest_weeks,
-        "regime":         regime,
-        "method":         method_used,
-        "accuracy":       acc_metrics,
-        "benchmarks":     benchmarks,
+        "generated":          datetime.now().strftime("%d %b %Y"),
+        "run_at":             datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "backtest_weeks":     actual_weeks,
+        "backtest_weeks_requested": args.backtest_weeks,
+        "regime":             regime,
+        "method":             method_used,
+        "accuracy":           acc_metrics,
+        "benchmarks":         benchmarks,
+        "data_note":          (
+            f"Based on {actual_weeks} weeks of walk-forward data. "
+            "Accuracy improves as daily scans accumulate over time."
+        ),
     }
 
     with open(PRED_ACCURACY_OUT, "w", encoding="utf-8") as fh:

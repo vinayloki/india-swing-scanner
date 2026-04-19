@@ -1556,10 +1556,32 @@ function buildPredictionTab() {
         </div>
       </div>
 
+      <!-- ═══ MARKET REGIME CONTEXT BANNER ═══ -->
+      ${regimeData ? (() => {
+        const r   = regimeData.regime || 'Sideways';
+        const ctx = regimeData.signal_context || '';
+        const act = regimeData.action_guide   || '';
+        const pct = regimeData.pct_vs_ema200;
+        const pctStr = pct != null ? ` · Nifty ${pct > 0 ? '+' : ''}${pct}% vs 200-EMA` : '';
+        const cls = r === 'Bull' ? 'rgba(34,197,94,0.08)' : r === 'Bear' ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)';
+        const border = r === 'Bull' ? 'rgba(34,197,94,0.2)' : r === 'Bear' ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)';
+        const pill = r === 'Bull' ? '<span class="regime-pill regime-bull">▲ Bull</span>'
+                   : r === 'Bear' ? '<span class="regime-pill regime-bear">▼ Bear</span>'
+                   : '<span class="regime-pill regime-side">→ Sideways</span>';
+        return `<div style="background:${cls};border:1px solid ${border};border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:14px;align-items:flex-start">
+          <div style="flex-shrink:0;margin-top:2px">${pill}</div>
+          <div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.75);line-height:1.6">${ctx}${pctStr}</div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:4px">🎯 ${act}</div>
+          </div>
+        </div>`;
+      })() : ''}
+
       <!-- ═══ INVESTOR EDUCATION: What to expect ═══ -->
       <div style="background:rgba(167,139,250,0.04);border:1px solid rgba(167,139,250,0.1);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:12.5px;color:rgba(255,255,255,0.5);line-height:1.7">
         <strong style="color:var(--purple)">💡 What to expect here:</strong> These are <strong style="color:rgba(255,255,255,0.7)">next-week directional predictions</strong> for all scanned stocks. Filter by signal type or slide the confidence bar to narrow the list. Use BUY signals with confidence above 65% as starting candidates — always check the chart on TradingView before acting.
       </div>
+
 
       <!-- ═══ READING THE NUMBERS ═══ -->
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:22px">

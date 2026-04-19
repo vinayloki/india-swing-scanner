@@ -1,64 +1,80 @@
 {
-  "generated": "19 Apr 2026",
-  "run_at": "2026-04-19 22:33",
-  "backtest_weeks": 12,
-  "regime": "Sideways",
+  "generated": "20 Apr 2026",
+  "run_at": "2026-04-20 00:23",
+  "backtest_weeks": 26,
+  "backtest_weeks_requested": 26,
+  "regime": "Bull",
   "method": "rule_based",
   "accuracy": {
-    "total_predictions": 23135,
-    "correct_predictions": 9546,
-    "overall_accuracy_pct": 41.26,
+    "total_predictions": 49859,
+    "correct_predictions": 24984,
+    "overall_accuracy_pct": 50.11,
     "precision": {
-      "buy_pct": 4.17,
-      "sell_pct": 0.38,
-      "hold_pct": 96.57
+      "buy_pct": 3.48,
+      "sell_pct": 0.49,
+      "hold_pct": 97.51
     },
     "recall": {
-      "buy_pct": 13.43,
-      "sell_pct": 24.57,
-      "hold_pct": 42.18
+      "buy_pct": 22.23,
+      "sell_pct": 19.22,
+      "hold_pct": 50.98
     },
     "win_rate": {
-      "buy_pct": 52.01,
-      "sell_pct": 49.27,
-      "overall_pct": 49.69
+      "buy_pct": 44.85,
+      "sell_pct": 54.15,
+      "overall_pct": 51.73
     },
     "avg_return_per_prediction": {
-      "buy_pct": 0.51,
-      "sell_pct": -0.942,
-      "hold_pct": 0.273
+      "buy_pct": -0.327,
+      "sell_pct": -0.181,
+      "hold_pct": -0.494
     },
     "class_counts": {
-      "buy": 2036,
-      "sell": 11346,
-      "hold": 9753
+      "buy": 6401,
+      "sell": 18155,
+      "hold": 25303
     },
     "confusion_matrix": {
       "BUY": {
-        "BUY": 85,
-        "SELL": 45,
-        "HOLD": 1906
+        "BUY": 223,
+        "SELL": 165,
+        "HOLD": 6013
       },
       "SELL": {
-        "BUY": 300,
-        "SELL": 43,
-        "HOLD": 11003
+        "BUY": 358,
+        "SELL": 89,
+        "HOLD": 17708
       },
       "HOLD": {
-        "BUY": 248,
-        "SELL": 87,
-        "HOLD": 9418
+        "BUY": 422,
+        "SELL": 209,
+        "HOLD": 24672
       }
     },
     "accuracy_timeline": [
       {
+        "month": "2025-10",
+        "accuracy_pct": 64.7,
+        "trades": 5696
+      },
+      {
+        "month": "2025-11",
+        "accuracy_pct": 60.3,
+        "trades": 7606
+      },
+      {
+        "month": "2025-12",
+        "accuracy_pct": 53.9,
+        "trades": 7647
+      },
+      {
         "month": "2026-01",
-        "accuracy_pct": 33.7,
-        "trades": 3866
+        "accuracy_pct": 45.2,
+        "trades": 9641
       },
       {
         "month": "2026-02",
-        "accuracy_pct": 53.2,
+        "accuracy_pct": 53.3,
         "trades": 7779
       },
       {
@@ -68,35 +84,35 @@
       },
       {
         "month": "2026-04",
-        "accuracy_pct": 48.0,
+        "accuracy_pct": 47.7,
         "trades": 3789
       }
     ],
     "confidence_calibration": [
       {
         "conf_band": "<40",
-        "acc": 96.5,
-        "n": 7771
+        "acc": 97.5,
+        "n": 21003
       },
       {
         "conf_band": "40-50",
-        "acc": 96.7,
-        "n": 1982
+        "acc": 97.6,
+        "n": 4300
       },
       {
         "conf_band": "60-70",
-        "acc": 0.0,
-        "n": 55
+        "acc": 0.4,
+        "n": 274
       },
       {
         "conf_band": "70-80",
-        "acc": 1.2,
-        "n": 4343
+        "acc": 1.0,
+        "n": 9478
       },
       {
         "conf_band": ">80",
-        "acc": 0.8,
-        "n": 8984
+        "acc": 1.5,
+        "n": 14804
       }
     ],
     "weekly_log": [
@@ -107,7 +123,7 @@
         "actual": "HOLD",
         "return_pct": 1.94,
         "correct": false,
-        "confidence": 87
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -179,7 +195,7 @@
         "actual": "HOLD",
         "return_pct": 7.304,
         "correct": false,
-        "confidence": 76
+        "confidence": 74
       },
       {
         "week": "2026-04-10",
@@ -188,7 +204,7 @@
         "actual": "HOLD",
         "return_pct": -4.121,
         "correct": false,
-        "confidence": 81
+        "confidence": 87
       },
       {
         "week": "2026-04-10",
@@ -206,7 +222,7 @@
         "actual": "HOLD",
         "return_pct": 1.76,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -215,7 +231,7 @@
         "actual": "HOLD",
         "return_pct": 6.78,
         "correct": false,
-        "confidence": 77
+        "confidence": 82
       },
       {
         "week": "2026-04-10",
@@ -224,7 +240,7 @@
         "actual": "HOLD",
         "return_pct": 6.844,
         "correct": false,
-        "confidence": 73
+        "confidence": 78
       },
       {
         "week": "2026-04-10",
@@ -233,7 +249,7 @@
         "actual": "HOLD",
         "return_pct": 8.727,
         "correct": false,
-        "confidence": 83
+        "confidence": 81
       },
       {
         "week": "2026-04-10",
@@ -242,7 +258,7 @@
         "actual": "HOLD",
         "return_pct": -0.806,
         "correct": true,
-        "confidence": 43
+        "confidence": 42
       },
       {
         "week": "2026-04-10",
@@ -251,7 +267,7 @@
         "actual": "BUY",
         "return_pct": 12.86,
         "correct": false,
-        "confidence": 86
+        "confidence": 84
       },
       {
         "week": "2026-04-10",
@@ -269,7 +285,7 @@
         "actual": "HOLD",
         "return_pct": 5.0,
         "correct": true,
-        "confidence": 36
+        "confidence": 34
       },
       {
         "week": "2026-04-10",
@@ -296,7 +312,7 @@
         "actual": "BUY",
         "return_pct": 16.927,
         "correct": true,
-        "confidence": 80
+        "confidence": 85
       },
       {
         "week": "2026-04-10",
@@ -305,7 +321,7 @@
         "actual": "HOLD",
         "return_pct": 0.791,
         "correct": false,
-        "confidence": 75
+        "confidence": 80
       },
       {
         "week": "2026-04-10",
@@ -314,7 +330,7 @@
         "actual": "HOLD",
         "return_pct": 12.096,
         "correct": false,
-        "confidence": 87
+        "confidence": 85
       },
       {
         "week": "2026-04-10",
@@ -341,7 +357,7 @@
         "actual": "HOLD",
         "return_pct": 7.436,
         "correct": false,
-        "confidence": 85
+        "confidence": 83
       },
       {
         "week": "2026-04-10",
@@ -350,7 +366,7 @@
         "actual": "HOLD",
         "return_pct": 1.351,
         "correct": true,
-        "confidence": 38
+        "confidence": 37
       },
       {
         "week": "2026-04-10",
@@ -364,11 +380,11 @@
       {
         "week": "2026-04-10",
         "ticker": "GRAPHITE",
-        "predicted": "HOLD",
+        "predicted": "BUY",
         "actual": "HOLD",
         "return_pct": 6.333,
-        "correct": true,
-        "confidence": 31
+        "correct": false,
+        "confidence": 73
       },
       {
         "week": "2026-04-10",
@@ -377,7 +393,7 @@
         "actual": "BUY",
         "return_pct": 22.185,
         "correct": true,
-        "confidence": 82
+        "confidence": 88
       },
       {
         "week": "2026-04-10",
@@ -395,7 +411,7 @@
         "actual": "HOLD",
         "return_pct": 1.68,
         "correct": true,
-        "confidence": 43
+        "confidence": 42
       },
       {
         "week": "2026-04-10",
@@ -413,7 +429,7 @@
         "actual": "HOLD",
         "return_pct": -1.603,
         "correct": false,
-        "confidence": 89
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -440,7 +456,7 @@
         "actual": "BUY",
         "return_pct": 15.895,
         "correct": false,
-        "confidence": 38
+        "confidence": 37
       },
       {
         "week": "2026-04-10",
@@ -449,7 +465,7 @@
         "actual": "HOLD",
         "return_pct": 1.266,
         "correct": false,
-        "confidence": 73
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -458,7 +474,7 @@
         "actual": "HOLD",
         "return_pct": 2.125,
         "correct": false,
-        "confidence": 82
+        "confidence": 87
       },
       {
         "week": "2026-04-10",
@@ -485,7 +501,7 @@
         "actual": "HOLD",
         "return_pct": 3.95,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -512,7 +528,7 @@
         "actual": "HOLD",
         "return_pct": 3.758,
         "correct": false,
-        "confidence": 87
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -521,7 +537,7 @@
         "actual": "HOLD",
         "return_pct": 7.367,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -539,7 +555,7 @@
         "actual": "HOLD",
         "return_pct": 3.261,
         "correct": false,
-        "confidence": 91
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -548,7 +564,7 @@
         "actual": "BUY",
         "return_pct": 17.184,
         "correct": true,
-        "confidence": 71
+        "confidence": 75
       },
       {
         "week": "2026-04-10",
@@ -566,7 +582,7 @@
         "actual": "HOLD",
         "return_pct": 10.323,
         "correct": false,
-        "confidence": 72
+        "confidence": 77
       },
       {
         "week": "2026-04-10",
@@ -575,7 +591,7 @@
         "actual": "HOLD",
         "return_pct": 7.058,
         "correct": false,
-        "confidence": 72
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -584,7 +600,7 @@
         "actual": "HOLD",
         "return_pct": 4.473,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -593,7 +609,7 @@
         "actual": "HOLD",
         "return_pct": 5.526,
         "correct": false,
-        "confidence": 88
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -611,7 +627,7 @@
         "actual": "HOLD",
         "return_pct": -1.822,
         "correct": true,
-        "confidence": 38
+        "confidence": 37
       },
       {
         "week": "2026-04-10",
@@ -629,7 +645,7 @@
         "actual": "HOLD",
         "return_pct": 5.652,
         "correct": false,
-        "confidence": 74
+        "confidence": 78
       },
       {
         "week": "2026-04-10",
@@ -647,7 +663,7 @@
         "actual": "HOLD",
         "return_pct": 1.751,
         "correct": false,
-        "confidence": 82
+        "confidence": 88
       },
       {
         "week": "2026-04-10",
@@ -665,7 +681,7 @@
         "actual": "BUY",
         "return_pct": 13.14,
         "correct": true,
-        "confidence": 83
+        "confidence": 89
       },
       {
         "week": "2026-04-10",
@@ -674,7 +690,7 @@
         "actual": "HOLD",
         "return_pct": 13.975,
         "correct": false,
-        "confidence": 74
+        "confidence": 72
       },
       {
         "week": "2026-04-10",
@@ -683,7 +699,7 @@
         "actual": "HOLD",
         "return_pct": 4.484,
         "correct": true,
-        "confidence": 42
+        "confidence": 41
       },
       {
         "week": "2026-04-10",
@@ -692,16 +708,16 @@
         "actual": "HOLD",
         "return_pct": 6.664,
         "correct": true,
-        "confidence": 31
+        "confidence": 32
       },
       {
         "week": "2026-04-10",
         "ticker": "HILTON",
-        "predicted": "SELL",
+        "predicted": "HOLD",
         "actual": "HOLD",
         "return_pct": 18.759,
-        "correct": false,
-        "confidence": 71
+        "correct": true,
+        "confidence": 31
       },
       {
         "week": "2026-04-10",
@@ -719,7 +735,7 @@
         "actual": "HOLD",
         "return_pct": 4.727,
         "correct": false,
-        "confidence": 91
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -737,7 +753,7 @@
         "actual": "HOLD",
         "return_pct": 7.462,
         "correct": false,
-        "confidence": 86
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -746,7 +762,7 @@
         "actual": "HOLD",
         "return_pct": 2.241,
         "correct": false,
-        "confidence": 71
+        "confidence": 75
       },
       {
         "week": "2026-04-10",
@@ -773,7 +789,7 @@
         "actual": "HOLD",
         "return_pct": 4.906,
         "correct": true,
-        "confidence": 39
+        "confidence": 38
       },
       {
         "week": "2026-04-10",
@@ -809,7 +825,7 @@
         "actual": "HOLD",
         "return_pct": 1.899,
         "correct": true,
-        "confidence": 38
+        "confidence": 37
       },
       {
         "week": "2026-04-10",
@@ -827,7 +843,7 @@
         "actual": "HOLD",
         "return_pct": 10.489,
         "correct": false,
-        "confidence": 74
+        "confidence": 72
       },
       {
         "week": "2026-04-10",
@@ -836,7 +852,7 @@
         "actual": "HOLD",
         "return_pct": 10.837,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -845,7 +861,7 @@
         "actual": "HOLD",
         "return_pct": 4.589,
         "correct": false,
-        "confidence": 73
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -863,7 +879,7 @@
         "actual": "HOLD",
         "return_pct": -0.039,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -872,7 +888,7 @@
         "actual": "HOLD",
         "return_pct": 3.611,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -890,7 +906,7 @@
         "actual": "BUY",
         "return_pct": 14.693,
         "correct": false,
-        "confidence": 72
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -899,7 +915,7 @@
         "actual": "HOLD",
         "return_pct": 3.049,
         "correct": false,
-        "confidence": 74
+        "confidence": 72
       },
       {
         "week": "2026-04-10",
@@ -926,7 +942,7 @@
         "actual": "HOLD",
         "return_pct": -4.317,
         "correct": true,
-        "confidence": 43
+        "confidence": 42
       },
       {
         "week": "2026-04-10",
@@ -935,7 +951,7 @@
         "actual": "HOLD",
         "return_pct": 0.818,
         "correct": false,
-        "confidence": 72
+        "confidence": 70
       },
       {
         "week": "2026-04-10",
@@ -944,7 +960,7 @@
         "actual": "HOLD",
         "return_pct": 3.141,
         "correct": false,
-        "confidence": 84
+        "confidence": 90
       },
       {
         "week": "2026-04-10",
@@ -962,7 +978,7 @@
         "actual": "HOLD",
         "return_pct": 12.538,
         "correct": false,
-        "confidence": 92
+        "confidence": 90
       },
       {
         "week": "2026-04-10",
@@ -971,7 +987,7 @@
         "actual": "HOLD",
         "return_pct": 9.874,
         "correct": true,
-        "confidence": 35
+        "confidence": 33
       },
       {
         "week": "2026-04-10",
@@ -989,7 +1005,7 @@
         "actual": "HOLD",
         "return_pct": 2.025,
         "correct": true,
-        "confidence": 36
+        "confidence": 34
       },
       {
         "week": "2026-04-10",
@@ -1070,7 +1086,7 @@
         "actual": "HOLD",
         "return_pct": 6.609,
         "correct": true,
-        "confidence": 34
+        "confidence": 32
       },
       {
         "week": "2026-04-10",
@@ -1088,7 +1104,7 @@
         "actual": "HOLD",
         "return_pct": 2.036,
         "correct": false,
-        "confidence": 73
+        "confidence": 72
       },
       {
         "week": "2026-04-10",
@@ -1097,7 +1113,7 @@
         "actual": "HOLD",
         "return_pct": 9.168,
         "correct": false,
-        "confidence": 72
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -1106,7 +1122,7 @@
         "actual": "HOLD",
         "return_pct": 6.616,
         "correct": false,
-        "confidence": 84
+        "confidence": 90
       },
       {
         "week": "2026-04-10",
@@ -1115,7 +1131,7 @@
         "actual": "HOLD",
         "return_pct": 12.945,
         "correct": true,
-        "confidence": 32
+        "confidence": 30
       },
       {
         "week": "2026-04-10",
@@ -1178,7 +1194,7 @@
         "actual": "HOLD",
         "return_pct": 8.391,
         "correct": false,
-        "confidence": 91
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -1232,7 +1248,7 @@
         "actual": "HOLD",
         "return_pct": 2.939,
         "correct": true,
-        "confidence": 36
+        "confidence": 34
       },
       {
         "week": "2026-04-10",
@@ -1259,7 +1275,7 @@
         "actual": "BUY",
         "return_pct": 25.601,
         "correct": false,
-        "confidence": 78
+        "confidence": 76
       },
       {
         "week": "2026-04-10",
@@ -1268,7 +1284,7 @@
         "actual": "HOLD",
         "return_pct": 3.529,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -1277,7 +1293,7 @@
         "actual": "HOLD",
         "return_pct": 7.015,
         "correct": true,
-        "confidence": 36
+        "confidence": 34
       },
       {
         "week": "2026-04-10",
@@ -1304,7 +1320,7 @@
         "actual": "HOLD",
         "return_pct": 5.265,
         "correct": true,
-        "confidence": 43
+        "confidence": 42
       },
       {
         "week": "2026-04-10",
@@ -1313,7 +1329,7 @@
         "actual": "HOLD",
         "return_pct": -0.251,
         "correct": false,
-        "confidence": 84
+        "confidence": 91
       },
       {
         "week": "2026-04-10",
@@ -1322,7 +1338,7 @@
         "actual": "HOLD",
         "return_pct": 9.538,
         "correct": false,
-        "confidence": 78
+        "confidence": 76
       },
       {
         "week": "2026-04-10",
@@ -1349,7 +1365,7 @@
         "actual": "HOLD",
         "return_pct": 0.703,
         "correct": false,
-        "confidence": 88
+        "confidence": 92
       },
       {
         "week": "2026-04-10",
@@ -1367,7 +1383,7 @@
         "actual": "HOLD",
         "return_pct": 1.917,
         "correct": false,
-        "confidence": 75
+        "confidence": 80
       },
       {
         "week": "2026-04-10",
@@ -1390,11 +1406,11 @@
       {
         "week": "2026-04-10",
         "ticker": "FINEORG",
-        "predicted": "HOLD",
+        "predicted": "BUY",
         "actual": "HOLD",
         "return_pct": 5.463,
-        "correct": true,
-        "confidence": 31
+        "correct": false,
+        "confidence": 73
       },
       {
         "week": "2026-04-10",
@@ -1403,7 +1419,7 @@
         "actual": "HOLD",
         "return_pct": 5.183,
         "correct": false,
-        "confidence": 80
+        "confidence": 78
       },
       {
         "week": "2026-04-10",
@@ -1448,7 +1464,7 @@
         "actual": "HOLD",
         "return_pct": -0.566,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -1475,7 +1491,7 @@
         "actual": "HOLD",
         "return_pct": -2.322,
         "correct": true,
-        "confidence": 35
+        "confidence": 33
       },
       {
         "week": "2026-04-10",
@@ -1493,7 +1509,7 @@
         "actual": "HOLD",
         "return_pct": 7.089,
         "correct": false,
-        "confidence": 70
+        "confidence": 74
       },
       {
         "week": "2026-04-10",
@@ -1511,7 +1527,7 @@
         "actual": "HOLD",
         "return_pct": 1.826,
         "correct": false,
-        "confidence": 74
+        "confidence": 73
       },
       {
         "week": "2026-04-10",
@@ -1529,7 +1545,7 @@
         "actual": "HOLD",
         "return_pct": 5.857,
         "correct": false,
-        "confidence": 72
+        "confidence": 70
       },
       {
         "week": "2026-04-10",
@@ -1538,7 +1554,7 @@
         "actual": "HOLD",
         "return_pct": -3.721,
         "correct": true,
-        "confidence": 36
+        "confidence": 34
       },
       {
         "week": "2026-04-10",
@@ -1547,7 +1563,7 @@
         "actual": "HOLD",
         "return_pct": 4.474,
         "correct": false,
-        "confidence": 75
+        "confidence": 80
       },
       {
         "week": "2026-04-10",
@@ -1556,7 +1572,7 @@
         "actual": "HOLD",
         "return_pct": 3.575,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -1574,7 +1590,7 @@
         "actual": "HOLD",
         "return_pct": 11.41,
         "correct": false,
-        "confidence": 72
+        "confidence": 71
       },
       {
         "week": "2026-04-10",
@@ -1619,7 +1635,7 @@
         "actual": "BUY",
         "return_pct": 13.123,
         "correct": true,
-        "confidence": 79
+        "confidence": 85
       },
       {
         "week": "2026-04-10",
@@ -1637,7 +1653,7 @@
         "actual": "HOLD",
         "return_pct": 6.757,
         "correct": true,
-        "confidence": 41
+        "confidence": 40
       },
       {
         "week": "2026-04-10",
@@ -1646,7 +1662,7 @@
         "actual": "HOLD",
         "return_pct": 3.718,
         "correct": true,
-        "confidence": 30
+        "confidence": 31
       },
       {
         "week": "2026-04-10",
@@ -1655,7 +1671,7 @@
         "actual": "HOLD",
         "return_pct": 9.355,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -1664,7 +1680,7 @@
         "actual": "HOLD",
         "return_pct": -0.197,
         "correct": false,
-        "confidence": 82
+        "confidence": 88
       },
       {
         "week": "2026-04-10",
@@ -1691,7 +1707,7 @@
         "actual": "HOLD",
         "return_pct": 3.67,
         "correct": true,
-        "confidence": 39
+        "confidence": 38
       },
       {
         "week": "2026-04-10",
@@ -1709,7 +1725,7 @@
         "actual": "HOLD",
         "return_pct": 5.546,
         "correct": false,
-        "confidence": 71
+        "confidence": 76
       },
       {
         "week": "2026-04-10",
@@ -1718,7 +1734,7 @@
         "actual": "HOLD",
         "return_pct": 3.84,
         "correct": false,
-        "confidence": 76
+        "confidence": 75
       },
       {
         "week": "2026-04-10",
@@ -1745,7 +1761,7 @@
         "actual": "HOLD",
         "return_pct": 7.92,
         "correct": false,
-        "confidence": 80
+        "confidence": 78
       },
       {
         "week": "2026-04-10",
@@ -1763,7 +1779,7 @@
         "actual": "HOLD",
         "return_pct": 6.735,
         "correct": true,
-        "confidence": 40
+        "confidence": 39
       },
       {
         "week": "2026-04-10",
@@ -1781,7 +1797,7 @@
         "actual": "HOLD",
         "return_pct": 3.744,
         "correct": false,
-        "confidence": 73
+        "confidence": 77
       },
       {
         "week": "2026-04-10",
@@ -1808,7 +1824,7 @@
         "actual": "HOLD",
         "return_pct": 4.449,
         "correct": false,
-        "confidence": 81
+        "confidence": 86
       },
       {
         "week": "2026-04-10",
@@ -1835,7 +1851,7 @@
         "actual": "HOLD",
         "return_pct": 0.704,
         "correct": true,
-        "confidence": 39
+        "confidence": 38
       },
       {
         "week": "2026-04-10",
@@ -1862,7 +1878,7 @@
         "actual": "HOLD",
         "return_pct": 2.644,
         "correct": false,
-        "confidence": 75
+        "confidence": 79
       },
       {
         "week": "2026-04-10",
@@ -1904,19 +1920,20 @@
   },
   "benchmarks": {
     "prediction_strategy": {
-      "total_return_pct": -7.19,
-      "sharpe_like": -1.365,
-      "n_trades": 13382
+      "total_return_pct": -3.36,
+      "sharpe_like": -0.627,
+      "n_trades": 24556
     },
     "equal_weight_benchmark": {
-      "total_return_pct": 7.19,
-      "sharpe_like": 0.968
+      "total_return_pct": -6.55,
+      "sharpe_like": -0.786
     },
     "buy_and_hold_nifty": {
       "total_return_pct": null,
       "sharpe_like": null
     },
-    "outperformance_vs_eq_pct": -14.38,
-    "statistical_significance": "No statistical edge detected (z=-0.73)"
-  }
+    "outperformance_vs_eq_pct": 3.19,
+    "statistical_significance": "Statistically significant (p<0.01) — model has real edge (z=5.41)"
+  },
+  "data_note": "Based on 26 weeks of walk-forward data. Accuracy improves as daily scans accumulate over time."
 }
