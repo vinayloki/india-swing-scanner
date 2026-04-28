@@ -1,28 +1,28 @@
 {
-  "generated": "27 Apr 2026",
-  "generated_ts": "2026-04-27_1234",
+  "generated": "28 Apr 2026",
+  "generated_ts": "2026-04-28_1236",
   "engine_version": "2.0",
-  "total_opportunities": 29,
+  "total_opportunities": 21,
   "opportunities": [
     {
-      "ticker": "CEIGALL",
+      "ticker": "RRKABEL",
       "rank": 1,
-      "score": 41,
+      "score": 59,
       "signals": [
         "52W_BREAKOUT",
         "HIGH_VOLUME",
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "high_52w": 341.0,
-        "pct_from_52w_high": 1.07,
-        "volume_ratio": 3.13,
-        "price": 337.35,
-        "pct_change_1d": 3.42,
+        "high_52w": 1620.0,
+        "pct_from_52w_high": 0.68,
+        "volume_ratio": 5.91,
+        "price": 1609.0,
+        "pct_change_1d": 6.66,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "CEIGALL",
+        "name": "RRKABEL",
         "sector": "Others",
         "ind": null,
         "mcap_cr": null,
@@ -35,36 +35,37 @@
       }
     },
     {
-      "ticker": "RAMRAT",
+      "ticker": "IMFA",
       "rank": 2,
-      "score": 39,
+      "score": 43,
       "signals": [
         "52W_BREAKOUT",
+        "HIGH_VOLUME",
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "high_52w": 432.5,
-        "pct_from_52w_high": 1.38,
-        "volume_ratio": 2.87,
-        "price": 426.55,
-        "pct_change_1d": 11.04,
+        "high_52w": 1653.9,
+        "pct_from_52w_high": 1.33,
+        "volume_ratio": 3.34,
+        "price": 1631.9,
+        "pct_change_1d": 7.23,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "RAMRAT",
+        "name": "INDIAN METALS & FERRO",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
+        "ind": "Other Industrial Metals & Mining",
+        "mcap_cr": 8804.8,
+        "pe": 23.9,
+        "eps": 68.33,
+        "52h": 1653.9,
+        "52l": 550.1,
+        "bv": 465.33,
+        "dy": 164.0
       }
     },
     {
-      "ticker": "AZAD",
+      "ticker": "PTC",
       "rank": 3,
       "score": 35,
       "signals": [
@@ -72,15 +73,15 @@
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "high_52w": 2250.0,
-        "pct_from_52w_high": 0.57,
-        "volume_ratio": 2.57,
-        "price": 2237.1,
-        "pct_change_1d": 7.03,
+        "high_52w": 206.79,
+        "pct_from_52w_high": 0.52,
+        "volume_ratio": 2.61,
+        "price": 205.71,
+        "pct_change_1d": 5.38,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "AZAD",
+        "name": "PTC",
         "sector": "Others",
         "ind": null,
         "mcap_cr": null,
@@ -93,23 +94,20 @@
       }
     },
     {
-      "ticker": "KRISHANA",
+      "ticker": "ONGC",
       "rank": 4,
-      "score": 35,
+      "score": 29,
       "signals": [
-        "52W_BREAKOUT",
-        "VOLUME_SPIKE"
+        "52W_BREAKOUT"
       ],
       "indicators": {
-        "high_52w": 698.0,
-        "pct_from_52w_high": 1.6,
-        "volume_ratio": 2.58,
-        "price": 686.85,
-        "pct_change_1d": 7.63,
-        "above_sma10": true
+        "high_52w": 302.4,
+        "pct_from_52w_high": 0.36,
+        "volume_ratio": 2.24,
+        "price": 301.3
       },
       "fundamental": {
-        "name": "KRISHANA",
+        "name": "ONGC",
         "sector": "Others",
         "ind": null,
         "mcap_cr": null,
@@ -122,72 +120,20 @@
       }
     },
     {
-      "ticker": "JSWENERGY",
+      "ticker": "NESTLEIND",
       "rank": 5,
-      "score": 27,
-      "signals": [
-        "52W_BREAKOUT"
-      ],
-      "indicators": {
-        "high_52w": 575.5,
-        "pct_from_52w_high": 0.3,
-        "volume_ratio": 1.8,
-        "price": 573.8
-      },
-      "fundamental": {
-        "name": "JSWENERGY",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "ASTERDM",
-      "rank": 6,
-      "score": 26,
-      "signals": [
-        "52W_BREAKOUT"
-      ],
-      "indicators": {
-        "high_52w": 729.01,
-        "pct_from_52w_high": 1.26,
-        "volume_ratio": 2.41,
-        "price": 719.8
-      },
-      "fundamental": {
-        "name": "ASTERDM",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "SENORES",
-      "rank": 7,
       "score": 25,
       "signals": [
         "52W_BREAKOUT"
       ],
       "indicators": {
-        "high_52w": 946.3,
-        "pct_from_52w_high": 0.69,
-        "volume_ratio": 2.26,
-        "price": 939.75
+        "high_52w": 1445.1,
+        "pct_from_52w_high": 0.35,
+        "volume_ratio": 1.59,
+        "price": 1440.0
       },
       "fundamental": {
-        "name": "SENORES",
+        "name": "NESTLEIND",
         "sector": "Others",
         "ind": null,
         "mcap_cr": null,
@@ -200,172 +146,146 @@
       }
     },
     {
-      "ticker": "ADVENZYMES",
+      "ticker": "AGI",
+      "rank": 6,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 15.84,
+        "price": 672.55,
+        "pct_change_1d": 19.06,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "AGI GREENPAC LIMITED",
+        "sector": "Others",
+        "ind": "Packaging & Containers",
+        "mcap_cr": 4351.2,
+        "pe": 13.1,
+        "eps": 51.46,
+        "52h": 1009.0,
+        "52l": 465.0,
+        "bv": 342.86,
+        "dy": 124.0
+      }
+    },
+    {
+      "ticker": "BBOX",
+      "rank": 7,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 10.44,
+        "price": 639.85,
+        "pct_change_1d": 10.39,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "BLACK BOX LIMITED",
+        "sector": "Others",
+        "ind": "Software - Application",
+        "mcap_cr": 11357.0,
+        "pe": 51.4,
+        "eps": 12.46,
+        "52h": 655.85,
+        "52l": 364.9,
+        "bv": 53.22,
+        "dy": 17.0
+      }
+    },
+    {
+      "ticker": "DAMODARIND",
       "rank": 8,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 6.08,
-        "price": 330.55,
-        "pct_change_1d": 10.53,
+        "volume_ratio": 6.09,
+        "price": 30.91,
+        "pct_change_1d": 11.55,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "ADVENZYMES",
+        "name": "DAMODAR INDUSTRIES LTD",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
+        "ind": "Textile Manufacturing",
+        "mcap_cr": 72.0,
+        "pe": 8.0,
+        "eps": 3.87,
+        "52h": 41.49,
+        "52l": 20.0,
+        "bv": 63.0,
         "dy": null
       }
     },
     {
-      "ticker": "ASAL",
+      "ticker": "DHANBANK",
       "rank": 9,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 13.69,
-        "price": 532.3,
-        "pct_change_1d": 11.27,
+        "volume_ratio": 9.96,
+        "price": 31.82,
+        "pct_change_1d": 14.05,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "ASAL",
+        "name": "DHANLAXMI BANK LIMITED",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
+        "ind": "Banks - Regional",
+        "mcap_cr": 1255.9,
+        "pe": 13.1,
+        "eps": 2.43,
+        "52h": 33.5,
+        "52l": 19.45,
+        "bv": 36.75,
         "dy": null
       }
     },
     {
-      "ticker": "AUSOMENT",
+      "ticker": "EMIL",
       "rank": 10,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 8.54,
-        "price": 138.47,
-        "pct_change_1d": 4.4,
+        "volume_ratio": 13.83,
+        "price": 122.75,
+        "pct_change_1d": 11.08,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "AUSOMENT",
+        "name": "ELECTRONICS MART IND LTD",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
+        "ind": "Specialty Retail",
+        "mcap_cr": 4722.8,
+        "pe": 50.5,
+        "eps": 2.43,
+        "52h": 168.5,
+        "52l": 84.9,
+        "bv": 40.45,
         "dy": null
       }
     },
     {
-      "ticker": "AYE",
+      "ticker": "EPACK",
       "rank": 11,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 8.94,
-        "price": 148.42,
-        "pct_change_1d": 10.05,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "AYE FINANCE LIMITED",
-        "sector": "Others",
-        "ind": "Credit Services",
-        "mcap_cr": 3628.9,
-        "pe": 27.7,
-        "eps": 5.35,
-        "52h": 158.0,
-        "52l": 88.22,
-        "bv": 87.77,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "ELECTHERM",
-      "rank": 12,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 6.3,
-        "price": 866.8,
-        "pct_change_1d": 20.0,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "ELECTHERM",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "EMAMIREAL",
-      "rank": 13,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 8.03,
-        "price": 104.45,
-        "pct_change_1d": 14.88,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "EMAMI REALTY LIMITED",
-        "sector": "Real Estate",
-        "ind": "Real Estate - Development",
-        "mcap_cr": 543.5,
-        "pe": null,
-        "eps": -49.47,
-        "52h": 129.0,
-        "52l": 48.2,
-        "bv": -33.03,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "EPACK",
-      "rank": 14,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 12.16,
-        "price": 269.64,
-        "pct_change_1d": 15.83,
+        "volume_ratio": 11.73,
+        "price": 291.03,
+        "pct_change_1d": 7.93,
         "above_sma10": true
       },
       "fundamental": {
@@ -382,224 +302,94 @@
       }
     },
     {
-      "ticker": "GRINDWELL",
+      "ticker": "GREENPOWER",
+      "rank": 12,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 11.68,
+        "price": 12.72,
+        "pct_change_1d": 13.47,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "ORIENT GREEN POWER CO LTD",
+        "sector": "Others",
+        "ind": "Utilities - Independent Power Producers",
+        "mcap_cr": 1492.1,
+        "pe": 20.5,
+        "eps": 0.62,
+        "52h": 15.81,
+        "52l": 7.98,
+        "bv": 10.16,
+        "dy": null
+      }
+    },
+    {
+      "ticker": "LAXMIDENTL",
+      "rank": 13,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 6.18,
+        "price": 209.94,
+        "pct_change_1d": 9.08,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "LAXMI DENTAL LIMITED",
+        "sector": "Others",
+        "ind": "Medical Instruments & Supplies",
+        "mcap_cr": 1153.9,
+        "pe": 49.7,
+        "eps": 4.22,
+        "52h": 509.95,
+        "52l": 155.88,
+        "bv": 42.72,
+        "dy": null
+      }
+    },
+    {
+      "ticker": "LINC",
+      "rank": 14,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 11.92,
+        "price": 106.94,
+        "pct_change_1d": 9.16,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "LINC LIMITED",
+        "sector": "Others",
+        "ind": "Business Equipment & Supplies",
+        "mcap_cr": 636.4,
+        "pe": 18.5,
+        "eps": 5.79,
+        "52h": 160.74,
+        "52l": 85.01,
+        "bv": 40.38,
+        "dy": 153.0
+      }
+    },
+    {
+      "ticker": "MOBIKWIK",
       "rank": 15,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 8.98,
-        "price": 1624.2,
-        "pct_change_1d": 0.89,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "GRINDWELL",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "HESTERBIO",
-      "rank": 16,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 6.36,
-        "price": 1668.7,
-        "pct_change_1d": 11.84,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "HESTERBIO",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "INDIACEM",
-      "rank": 17,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 17.69,
-        "price": 435.1,
-        "pct_change_1d": 6.72,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "INDIACEM",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "IRMENERGY",
-      "rank": 18,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 7.02,
-        "price": 331.39,
-        "pct_change_1d": 16.81,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "IRM ENERGY LIMITED",
-        "sector": "Others",
-        "ind": "Utilities - Regulated Gas",
-        "mcap_cr": 1360.7,
-        "pe": 30.3,
-        "eps": 10.92,
-        "52h": 393.0,
-        "52l": 165.4,
-        "bv": 236.5,
-        "dy": 53.0
-      }
-    },
-    {
-      "ticker": "KANPRPLA",
-      "rank": 19,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 7.79,
-        "price": 210.26,
-        "pct_change_1d": 1.38,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "KANPRPLA",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "KIRLPNU",
-      "rank": 20,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 10.47,
-        "price": 1448.3,
-        "pct_change_1d": 8.29,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "KIRLPNU",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "M&MFIN",
-      "rank": 21,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 7.36,
-        "price": 317.7,
-        "pct_change_1d": 7.91,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "M&MFIN",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "MAANALU",
-      "rank": 22,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 9.48,
-        "price": 164.11,
-        "pct_change_1d": 13.3,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "MAANALU",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "MOBIKWIK",
-      "rank": 23,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 9.96,
-        "price": 224.98,
-        "pct_change_1d": 11.26,
+        "volume_ratio": 6.65,
+        "price": 228.71,
+        "pct_change_1d": 1.66,
         "above_sma10": true
       },
       "fundamental": {
@@ -616,150 +406,150 @@
       }
     },
     {
-      "ticker": "NRAIL",
-      "rank": 24,
+      "ticker": "MODISONLTD",
+      "rank": 16,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 6.07,
-        "price": 492.15,
-        "pct_change_1d": 4.04,
+        "volume_ratio": 8.82,
+        "price": 170.54,
+        "pct_change_1d": 12.04,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "NRAIL",
+        "name": "MODISON LIMITED",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
+        "ind": "Electrical Equipment & Parts",
+        "mcap_cr": 553.4,
+        "pe": 12.0,
+        "eps": 14.2,
+        "52h": 197.45,
+        "52l": 114.0,
+        "bv": 69.74,
+        "dy": 328.0
+      }
+    },
+    {
+      "ticker": "PIRAMALFIN",
+      "rank": 17,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 12.24,
+        "price": 2008.8,
+        "pct_change_1d": 8.99,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "PIRAMAL FINANCE LIMITED",
+        "sector": "Others",
+        "ind": "Credit Services",
+        "mcap_cr": 45399.9,
+        "pe": 74.2,
+        "eps": 27.09,
+        "52h": 2073.2,
+        "52l": 1260.0,
+        "bv": 1210.38,
         "dy": null
       }
     },
     {
-      "ticker": "SBCL",
-      "rank": 25,
+      "ticker": "PLASTIBLEN",
+      "rank": 18,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 6.38,
-        "price": 639.5,
-        "pct_change_1d": 7.97,
+        "volume_ratio": 16.89,
+        "price": 181.02,
+        "pct_change_1d": 14.82,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "SHIVALIK BIMETAL CON. LTD",
+        "name": "PLASTIBLENDS INDIA LTD",
         "sector": "Others",
-        "ind": "Metal Fabrication",
-        "mcap_cr": 3683.8,
-        "pe": 40.4,
-        "eps": 15.81,
-        "52h": 655.4,
-        "52l": 368.6,
-        "bv": 76.35,
-        "dy": 68.0
+        "ind": "Specialty Chemicals",
+        "mcap_cr": 470.5,
+        "pe": 14.5,
+        "eps": 12.45,
+        "52h": 230.0,
+        "52l": 121.01,
+        "bv": 167.47,
+        "dy": 159.0
       }
     },
     {
-      "ticker": "TANLA",
-      "rank": 26,
+      "ticker": "TATACHEM",
+      "rank": 19,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 12.21,
-        "price": 582.95,
-        "pct_change_1d": 20.0,
+        "volume_ratio": 7.75,
+        "price": 802.15,
+        "pct_change_1d": 11.05,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "TANLA",
+        "name": "TATA CHEMICALS LTD",
         "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
+        "ind": "Chemicals",
+        "mcap_cr": 20435.3,
+        "pe": 126.1,
+        "eps": 6.36,
+        "52h": 1026.65,
+        "52l": 580.3,
+        "bv": 876.78,
+        "dy": 152.0
+      }
+    },
+    {
+      "ticker": "URJA",
+      "rank": 20,
+      "score": 25,
+      "signals": [
+        "VOLUME_SPIKE"
+      ],
+      "indicators": {
+        "volume_ratio": 7.34,
+        "price": 12.64,
+        "pct_change_1d": 15.86,
+        "above_sma10": true
+      },
+      "fundamental": {
+        "name": "URJA GLOBAL LIMITED",
+        "sector": "Others",
+        "ind": "Solar",
+        "mcap_cr": 704.3,
+        "pe": 632.0,
+        "eps": 0.02,
+        "52h": 17.49,
+        "52l": 8.0,
+        "bv": 3.31,
         "dy": null
       }
     },
     {
-      "ticker": "TMB",
-      "rank": 27,
+      "ticker": "VSSL",
+      "rank": 21,
       "score": 25,
       "signals": [
         "VOLUME_SPIKE"
       ],
       "indicators": {
-        "volume_ratio": 11.53,
-        "price": 697.3,
-        "pct_change_1d": 8.97,
+        "volume_ratio": 16.44,
+        "price": 293.29,
+        "pct_change_1d": 7.44,
         "above_sma10": true
       },
       "fundamental": {
-        "name": "TMB",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "TNPL",
-      "rank": 28,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 7.09,
-        "price": 147.74,
-        "pct_change_1d": 4.91,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "TNPL",
-        "sector": "Others",
-        "ind": null,
-        "mcap_cr": null,
-        "pe": null,
-        "eps": null,
-        "52h": null,
-        "52l": null,
-        "bv": null,
-        "dy": null
-      }
-    },
-    {
-      "ticker": "USHAMART",
-      "rank": 29,
-      "score": 25,
-      "signals": [
-        "VOLUME_SPIKE"
-      ],
-      "indicators": {
-        "volume_ratio": 7.53,
-        "price": 460.35,
-        "pct_change_1d": 3.68,
-        "above_sma10": true
-      },
-      "fundamental": {
-        "name": "USHAMART",
+        "name": "VSSL",
         "sector": "Others",
         "ind": null,
         "mcap_cr": null,
