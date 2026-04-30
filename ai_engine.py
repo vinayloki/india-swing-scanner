@@ -37,6 +37,13 @@ AI_PICKS_OUT     = OUTPUT_DIR / "ai_picks.json"
 BACKTEST_FILE    = OUTPUT_DIR / "backtest_results.json"
 MARKET_REGIME    = OUTPUT_DIR / "market_regime.json"
 
+# Try to import CSV loader (may not be available in all environments)
+try:
+    from data_providers.screener_csv import load_screener_csv
+    _HAS_CSV_LOADER = True
+except ImportError:
+    _HAS_CSV_LOADER = False
+
 # ── Trade parameters (mirrors config/settings.py) ─────────────────────────
 TAKE_PROFIT_PCT    = 4.0    # % target
 STOP_LOSS_FIXED    = 2.0    # % floor
@@ -68,7 +75,7 @@ REGIME_SCORE_MULT = {"Bull": 1.0, "Sideways": 0.7, "Bear": 0.4}
 
 
 def load_data():
-    """Load full_summary.json, fundamentals.json, backtest stats, and market regime."""
+    """Load full_summary.json, fundamentals.json, CSV fundamentals, backtest stats, and market regime."""
     if not FULL_SUMMARY.exists():
         print(f"ERROR: {FULL_SUMMARY} not found. Run scanner.py first.")
         sys.exit(1)
@@ -78,16 +85,62 @@ def load_data():
     stocks    = full.get("stocks", [])
     generated = full.get("generated", "Unknown")
 
+    # 1. Start with CSV fundamentals (5700+ stocks) as the base
     fund_map = {}
+    if _HAS_CSV_LOADER:
+        try:
+            csv_data = load_screener_csv()
+            if csv_data:
+                fund_map = csv_data
+                print(f"[OK] CSV fundamentals loaded: {len(fund_map):,} stocks")
+        except Exception as e:
+            print(f"[WARN] CSV loader failed: {e}")
+
+    # 2. Overlay with fundamentals.json (yfinance data — has 52h/52l/eps/dy)
     if FUNDAMENTALS.exists():
         with open(FUNDAMENTALS, encoding="utf-8") as f:
             fj = json.load(f)
+        yf_count = 0
         for s in fj.get("stocks", []):
-            if s.get("s"):
-                fund_map[s["s"]] = s
+            ticker = s.get("s")
+            if not ticker:
+                continue
+            if ticker in fund_map:
+                # Merge: yfinance data supplements CSV (don't overwrite CSV fields)
+                existing = fund_map[ticker]
+                for key in ["52h", "52l", "eps", "dy", "bv"]:
+                    if s.get(key) is not None and existing.get(key) is None:
+                        existing[key] = s[key]
+                # If CSV has no sector but yfinance does, use yfinance
+                if not existing.get("sector") and s.get("sector"):
+                    existing["sector"] = s["sector"]
+            else:
+                fund_map[ticker] = s
+            yf_count += 1
+        print(f"[OK] yfinance fundamentals merged: {yf_count} stocks")
+
+    # 3. Also extract fundamentals embedded in full_summary (sector, pe, roe)
+    for stock in stocks:
+        ticker = stock.get("t", "")
+        if ticker and ticker not in fund_map:
+            # Some full_summary records now carry enriched fields from CSV
+            embedded = {}
+            if stock.get("sector"):
+                embedded["sector"] = stock["sector"]
+            if stock.get("pe") is not None:
+                embedded["pe"] = stock["pe"]
+            if stock.get("roe") is not None:
+                embedded["roe"] = stock["roe"]
+            if stock.get("name"):
+                embedded["name"] = stock["name"]
+            if stock.get("mcap") is not None:
+                embedded["mcap"] = stock["mcap"]
+            if embedded:
+                embedded["s"] = ticker
+                fund_map[ticker] = embedded
 
     print(f"[OK] Loaded {len(stocks)} stocks   Generated: {generated}")
-    print(f"[OK] Fundamentals available for {len(fund_map)} stocks")
+    print(f"[OK] Total fundamentals coverage: {len(fund_map):,} stocks")
     return stocks, fund_map, generated
 
 

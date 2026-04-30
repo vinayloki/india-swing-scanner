@@ -45,6 +45,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-actions.txt
 
+      - name: Detect Screener CSV
+        run: |
+          CSV_COUNT=$(ls -1 Stock_Screener_*.csv 2>/dev/null | wc -l)
+          if [ "$CSV_COUNT" -gt 0 ]; then
+            echo "📄 Found $CSV_COUNT Screener CSV file(s):"
+            ls -lh Stock_Screener_*.csv
+            echo "Scanner will auto-enrich fundamentals from CSV data."
+          else
+            echo "ℹ️  No Screener CSV found — using yfinance fundamentals only."
+            echo "To enrich: export from Tickertape, commit as Stock_Screener_*.csv"
+          fi
+
       - name: Run MarketPulse Scanner
         run: python scanner.py
 

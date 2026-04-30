@@ -40,6 +40,7 @@ from config.settings import (
     LOG_DATEFMT,
 )
 from data_providers import get_provider
+from data_providers.screener_csv import load_screener_csv, get_csv_tickers
 from scanners import BreakoutScanner, MomentumScanner, VolumeScanner
 from engine import ScoringEngine
 
@@ -64,6 +65,7 @@ def fetch_nse_tickers() -> list[str]:
     """
     Fetch all NSE equity tickers via the DataProvider.
     Three-level fallback: NSE CSV → GitHub mirror → disk cache.
+    Also merges tickers from any Screener/Tickertape CSV in the project root.
     No Node.js required.
     """
     log.info("🔍 Fetching NSE ticker universe...")
@@ -73,6 +75,15 @@ def fetch_nse_tickers() -> list[str]:
     if not tickers:
         log.error("❌ Could not fetch any tickers. Aborting.")
         sys.exit(1)
+
+    # Merge tickers from Screener/Tickertape CSV (if available)
+    csv_tickers = get_csv_tickers()
+    if csv_tickers:
+        before = len(tickers)
+        combined = sorted(set(tickers) | set(csv_tickers))
+        added = len(combined) - before
+        tickers = combined
+        log.info(f"   📄 CSV universe: {len(csv_tickers)} tickers → added {added} new")
 
     log.info(f"📊 Total unique tickers: {len(tickers)}")
     return tickers
@@ -168,7 +179,7 @@ def calculate_performance(prices: pd.DataFrame) -> pd.DataFrame:
 #  STEP 4: Rank & Export (existing output files — unchanged)
 # ═══════════════════════════════════════════════════════════════════════
 
-def rank_and_export(perf_df: pd.DataFrame, mcap_map: dict[str, str]):
+def rank_and_export(perf_df: pd.DataFrame, mcap_map: dict[str, str], csv_fund_map: dict = None):
     """
     Rank stocks by timeframe and export all existing output files.
     Includes 'm' (Market Cap category) into full_summary.json.
@@ -239,12 +250,28 @@ def rank_and_export(perf_df: pd.DataFrame, mcap_map: dict[str, str]):
     # ── Full summary JSON (compact — for browser table) ────────────
     full_records = []
     for _, row in perf_sorted.iterrows():
+        ticker = row["ticker"]
+        csv_fund = csv_fund_map.get(ticker, {}) if csv_fund_map else {}
         record = {
-            "t": row["ticker"], 
-            "c": row["last_close"], 
+            "t": ticker,
+            "c": row["last_close"],
             "d": row["last_date"],
-            "m": mcap_map.get(row["ticker"], "S")
+            "m": csv_fund.get("mcap_code") or mcap_map.get(ticker, "S"),
         }
+        # Enrich with CSV fundamentals if available
+        if csv_fund:
+            record["sector"] = csv_fund.get("sector", "")
+            record["ind"]    = csv_fund.get("ind", "")
+            if csv_fund.get("pe") is not None:
+                record["pe"] = csv_fund["pe"]
+            if csv_fund.get("roe") is not None:
+                record["roe"] = csv_fund["roe"]
+            if csv_fund.get("pb") is not None:
+                record["pb"] = csv_fund["pb"]
+            if csv_fund.get("mcap") is not None:
+                record["mcap"] = csv_fund["mcap"]
+            if csv_fund.get("name"):
+                record["name"] = csv_fund["name"]
         for tf in TIMEFRAMES:
             if tf in perf_df.columns:
                 val = row.get(tf)
@@ -285,15 +312,22 @@ def rank_and_export(perf_df: pd.DataFrame, mcap_map: dict[str, str]):
 #  STEP 5: Fetch Fundamentals for Top Movers
 # ═══════════════════════════════════════════════════════════════════════
 
-def fetch_fundamentals(perf_df: pd.DataFrame) -> dict[str, dict]:
+def fetch_fundamentals(perf_df: pd.DataFrame, csv_fund_map: dict = None) -> dict[str, dict]:
     """
     Fetch fundamental data for top movers across all timeframes.
+    Uses Screener/Tickertape CSV as primary source, yfinance as fallback.
     Returns dict for use by both Step 4 (existing) and Step 6 (engine).
     """
     log.info("🔬 Fetching fundamentals for top movers...")
-    provider = get_provider()
 
-    # Collect top movers across all timeframes
+    # Start with CSV fundamentals (covers 5700+ stocks)
+    fundamentals = dict(csv_fund_map) if csv_fund_map else {}
+    csv_count = len(fundamentals)
+    if csv_count:
+        log.info(f"   📄 CSV fundamentals loaded: {csv_count:,} stocks")
+
+    # Collect top movers that are NOT in CSV → fetch via yfinance
+    provider = get_provider()
     top_symbols = set()
     for tf in TIMEFRAMES:
         if tf not in perf_df.columns:
@@ -304,8 +338,14 @@ def fetch_fundamentals(perf_df: pd.DataFrame) -> dict[str, dict]:
         if "ticker" in perf_df.columns:
             top_symbols.update(valid.nlargest(TOP_N, tf)["ticker"].tolist())
 
-    top_list = sorted(list(top_symbols))[:FUNDAMENTALS_TOP_N]
-    fundamentals = provider.fetch_fundamentals(top_list)
+    # Only fetch from yfinance for stocks missing from CSV
+    missing = sorted(t for t in top_symbols if t not in fundamentals)[:FUNDAMENTALS_TOP_N]
+    if missing:
+        log.info(f"   🔬 Fetching {len(missing)} stocks via yfinance (not in CSV)...")
+        yf_data = provider.fetch_fundamentals(missing)
+        fundamentals.update(yf_data)
+    else:
+        log.info("   ✅ All top movers covered by CSV — skipping yfinance scrape")
 
     # Save standalone fundamentals.json (existing format)
     fund_list = list(fundamentals.values())
@@ -316,7 +356,7 @@ def fetch_fundamentals(perf_df: pd.DataFrame) -> dict[str, dict]:
              "count": len(fund_list), "stocks": fund_list},
             f, separators=(",", ":"), ensure_ascii=False,
         )
-    log.info(f"   📄 Fundamentals JSON saved: {fund_path.name}")
+    log.info(f"   📄 Fundamentals JSON saved: {fund_path.name} ({len(fund_list):,} stocks)")
     return fundamentals
 
 
@@ -598,7 +638,13 @@ def main():
 ╚══════════════════════════════════════════════════════════════════╝
     """)
 
+    # Step 0: Load Screener/Tickertape CSV fundamentals (if available)
+    csv_fund_map = load_screener_csv()
+    if csv_fund_map:
+        log.info(f"📄 CSV fundamentals: {len(csv_fund_map):,} stocks enriched")
+
     # Step 1: Ticker universe (now via Python, no Node.js)
+    # Also merges tickers from CSV if available
     tickers = fetch_nse_tickers()
 
     # Step 2: Full OHLCV download
@@ -608,13 +654,13 @@ def main():
     # Step 3: Multi-timeframe performance
     performance = calculate_performance(prices)
 
-    # Step 4: Rank and export (existing output files)
+    # Step 4: Rank and export (existing output files, enriched with CSV data)
     provider = get_provider()
     mcap_map = getattr(provider, "fetch_mcap_categories", lambda: {})()
-    rank_and_export(performance, mcap_map)
+    rank_and_export(performance, mcap_map, csv_fund_map=csv_fund_map)
 
-    # Step 5: Fundamentals for top movers
-    fundamentals = fetch_fundamentals(performance)
+    # Step 5: Fundamentals for top movers (CSV-first, yfinance fallback)
+    fundamentals = fetch_fundamentals(performance, csv_fund_map=csv_fund_map)
 
     # Step 6: Opportunity Engine
     run_opportunity_engine(ohlcv, fundamentals)
